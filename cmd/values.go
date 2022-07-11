@@ -21,6 +21,18 @@ type RegCred struct {
 	RegCred  bool
 }
 
+//Parent level of Tenancy struct
+type Tenancy struct {
+	Tenancy TenancyValues
+}
+
+// Used in the Tenancy struct
+type TenancyValues struct {
+	Enabled bool
+	Key     string
+	Value   string
+}
+
 // Parent level of SSO struct
 type Sso struct {
 	Sso SsoValues
@@ -106,6 +118,28 @@ type Template struct {
 	Network  Networking
 	Sso      Sso
 	Storage  Storage
+	Tenancy  Tenancy
+}
+
+/* function used to leverate the Tenancy struct
+and to prompt user for all Tenancy settings this
+will return a struct
+*/
+func gatherTenancy(tenancy *Tenancy) {
+	fmt.Println("In the gatherTenancy func")
+	var enableTenancy string
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to enable Tenancy? ")
+	fmt.Scan(&enableTenancy)
+	if enableTenancy == "no" {
+		tenancy.Tenancy.Enabled = false
+	}
+	if enableTenancy == "yes" {
+		tenancy.Tenancy.Enabled = true
+		tenancy.Tenancy.Key = "purpose"
+		tenancy.Tenancy.Value = "cnvrg-control-plane"
+	}
 }
 
 /* function used to leverate the Sso struct
@@ -264,7 +298,10 @@ to quickly create a Cobra application.`,
 		gatherSso(&sso)
 		storage := Storage{}
 		gatherStorage(&storage)
-		finaltemp := Template{registry, network, sso, storage}
+		tenancy := Tenancy{}
+		gatherTenancy(&tenancy)
+
+		finaltemp := Template{registry, network, sso, storage, tenancy}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			log.Fatal(err)

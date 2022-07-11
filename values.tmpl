@@ -58,3 +58,10 @@ sso:
     defaultSc: {{ .Storage.Nfs.DefaultSc }}
     reclaimPolicy: {{ .Storage.Nfs.ReclaimPolicy }}
 {{- end }}
+
+{{- if .Tenancy.Tenancy.Enabled }}
+tenancy:
+  enabled: {{ .Tenancy.Tenancy.Enabled }}
+  key: {{ .Tenancy.Tenancy.Key }}
+  value: {{ .Tenancy.Tenancy.Value }}
+{{- end }}
