@@ -40,3 +40,21 @@ sso:
   azureTenant: {{ .Sso.Sso.AzureTenant }}
   oidcIssuerUrl: {{ .Sso.Sso.OidcIssuerUrl }}
 {{- end }}
+
+{{- if .Storage.Hostpath.Enabled }}
+  hostpath:
+    enabled: {{ .Storage.Hostpath.Enabled }}
+    defaultSc: {{ .Storage.Hostpath.DefaultSc }}
+    path: {{ .Storage.Hostpath.Path }}
+    reclaimPolicy: {{ .Storage.Hostpath.ReclaimPolicy }}
+    nodeSelector: {{ .Storage.Hostpath.NodeSelector }}
+{{- end }}
+
+{{- if .Storage.Nfs.Enabled }}
+  nfs:
+    enabled: {{ .Storage.Nfs.Enabled }}
+    server: {{ .Storage.Nfs.Server }}
+    path: {{ .Storage.Nfs.Path }}
+    defaultSc: {{ .Storage.Nfs.DefaultSc }}
+    reclaimPolicy: {{ .Storage.Nfs.ReclaimPolicy }}
+{{- end }}

@@ -38,6 +38,29 @@ type SsoValues struct {
 	OidcIssuerUrl string
 }
 
+// Parent level of Storage struct
+type Storage struct {
+	Hostpath Hostpath
+	Nfs      Nfs
+}
+
+// Used in the Storage struct
+type Hostpath struct {
+	Enabled       bool
+	DefaultSc     bool
+	Path          string
+	ReclaimPolicy string
+	NodeSelector  []string // Need to figure out how to define "{ }"
+}
+
+type Nfs struct {
+	Enabled       bool
+	Server        string
+	Path          string
+	DefaultSc     bool
+	ReclaimPolicy string
+}
+
 // Parent level of the Networking struct
 type Networking struct {
 	Https   HttpsValues
@@ -82,6 +105,48 @@ type Template struct {
 	Registry RegCred
 	Network  Networking
 	Sso      Sso
+	Storage  Storage
+}
+
+/* function used to leverate the Sso struct
+and to prompt user for all Storage settings this
+will return a struct
+*/
+func gatherStorage(storage *Storage) {
+	fmt.Println("In the gatherStorage func")
+	var enableHostpath string
+	var enableNfs string
+
+	// Ask if they want to enable Hostpath for storage skip if "no"
+	fmt.Print("Do you want to enable Hostpath for storage? ")
+	fmt.Scan(&enableHostpath)
+	if enableHostpath == "no" {
+		storage.Hostpath.Enabled = false
+	}
+	if enableHostpath == "yes" {
+
+		storage.Hostpath.Enabled = true
+		storage.Hostpath.DefaultSc = false
+		storage.Hostpath.Path = "/cnvrg-hostpath-storage"
+		storage.Hostpath.ReclaimPolicy = "Retain"
+		storage.Hostpath.NodeSelector = []string{}
+	}
+
+	// Ask if they want to enable NFS for storage skip if "no"
+	fmt.Print("Do you want to enable NFS for storage? ")
+	fmt.Scan(&enableNfs)
+	if enableNfs == "no" {
+		storage.Nfs.Enabled = false
+	}
+	if enableNfs == "yes" {
+
+		storage.Nfs.Enabled = true
+		storage.Nfs.Server = ""
+		storage.Nfs.Path = ""
+		storage.Nfs.DefaultSc = false
+		storage.Nfs.ReclaimPolicy = "Retain"
+
+	}
 }
 
 /* function used to leverate the Sso struct
@@ -197,7 +262,9 @@ to quickly create a Cobra application.`,
 		gatherNetworking(&network)
 		sso := Sso{}
 		gatherSso(&sso)
-		finaltemp := Template{registry, network, sso}
+		storage := Storage{}
+		gatherStorage(&storage)
+		finaltemp := Template{registry, network, sso, storage}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			log.Fatal(err)
