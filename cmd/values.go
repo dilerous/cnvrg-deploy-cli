@@ -13,21 +13,44 @@ import (
 	"github.com/spf13/cobra"
 )
 
+/* This struc includes clusterDomain, clusterInternalDomain,
+spec and imageHub
+*/
+type ClusterDomain struct {
+	ClusterDomain         string
+	ClusterInternalDomain string `default:"cluster.local"`
+	Spec                  string `default:"allinone"`
+	ImageHub              string `default:"docker.io/cnvrg"`
+}
+
+// Parent struct for the Backup values
+type Backup struct {
+	Enabled  bool
+	Rotation int
+	Period   string
+}
+
+//Parent struct for the Capsule values
+type Capsule struct {
+	Enabled bool
+	Image   string `default:"cnvrg-capsule:1.0.2"`
+}
+
+// Parent level of ConfigReloader struct
+type ConfigReloader struct {
+	Enabled bool
+}
+
 // Parent level of Registry struct
-type RegCred struct {
-	Username string
+type Registry struct {
+	User     string
 	Password string
 	Url      string `default:"docker.io"`
-	RegCred  bool
+	Enabled  bool
 }
 
 //Parent level of Tenancy struct
 type Tenancy struct {
-	Tenancy TenancyValues
-}
-
-// Used in the Tenancy struct
-type TenancyValues struct {
 	Enabled bool
 	Key     string
 	Value   string
@@ -35,11 +58,6 @@ type TenancyValues struct {
 
 // Parent level of SSO struct
 type Sso struct {
-	Sso SsoValues
-}
-
-// Used in the Sso parent struct
-type SsoValues struct {
 	Enabled       bool
 	AdminUser     string
 	Provider      string
@@ -114,11 +132,122 @@ type Istio struct {
 
 // Template struct for the values.tmpl file
 type Template struct {
-	Registry RegCred
-	Network  Networking
-	Sso      Sso
-	Storage  Storage
-	Tenancy  Tenancy
+	ClusterDomain  ClusterDomain
+	Registry       Registry
+	Network        Networking
+	Sso            Sso
+	Storage        Storage
+	Tenancy        Tenancy
+	ConfigReloader ConfigReloader
+	Capsule        Capsule
+	Backup         Backup
+}
+
+/* function used to leverage the ClusterDomain struct
+and to prompt user for all clusterDomain and image settings. This
+function will return a struct.
+*/
+func gatherClusterDomain(cluster *ClusterDomain) {
+	fmt.Println("In the gatherCapsule func")
+	var clusterDomain string
+	var clusterInternalDomain string = "cluster.local"
+	// var spec string
+	// var imageHub string
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("What is your wildcard domain? ")
+	fmt.Scan(&clusterDomain)
+	cluster.ClusterDomain = clusterDomain
+
+	fmt.Printf("Do you want to change the internal cluster domain [ default is %v ]? ", clusterInternalDomain)
+	fmt.Scan(&clusterInternalDomain)
+	if clusterInternalDomain == "" {
+		cluster.ClusterInternalDomain = "cluster.local"
+	} else {
+		cluster.ClusterInternalDomain = clusterInternalDomain
+	}
+
+}
+
+/* function used to leverage the Backup struct
+and to prompt user for all Backup settings this
+will return a struct
+*/
+func gatherBackup(backup *Backup) {
+	fmt.Println("In the gatherCapsule func")
+	var disableBackup string
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable backups? ")
+	fmt.Scan(&disableBackup)
+	if disableBackup == "yes" {
+		backup.Enabled = false
+	}
+	if disableBackup == "no" {
+		backup.Enabled = true
+		backup.Rotation = 5
+		backup.Period = "24h"
+	}
+}
+
+/* function used to leverage the Capsule struct
+and to prompt user for all Capsule settings this
+will return a struct
+*/
+func gatherCapsule(capsule *Capsule) {
+	fmt.Println("In the gatherCapsule func")
+	var disableCapsule string
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable capsule? ")
+	fmt.Scan(&disableCapsule)
+	if disableCapsule == "yes" {
+		capsule.Enabled = false
+	}
+	if disableCapsule == "no" {
+		capsule.Enabled = true
+	}
+}
+
+/* function used to leverate the Tenancy struct
+and to prompt user for all Tenancy settings this
+will return a struct
+*/
+func gatherConfigReloader(configReloader *ConfigReloader) {
+	fmt.Println("In the gatherTenancy func")
+	var enableConfigReloader string
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to enable ConfigReloader? ")
+	fmt.Scan(&enableConfigReloader)
+	if enableConfigReloader == "no" {
+		configReloader.Enabled = false
+	}
+	if enableConfigReloader == "yes" {
+		configReloader.Enabled = true
+	}
+}
+
+/* function used to leverate the Registry struct
+and to prompt user for all Registry settings this
+will return a struct
+*/
+func gatherRegistry(registry *Registry) {
+	fmt.Println("In the gatherRegistry func")
+	var enableRegistry string
+
+	// Ask if they want to enable SSO skip if "no"
+	fmt.Print("Do you want to include specific registry credentials? ")
+	fmt.Scan(&enableRegistry)
+	if enableRegistry == "no" {
+		registry.Enabled = false
+	}
+	if enableRegistry == "yes" {
+		registry.Enabled = true
+		registry.Url = "docker.io"
+		registry.User = "dockeruser"
+		registry.Password = "dockerpassword"
+	}
 }
 
 /* function used to leverate the Tenancy struct
@@ -133,12 +262,12 @@ func gatherTenancy(tenancy *Tenancy) {
 	fmt.Print("Do you want to enable Tenancy? ")
 	fmt.Scan(&enableTenancy)
 	if enableTenancy == "no" {
-		tenancy.Tenancy.Enabled = false
+		tenancy.Enabled = false
 	}
 	if enableTenancy == "yes" {
-		tenancy.Tenancy.Enabled = true
-		tenancy.Tenancy.Key = "purpose"
-		tenancy.Tenancy.Value = "cnvrg-control-plane"
+		tenancy.Enabled = true
+		tenancy.Key = "purpose"
+		tenancy.Value = "cnvrg-control-plane"
 	}
 }
 
@@ -195,17 +324,17 @@ func gatherSso(sso *Sso) {
 	fmt.Print("Do you want to enable SSO? ")
 	fmt.Scan(&enableSso)
 	if enableSso == "no" {
-		sso.Sso.Enabled = false
+		sso.Enabled = false
 	}
 	if enableSso == "yes" {
-		sso.Sso.Enabled = true
-		sso.Sso.AdminUser = ""
-		sso.Sso.Provider = ""
-		sso.Sso.EmailDomain = []string{"10.2.3.8,", "192.168.1.5"}
-		sso.Sso.ClientId = ""
-		sso.Sso.ClientSecret = ""
-		sso.Sso.AzureTenant = ""
-		sso.Sso.OidcIssuerUrl = ""
+		sso.Enabled = true
+		sso.AdminUser = ""
+		sso.Provider = ""
+		sso.EmailDomain = []string{"10.2.3.8,", "192.168.1.5"}
+		sso.ClientId = ""
+		sso.ClientSecret = ""
+		sso.AzureTenant = ""
+		sso.OidcIssuerUrl = ""
 	}
 }
 
@@ -287,11 +416,10 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("values called")
-		registry := RegCred{}
-		fmt.Println("enable the registry?")
-		registry.RegCred = true
-		registry.Username = "brad"
-		registry.Password = "Password123!"
+		clusterdomain := ClusterDomain{}
+		gatherClusterDomain(&clusterdomain)
+		registry := Registry{}
+		gatherRegistry(&registry)
 		network := Networking{}
 		gatherNetworking(&network)
 		sso := Sso{}
@@ -300,8 +428,14 @@ to quickly create a Cobra application.`,
 		gatherStorage(&storage)
 		tenancy := Tenancy{}
 		gatherTenancy(&tenancy)
+		configreloader := ConfigReloader{}
+		gatherConfigReloader(&configreloader)
+		capsule := Capsule{}
+		gatherCapsule(&capsule)
+		backup := Backup{}
+		gatherBackup(&backup)
 
-		finaltemp := Template{registry, network, sso, storage, tenancy}
+		finaltemp := Template{clusterdomain, registry, network, sso, storage, tenancy, configreloader, capsule, backup}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			log.Fatal(err)

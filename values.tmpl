@@ -1,3 +1,9 @@
+clusterDomain: {{ .ClusterDomain.ClusterDomain }}
+clusterInternalDomain: {{ .ClusterDomain.ClusterInternalDomain }}
+spec: {{ .ClusterDomain.Spec }} 
+imageHub: {{ .ClusterDomain.ImageHub }}
+
+
 {{- if .Network.Https.Enabled }}
 networking:
   https:
@@ -29,16 +35,16 @@ networking:
     lbSourceRanges: {{.Network.Istio.LbSourceRanges }}
 {{- end }}
 
-{{- if .Sso.Sso.Enabled }}
+{{- if .Sso.Enabled }}
 sso:
-  enabled: {{ .Sso.Sso.Enabled }}
-  adminUser: {{ .Sso.Sso.AdminUser }}
-  provider: {{ .Sso.Sso.Provider }}
-  emailDomain: {{ .Sso.Sso.EmailDomain }}
-  clientId: {{ .Sso.Sso.ClientId }}
-  clientSecret: {{ .Sso.Sso.ClientSecret }}
-  azureTenant: {{ .Sso.Sso.AzureTenant }}
-  oidcIssuerUrl: {{ .Sso.Sso.OidcIssuerUrl }}
+  enabled: {{ .Sso.Enabled }}
+  adminUser: {{ .Sso.AdminUser }}
+  provider: {{ .Sso.Provider }}
+  emailDomain: {{ .Sso.EmailDomain }}
+  clientId: {{ .Sso.ClientId }}
+  clientSecret: {{ .Sso.ClientSecret }}
+  azureTenant: {{ .Sso.AzureTenant }}
+  oidcIssuerUrl: {{ .Sso.OidcIssuerUrl }}
 {{- end }}
 
 {{- if .Storage.Hostpath.Enabled }}
@@ -59,9 +65,34 @@ sso:
     reclaimPolicy: {{ .Storage.Nfs.ReclaimPolicy }}
 {{- end }}
 
-{{- if .Tenancy.Tenancy.Enabled }}
+{{- if .Tenancy.Enabled }}
 tenancy:
-  enabled: {{ .Tenancy.Tenancy.Enabled }}
-  key: {{ .Tenancy.Tenancy.Key }}
-  value: {{ .Tenancy.Tenancy.Value }}
+  enabled: {{ .Tenancy.Enabled }}
+  key: {{ .Tenancy.Key }}
+  value: {{ .Tenancy.Value }}
+{{- end }}
+
+{{- if .Registry.Enabled }}
+registry:
+  url: {{ .Registry.Url }}
+  user: {{ .Registry.User }}
+  password: {{ .Registry.Password }}
+{{- end }}
+
+{{- if .ConfigReloader.Enabled }}
+configReloader:
+  enabled: {{ .ConfigReloader.Enabled }}
+{{- end }}
+
+{{- if eq .Capsule.Enabled false }}
+capsule:
+  enabled: {{ .Capsule.Enabled }}
+  image: {{ .Capsule.Image }}
+{{- end }}
+
+{{- if eq .Backup.Enabled false }}
+backup:
+  enabled: {{ .Backup.Enabled }}
+  rotation: {{ .Backup.Rotation }}
+  period: {{ .Backup.Period }}
 {{- end }}
