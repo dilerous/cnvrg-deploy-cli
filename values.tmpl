@@ -7,8 +7,8 @@ imageHub: {{ .ClusterDomain.ImageHub }}
 {{- if .Network.Https.Enabled }}
 networking:
   https:
-    enabled: {{.Network.Https.Enabled }}
-    certSecret: {{.Network.Https.CertSecret }}
+    enabled: {{ .Network.Https.Enabled }}
+    certSecret: {{ .Network.Https.CertSecret }}
 {{- end }}
 
 {{- if .Network.Proxy.Enabled }}

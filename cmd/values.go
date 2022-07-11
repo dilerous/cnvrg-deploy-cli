@@ -83,6 +83,7 @@ type Hostpath struct {
 	NodeSelector  []string // Need to figure out how to define "{ }"
 }
 
+// Used in the Storage struct
 type Nfs struct {
 	Enabled       bool
 	Server        string
@@ -115,9 +116,9 @@ type Proxy struct {
 
 // Used in the Networking struct
 type Ingress struct {
-	Type           string `default: "istio"`
-	IstioGwEnabled bool   `default: true, yaml:"IstioGwEnabled"`
-	IstioGwName    string `yaml: "IstioGwName"`
+	Type           string `default:"istio"`
+	IstioGwEnabled bool   `default:"true"`
+	IstioGwName    string `yaml:"IstioGwName"`
 	External       bool
 }
 
@@ -148,20 +149,19 @@ and to prompt user for all clusterDomain and image settings. This
 function will return a struct.
 */
 func gatherClusterDomain(cluster *ClusterDomain) {
-	fmt.Println("In the gatherCapsule func")
+	fmt.Println("In the gatherClusterDomain func")
 	var clusterDomain string
 	var clusterInternalDomain string = "cluster.local"
-	// var spec string
-	// var imageHub string
+	fmt.Print(clusterInternalDomain)
 
-	// Ask if they want to enable Tenancy skip if "no"
+	// Ask what the wildcard domain
 	fmt.Print("What is your wildcard domain? ")
 	fmt.Scan(&clusterDomain)
 	cluster.ClusterDomain = clusterDomain
 
-	fmt.Printf("Do you want to change the internal cluster domain [ default is %v ]? ", clusterInternalDomain)
+	fmt.Printf("Do you want to change the internal cluster domain? yes/no [ default is %v ]? ", clusterInternalDomain)
 	fmt.Scan(&clusterInternalDomain)
-	if clusterInternalDomain == "" {
+	if clusterInternalDomain == "no" {
 		cluster.ClusterInternalDomain = "cluster.local"
 	} else {
 		cluster.ClusterInternalDomain = clusterInternalDomain
