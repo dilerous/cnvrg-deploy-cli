@@ -27,7 +27,7 @@ logging:
     enabled: {{ .Logging.ElastalertEnable }}
     storageSize: {{ .Logging.ElastaStorageSize }}
     storageClass: {{ .Logging.ElastaStorageClass }}
-    nodeSelector: {{ .Logging.ElastaNodeSelector }}
+    nodeSelector: { {{ .Logging.ElastaNodeSelector }} }
 {{- end }}
 {{- if eq .Logging.KibanaEnable false }}
   kibana:
@@ -49,6 +49,61 @@ networking:
     httpsProxy: {{ .Network.Proxy.HttpsProxy }}
     noProxy: {{ .Network.Proxy.NoProxy }}
 {{- end }}
+
+
+monitoring:
+{{- if eq .Monitoring.DcgmExportEnable false }}
+  dcgmExporter:
+    enabled: {{ .Monitoring.DcgmExportEnable }}
+{{- end }}
+
+{{- if eq .Monitoring.HabanaExportEnable false }}
+  habanaExporter:
+    enabled: {{ .Monitoring.HabanaExportEnable }}
+{{- end }}
+
+{{- if eq .Monitoring.NodeExportEnable false }}
+  nodeExporter:
+    enabled: {{ .Monitoring.NodeExportEnable }}
+{{- end }}
+
+{{- if eq .Monitoring.KubeStateMetricEnable false }}
+  kubeStateMetrics:
+    enabled: {{ .Monitoring.KubeStateMetricEnable }}
+{{- end }}
+
+{{- if eq .Monitoring.GrafanaEnable false }}
+  grafana:
+    enabled: {{ .Monitoring.GrafanaEnable }}
+    svcName: {{ .Monitoring.GrafanaSvcName }}
+{{- end }}
+
+{{- if eq .Monitoring.PrometheusOperatorEnable false }}
+  prometheusOperator:
+    enabled: {{ .Monitoring.PrometheusOperatorEnable }}
+{{- end }}
+
+
+{{- if eq .Monitoring.PrometheusEnable false }}
+  prometheus:
+    enabled: {{ .Monitoring.PrometheusEnable }}
+    storageSize: {{ .Monitoring.PrometheusStorageSize }}
+    storageClass: {{ .Monitoring.PrometheusStorageClass }}
+    nodeSelector: { {{ .Monitoring.PrometheusNodeSelector }} }
+{{- end }}
+
+{{- if eq .Monitoring.DefaultSvcMonitorsEnable false }}
+  defaultServiceMonitors:
+    enabled: {{ .Monitoring.DefaultSvcMonitorsEnable }}
+  {{- end }}
+
+{{- if eq .Monitoring.CnvrgIdleMetricsEnable false }}
+  cnvrgIdleMetricsExporter:
+    enabled: {{ .Monitoring.CnvrgIdleMetricsEnable }}
+    labels: { {{ .Monitoring.CnvrgIdleMetricsLabels }} }
+  {{- end }}
+
+
 
 {{- if .Network.Ingress.External }}
   ingress:

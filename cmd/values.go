@@ -117,6 +117,23 @@ type Nfs struct {
 	ReclaimPolicy string
 }
 
+type Monitoring struct {
+	DcgmExportEnable         bool
+	HabanaExportEnable       bool
+	NodeExportEnable         bool
+	KubeStateMetricEnable    bool
+	GrafanaEnable            bool
+	GrafanaSvcName           string
+	PrometheusOperatorEnable bool
+	PrometheusEnable         bool
+	PrometheusStorageSize    string
+	PrometheusStorageClass   string
+	PrometheusNodeSelector   string
+	DefaultSvcMonitorsEnable bool
+	CnvrgIdleMetricsEnable   bool
+	CnvrgIdleMetricsLabels   string
+}
+
 // Parent level of the Networking struct
 type Networking struct {
 	Https   HttpsValues
@@ -171,6 +188,7 @@ type Template struct {
 	Backup         Backup
 	Gpu            Gpu
 	Logging        Logging
+	Monitoring     Monitoring
 }
 
 /* function used to leverage the ClusterDomain struct
@@ -210,6 +228,86 @@ func gatherLabels(labels *Labels) {
 	fmt.Scanf("%s %s", &key, &value)
 	labels.Key = key
 	labels.Value = value
+}
+
+/* function used to leverage the Logging struct
+and to prompt user for all Logging settings this
+will return a struct
+*/
+func gatherMonitoring(monitoring *Monitoring) {
+	fmt.Println("In the gatherLabels func")
+	var disableDcgmExport string
+	var disableHabana string
+	var disableNodeExport string
+	var disableKubeState string
+	var disableGrafana string
+	var disablePromOperator string
+	var disablePrometheus string
+	var disableDefaultSvcMonitor string
+	var disableCnvrgIDMetrics string
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable dcgm Export? ")
+	fmt.Scan(&disableDcgmExport)
+	if disableDcgmExport == "yes" {
+		monitoring.DcgmExportEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Habana? ")
+	fmt.Scan(&disableHabana)
+	if disableHabana == "yes" {
+		monitoring.HabanaExportEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Kibana? ")
+	fmt.Scan(&disableNodeExport)
+	if disableNodeExport == "yes" {
+		monitoring.NodeExportEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Kibana? ")
+	fmt.Scan(&disableKubeState)
+	if disableKubeState == "yes" {
+		monitoring.KubeStateMetricEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Kibana? ")
+	fmt.Scan(&disableGrafana)
+	if disableGrafana == "yes" {
+		monitoring.GrafanaEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Kibana? ")
+	fmt.Scan(&disablePromOperator)
+	if disablePromOperator == "yes" {
+		monitoring.PrometheusOperatorEnable = false
+	}
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Kibana? ")
+	fmt.Scan(&disablePrometheus)
+	if disablePrometheus == "yes" {
+		monitoring.PrometheusEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Kibana? ")
+	fmt.Scan(&disableDefaultSvcMonitor)
+	if disableDefaultSvcMonitor == "yes" {
+		monitoring.DefaultSvcMonitorsEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Kibana? ")
+	fmt.Scan(&disableCnvrgIDMetrics)
+	if disableCnvrgIDMetrics == "yes" {
+		monitoring.CnvrgIdleMetricsEnable = false
+	}
+
 }
 
 /* function used to leverage the Logging struct
@@ -555,8 +653,10 @@ to quickly create a Cobra application.`,
 		gatherGpu(&gpu)
 		logging := Logging{}
 		gatherLogging(&logging)
+		monitoring := Monitoring{}
+		gatherMonitoring(&monitoring)
 
-		finaltemp := Template{clusterdomain, labels, annotations, registry, network, sso, storage, tenancy, configreloader, capsule, backup, gpu, logging}
+		finaltemp := Template{clusterdomain, labels, annotations, registry, network, sso, storage, tenancy, configreloader, capsule, backup, gpu, logging, monitoring}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			log.Fatal(err)
