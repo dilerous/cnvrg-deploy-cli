@@ -45,6 +45,34 @@ type Gpu struct {
 	HabanaEnable bool
 }
 
+type Dbs struct {
+	CvatEnable        bool
+	EsEnable          bool
+	EsStorageSize     string
+	EsStorageClass    string
+	EsPatchNodes      bool
+	EsNodeSelector    string
+	CleanUpAll        string
+	CleanUpApp        string
+	CleanUpJobs       string
+	CleanUpEndpoints  string
+	MinioEnable       bool
+	MinioStorageSize  string
+	MinioStorageClass string
+	MinioNodeSelector string
+	PgEnable          bool
+	PgStorageSize     string
+	PgStorageClass    string
+	PgNodeSelector    string
+	PgPagesEnable     bool
+	PgPagesSize       string
+	PgPagesMemory     string
+	RedisEnable       bool
+	RedisStorageSize  string
+	RedisStorageClass string
+	RedisNodeSelector string
+}
+
 type Logging struct {
 	FluentbitEnable    bool
 	ElastalertEnable   bool
@@ -189,6 +217,7 @@ type Template struct {
 	Gpu            Gpu
 	Logging        Logging
 	Monitoring     Monitoring
+	Dbs            Dbs
 }
 
 /* function used to leverage the ClusterDomain struct
@@ -306,6 +335,43 @@ func gatherMonitoring(monitoring *Monitoring) {
 	fmt.Scan(&disableCnvrgIDMetrics)
 	if disableCnvrgIDMetrics == "yes" {
 		monitoring.CnvrgIdleMetricsEnable = false
+	}
+
+}
+
+func gatherDbs(dbs *Dbs) {
+	fmt.Println("In the gatherLabels func")
+	var disableCvat string
+	var disableEs string
+	var disableMinio string
+	var disablePg string
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to enable CVAT? ")
+	fmt.Scan(&disableCvat)
+	if disableCvat == "yes" {
+		dbs.CvatEnable = true
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Elastic Search? ")
+	fmt.Scan(&disableEs)
+	if disableEs == "yes" {
+		dbs.EsEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Minio? ")
+	fmt.Scan(&disableMinio)
+	if disableMinio == "yes" {
+		dbs.MinioEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Postgres? ")
+	fmt.Scan(&disablePg)
+	if disablePg == "yes" {
+		dbs.PgEnable = false
 	}
 
 }
@@ -655,8 +721,11 @@ to quickly create a Cobra application.`,
 		gatherLogging(&logging)
 		monitoring := Monitoring{}
 		gatherMonitoring(&monitoring)
+		dbs := Dbs{}
+		gatherDbs(&dbs)
 
-		finaltemp := Template{clusterdomain, labels, annotations, registry, network, sso, storage, tenancy, configreloader, capsule, backup, gpu, logging, monitoring}
+		finaltemp := Template{clusterdomain, labels, annotations, registry, network, sso, storage,
+			tenancy, configreloader, capsule, backup, gpu, logging, monitoring, dbs}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			log.Fatal(err)

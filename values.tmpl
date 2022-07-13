@@ -104,6 +104,85 @@ monitoring:
   {{- end }}
 
 
+dbs:
+{{- if .Dbs.CvatEnable }}
+  cvat:
+    enabled: {{ .Dbs.CvatEnable }}
+{{- end }}
+
+{{- if eq .Dbs.EsEnable false }}
+  es:
+    enabled: {{ .Dbs.EsEnable }}
+{{- end }}
+    storageSize: {{ .Dbs.EsStorageSize }}
+    storageClass: {{ .Dbs.EsStorageClass }}
+    patchEsNodes: {{ .Dbs.EsPatchNodes }}
+    nodeSelector: { {{ .Dbs.EsNodeSelector }} }
+    cleanupPolicy:
+      all: {{ .Dbs.CleanUpAll }}
+      app: {{ .Dbs.CleanUpApp }}
+      jobs: {{ .Dbs.CleanUpJobs }}
+      endpoints: {{ .Dbs.CleanUpEndpoints }} 
+
+{{- if eq .Dbs.MinioEnable false }} 
+  minio:
+    enabled: {{ .Dbs.MinioEnable }}
+{{- end }}
+    storageSize: {{ .Dbs.MinioStorageSize }}
+    storageClass: {{ .Dbs.MinioStorageClass }}
+    nodeSelector: { {{ .Dbs.MinioNodeSelector }} }
+
+ {{- if eq .Dbs.MinioEnable false }}    
+  pg:
+    enabled: {{ .Dbs.PgEnable }}
+{{- end }}
+    storageSize: {{ .Dbs.PgStorageSize }}
+    storageClass: {{ .Dbs.PgStorageClass }}
+    nodeSelector: { {{ .Dbs.PgNodeSelector }} }
+    hugePages:
+      enabled: {{ .Dbs.PgPagesEnable }}
+      size: {{ .Dbs.PgPagesSize }}
+      memory: {{ .Dbs.PgPagesMemory }}
+
+{{- if eq .Dbs.RedisEnable false }}
+  redis:
+    enabled: {{ .Dbs.RedisEnable }}
+{{- end }}
+    storageSize: {{ .Dbs.RedisStorageSize }}
+    storageClass: {{ .Dbs.RedisStorageClass }}
+    nodeSelector: {{ .Dbs.RedisNodeSelector }}
+
+	CvatEnable        bool
+	EsEnable          bool
+	EsStorageSize     string
+	EsStorageClass    string
+	EsPatchNodes      bool
+	EsNodeSelector    string
+	CleanUpAll        string
+	CleanUpApp        string
+	CleanUpJobs       string
+	CleanUpEndpoints  string
+	MinioEnable       bool
+	MinioStorageSize  string
+	MinioStorageClass string
+	MinioNodeSelector string
+	PgEnable          bool
+	PgStorageSize     string
+	PgStorageClass    string
+	PgNodeSelector    string
+	PgPagesEnable     bool
+	PgPagesSize       string
+	PgPagesMemory     string
+	RedisEnable       bool
+	RedisStorageSize  string
+	RedisStorageClass string
+	RedisNodeSelector string
+
+
+
+
+
+
 
 {{- if .Network.Ingress.External }}
   ingress:
