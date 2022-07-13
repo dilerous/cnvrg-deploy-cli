@@ -152,37 +152,114 @@ dbs:
     storageClass: {{ .Dbs.RedisStorageClass }}
     nodeSelector: {{ .Dbs.RedisNodeSelector }}
 
-	CvatEnable        bool
-	EsEnable          bool
-	EsStorageSize     string
-	EsStorageClass    string
-	EsPatchNodes      bool
-	EsNodeSelector    string
-	CleanUpAll        string
-	CleanUpApp        string
-	CleanUpJobs       string
-	CleanUpEndpoints  string
-	MinioEnable       bool
-	MinioStorageSize  string
-	MinioStorageClass string
-	MinioNodeSelector string
-	PgEnable          bool
-	PgStorageSize     string
-	PgStorageClass    string
-	PgNodeSelector    string
-	PgPagesEnable     bool
-	PgPagesSize       string
-	PgPagesMemory     string
-	RedisEnable       bool
-	RedisStorageSize  string
-	RedisStorageClass string
-	RedisNodeSelector string
 
+controlPlane:
+  image: {{ .ControlPlane.Image }}
+  baseConfig:
+    agentCustomTag: {{ .ControlPlane.BaseConfigAgentTag }}
+    intercom: {{ .ControlPlane.BaseConfigIntercom }}
+    featureFlags: { {{ .ControlPlane.BaseConfigFeatureFlags }} }
+    cnvrgPrivilegedJob: {{ .ControlPlane.BaseConfigCnvrgPrivileged }}
 
+{{- if eq .ControlPlane.HyperEnable false }}
+  hyper:
+    enabled: {{ .ControlPlane.HyperEnable }}
+{{- end }}
 
+{{- if eq .ControlPlane.CnvrgScheduleEnable false }}
+  cnvrgScheduler:
+    enabled: {{ .ControlPlane.CnvrgScheduleEnable }}
+{{- end }}
 
+{{ if .ControlPlane.CnvrgClusterProvisionerEnable }}
+  cnvrgClusterProvisionerOperator:
+    enabled: {{ .ControlPlane.CnvrgClusterProvisionerEnable }}
+{{- end }}
 
+  objectStorage:
+    type: {{ .ControlPlane.ObjectStorageType }}
+    bucket: {{ .ControlPlane.ObjectStorageBucket }}
+    region: {{ .ControlPlane.ObjectStorageRegion }}
+    accessKey: {{ .ControlPlane.ObjectStorageAccessKey }}
+    secretKey: {{ .ControlPlane.ObjectStorageSecretKey }}
+    endpoint: {{ .ControlPlane.ObjectStorageEndpoint }}
+    azureAccountName: {{ .ControlPlane.ObjectStorageAzureAcountName }}
+    azureContainer: {{ .ControlPlane.ObjectStorageAzureContainer }}
+    gcpSecretRef: {{ .ControlPlane.ObjectStorageGcpSecretRef }}
+    gcpProject: {{ .ControlPlane.ObjectStorageGcpProject }}
 
+{{- if eq .ControlPlane.SearchkiqEnable false }}
+  searchkiq:
+    enabled: {{ .ControlPlane.SearchkiqEnable }}
+{{- end }}
+
+{{- if eq .ControlPlane.SearchkiqHpaEnable false }}
+    hpa:
+      enabled: {{ .ControlPlane.SearchkiqHpaEnable }}
+{{- end }}
+      maxReplicas: {{ .ControlPlane.SearchkiqHpaMaxReplicas }}
+
+{{- if eq .ControlPlane.SidekiqEnable false }}
+  sidekiq:
+    enabled: {{ .ControlPlane.SidekiqEnable }}
+{{- end }}
+    split: {{ .ControlPlane.SidekiqSplit }}
+
+{{ if eq .ControlPlane.SidekiqHpaEnable false }}
+    hpa:
+      enabled: {{ .ControlPlane.SidekiqHpaEnable }}
+{{- end }}
+      maxReplicas: {{ .ControlPlane.SidekiqHpaMaxReplicas }}
+
+{{ if .ControlPlane.CnvrgRouterEnable }}
+  cnvrgRouter:
+    enabled: {{ .ControlPlane.CnvrgRouterEnable }}
+{{- end }}
+    image: {{ .ControlPlane.CnvrgRouterImage }}
+
+  smtp:
+    server: {{ .ControlPlane.SmtpServer }}
+    port: {{ .ControlPlane.SmtpPort }}
+    username: {{ .ControlPlane.SmtpUsername }}
+    password: {{ .ControlPlane.SmtpPassword }}
+    domain: {{ .ControlPlane.SmtpDomain }}
+    opensslVerifyMode: {{ .ControlPlane.SmtpOpenSslMode }}
+    sender: {{ .ControlPlane.SmtpSender }}
+
+{{ if eq .ControlPlane.SystemkiqEnable false }}
+  systemkiq:
+    enabled: {{ .ControlPlane.SystemkiqEnable }}
+{{- end }}
+{{ if eq .ControlPlane.SystemkiqHpaEnable false }}
+    hpa:
+      enabled: {{ .ControlPlane.SystemkiqHpaEnable }}
+{{- end }}
+      maxReplicas: {{ .ControlPlane.SystemkiqHpaMaxReplicas }}
+
+{{ if eq .ControlPlane.WebappEnable false }}
+  webapp:
+    enabled: {{ .ControlPlane.WebappEnable }}
+{{- end }}
+    svcName: {{ .ControlPlane.WebappSvcName }}
+    replicas: {{ .ControlPlane.WebappReplicas }}
+
+{{ if eq .ControlPlane.WebappHpaEnable false }}
+    hpa:
+      enabled: {{ .ControlPlane.WebappHpaEnable }}
+{{- end }}
+      maxReplicas: {{ .ControlPlane.WebappHpaMaxReplicas }}
+
+{{ if eq .ControlPlane.MpiEnable false }}     
+  mpi:
+    enabled: {{ .ControlPlane.MpiEnable }}
+{{- end }}
+    image: {{ .ControlPlane.MpiImage }}
+    kubectlDeliveryImage: {{ .ControlPlane.MpiKubectlImage }}
+    extraArgs: { {{ .ControlPlane.MpiExtraArgs }} }
+    registry:
+      url: {{ .ControlPlane.MpiRegistryUrl }}
+      user: {{ .ControlPlane.MpiRegistryUser }}
+      password: {{ .ControlPlane.MpiRegistryPassword }}
 
 {{- if .Network.Ingress.External }}
   ingress:

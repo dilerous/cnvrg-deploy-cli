@@ -60,6 +60,7 @@ type Dbs struct {
 	MinioStorageSize  string
 	MinioStorageClass string
 	MinioNodeSelector string
+
 	PgEnable          bool
 	PgStorageSize     string
 	PgStorageClass    string
@@ -71,6 +72,70 @@ type Dbs struct {
 	RedisStorageSize  string
 	RedisStorageClass string
 	RedisNodeSelector string
+}
+
+type ControlPlane struct {
+	Image string
+
+	BaseConfigAgentTag        string
+	BaseConfigIntercom        bool
+	BaseConfigFeatureFlags    string
+	BaseConfigCnvrgPrivileged bool
+
+	HyperEnable bool
+
+	CnvrgScheduleEnable bool
+
+	CnvrgClusterProvisionerEnable bool
+
+	ObjectStorageType            string
+	ObjectStorageBucket          string
+	ObjectStorageRegion          string
+	ObjectStorageAccessKey       string
+	ObjectStorageSecretKey       string
+	ObjectStorageEndpoint        string
+	ObjectStorageAzureAcountName string
+	ObjectStorageAzureContainer  string
+	ObjectStorageGcpSecretRef    string
+	ObjectStorageGcpProject      string
+
+	SearchkiqEnable         bool
+	SearchkiqHpaEnable      bool
+	SearchkiqHpaMaxReplicas int
+
+	SidekiqEnable         bool
+	SidekiqSplit          bool
+	SidekiqHpaEnable      bool
+	SidekiqHpaMaxReplicas int
+
+	CnvrgRouterEnable bool
+	CnvrgRouterImage  string
+
+	SmtpServer      string
+	SmtpPort        int
+	SmtpUsername    string
+	SmtpPassword    string
+	SmtpDomain      string
+	SmtpOpenSslMode string
+	SmtpSender      string
+
+	SystemkiqEnable         bool
+	SystemkiqHpaEnable      bool
+	SystemkiqHpaMaxReplicas int
+
+	WebappEnable         bool
+	WebappSvcName        string
+	WebappReplicas       int
+	WebappHpaEnable      bool
+	WebappHpaMaxReplicas int
+
+	MpiEnable           bool
+	MpiImage            string
+	MpiKubectlImage     string
+	MpiExtraArgs        string
+	MpiRegistryUrl      string
+	MpiRegistryUser     string
+	MpiRegistryPassword string
 }
 
 type Logging struct {
@@ -218,6 +283,7 @@ type Template struct {
 	Logging        Logging
 	Monitoring     Monitoring
 	Dbs            Dbs
+	ControlPlane   ControlPlane
 }
 
 /* function used to leverage the ClusterDomain struct
@@ -335,6 +401,75 @@ func gatherMonitoring(monitoring *Monitoring) {
 	fmt.Scan(&disableCnvrgIDMetrics)
 	if disableCnvrgIDMetrics == "yes" {
 		monitoring.CnvrgIdleMetricsEnable = false
+	}
+
+}
+
+func gatherControlPlane(controlplane *ControlPlane) {
+	fmt.Println("In the gatherLabels func")
+	var disableHyper string
+	var disableCnvrgScheduler string
+	var disableCnvrgClusterProvisioner string
+	var disableSearchkiq string
+	var disableSidekiq string
+	var disableSystemkiq string
+	var disableWebapp string
+	var disableMpi string
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Hyper? ")
+	fmt.Scan(&disableHyper)
+	if disableHyper == "yes" {
+		controlplane.HyperEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable cnvrg Scheduler? ")
+	fmt.Scan(&disableCnvrgScheduler)
+	if disableCnvrgScheduler == "yes" {
+		controlplane.CnvrgScheduleEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable the cnvrg cluster provisioner? ")
+	fmt.Scan(&disableCnvrgClusterProvisioner)
+	if disableCnvrgClusterProvisioner == "yes" {
+		controlplane.CnvrgClusterProvisionerEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Searchkiq? ")
+	fmt.Scan(&disableSearchkiq)
+	if disableSearchkiq == "yes" {
+		controlplane.SearchkiqEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Sidekiq? ")
+	fmt.Scan(&disableSidekiq)
+	if disableSidekiq == "yes" {
+		controlplane.SidekiqEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Searchkiq? ")
+	fmt.Scan(&disableSystemkiq)
+	if disableSystemkiq == "yes" {
+		controlplane.SystemkiqEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Webapp? ")
+	fmt.Scan(&disableWebapp)
+	if disableWebapp == "yes" {
+		controlplane.WebappEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable MPI? ")
+	fmt.Scan(&disableMpi)
+	if disableMpi == "yes" {
+		controlplane.MpiEnable = false
 	}
 
 }
@@ -723,9 +858,11 @@ to quickly create a Cobra application.`,
 		gatherMonitoring(&monitoring)
 		dbs := Dbs{}
 		gatherDbs(&dbs)
+		controlplane := ControlPlane{}
+		gatherControlPlane(&controlplane)
 
 		finaltemp := Template{clusterdomain, labels, annotations, registry, network, sso, storage,
-			tenancy, configreloader, capsule, backup, gpu, logging, monitoring, dbs}
+			tenancy, configreloader, capsule, backup, gpu, logging, monitoring, dbs, controlplane}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			log.Fatal(err)
