@@ -23,11 +23,36 @@ type ClusterDomain struct {
 	ImageHub              string `default:"docker.io/cnvrg"`
 }
 
+type Labels struct {
+	Key   string
+	Value string
+}
+
+type Annotations struct {
+	Key   string
+	Value string
+}
+
 // Parent struct for the Backup values
 type Backup struct {
 	Enabled  bool
 	Rotation int
 	Period   string
+}
+
+type Gpu struct {
+	NvidiaEnable bool
+	HabanaEnable bool
+}
+
+type Logging struct {
+	FluentbitEnable    bool
+	ElastalertEnable   bool
+	ElastaStorageSize  string
+	ElastaStorageClass string
+	ElastaNodeSelector string
+	KibanaEnable       bool
+	KibanaSvcName      string
 }
 
 //Parent struct for the Capsule values
@@ -134,6 +159,8 @@ type Istio struct {
 // Template struct for the values.tmpl file
 type Template struct {
 	ClusterDomain  ClusterDomain
+	Labels         Labels
+	Annotations    Annotations
 	Registry       Registry
 	Network        Networking
 	Sso            Sso
@@ -142,6 +169,8 @@ type Template struct {
 	ConfigReloader ConfigReloader
 	Capsule        Capsule
 	Backup         Backup
+	Gpu            Gpu
+	Logging        Logging
 }
 
 /* function used to leverage the ClusterDomain struct
@@ -152,7 +181,6 @@ func gatherClusterDomain(cluster *ClusterDomain) {
 	fmt.Println("In the gatherClusterDomain func")
 	var clusterDomain string
 	var clusterInternalDomain string = "cluster.local"
-	fmt.Print(clusterInternalDomain)
 
 	// Ask what the wildcard domain
 	fmt.Print("What is your wildcard domain? ")
@@ -167,6 +195,94 @@ func gatherClusterDomain(cluster *ClusterDomain) {
 		cluster.ClusterInternalDomain = clusterInternalDomain
 	}
 
+}
+
+/* function used to leverage the Labels struct
+and to prompt user for all Labels settings this
+will return a struct
+*/
+func gatherLabels(labels *Labels) {
+	fmt.Println("In the gatherLabels func")
+	var key string
+	var value string
+
+	fmt.Print("Do you want to add a label [format- key: value]? ")
+	fmt.Scanf("%s %s", &key, &value)
+	labels.Key = key
+	labels.Value = value
+}
+
+/* function used to leverage the Logging struct
+and to prompt user for all Logging settings this
+will return a struct
+*/
+func gatherLogging(logging *Logging) {
+	fmt.Println("In the gatherLabels func")
+	var disableFluentbit string
+	var disableElastalert string
+	var disableKibana string
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Fluentbit? ")
+	fmt.Scan(&disableFluentbit)
+	if disableFluentbit == "yes" {
+		logging.FluentbitEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Elastalert? ")
+	fmt.Scan(&disableElastalert)
+	if disableElastalert == "yes" {
+		logging.ElastalertEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Kibana? ")
+	fmt.Scan(&disableKibana)
+	if disableKibana == "yes" {
+		logging.KibanaEnable = false
+	}
+
+}
+
+/* function used to leverage the Gpu struct
+and to prompt user for all Gpu settings this
+will return a struct
+*/
+func gatherGpu(gpu *Gpu) {
+	fmt.Println("In the gatherLabels func")
+	var disableNvidia string
+	var disableHabana string
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Nvidia GPU? ")
+	fmt.Scan(&disableNvidia)
+	if disableNvidia == "yes" {
+		gpu.NvidiaEnable = false
+	}
+
+	// Ask if they want to enable Tenancy skip if "no"
+	fmt.Print("Do you want to disable Habana GPU? ")
+	fmt.Scan(&disableHabana)
+	if disableHabana == "yes" {
+		gpu.HabanaEnable = false
+	}
+
+}
+
+/* function used to leverage the Annotations struct
+and to prompt user for all Annotations settings this
+will return a struct
+*/
+func gatherAnnotations(annotations *Annotations) {
+	fmt.Println("In the gatherLabels func")
+	var key string
+	var value string
+
+	fmt.Print("Do you want to add an Annotation [format- key: value]? ")
+	fmt.Scanf("%s %s", &key, &value)
+	annotations.Key = key
+	annotations.Value = value
 }
 
 /* function used to leverage the Backup struct
@@ -349,9 +465,6 @@ func gatherNetworking(network *Networking) {
 	var externalIngress string
 	var diffIngress string
 
-	// testing example remove later
-	pleasework := []string{"hello,", "hows it going"}
-
 	// Ask if they want to enable https and skip if "no"
 	fmt.Print("Do you want to enable https? ")
 	fmt.Scan(&enableHttps)
@@ -367,7 +480,7 @@ func gatherNetworking(network *Networking) {
 	fmt.Scan(&enableProxy)
 	if enableProxy == "yes" {
 		network.Proxy.Enabled = true
-		network.Proxy.HttpProxy = pleasework
+		network.Proxy.HttpProxy = []string{"hello,", "hows it going"}
 		network.Proxy.HttpsProxy = []string{"10.2.3.8,", "192.168.1.5"}
 		network.Proxy.NoProxy = []string{"proxy1,", "proxy2"}
 	}
@@ -418,6 +531,10 @@ to quickly create a Cobra application.`,
 		fmt.Println("values called")
 		clusterdomain := ClusterDomain{}
 		gatherClusterDomain(&clusterdomain)
+		labels := Labels{}
+		gatherLabels(&labels)
+		annotations := Annotations{}
+		gatherAnnotations(&annotations)
 		registry := Registry{}
 		gatherRegistry(&registry)
 		network := Networking{}
@@ -434,8 +551,12 @@ to quickly create a Cobra application.`,
 		gatherCapsule(&capsule)
 		backup := Backup{}
 		gatherBackup(&backup)
+		gpu := Gpu{}
+		gatherGpu(&gpu)
+		logging := Logging{}
+		gatherLogging(&logging)
 
-		finaltemp := Template{clusterdomain, registry, network, sso, storage, tenancy, configreloader, capsule, backup}
+		finaltemp := Template{clusterdomain, labels, annotations, registry, network, sso, storage, tenancy, configreloader, capsule, backup, gpu, logging}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			log.Fatal(err)

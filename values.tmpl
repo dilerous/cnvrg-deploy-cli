@@ -3,6 +3,37 @@ clusterInternalDomain: {{ .ClusterDomain.ClusterInternalDomain }}
 spec: {{ .ClusterDomain.Spec }} 
 imageHub: {{ .ClusterDomain.ImageHub }}
 
+labels:{ {{ .Labels.Key }} {{ .Labels.Value }} }
+annotations:{ {{ .Annotations.Key }} {{ .Annotations.Value }} }
+
+{{- if eq .Gpu.NvidiaDp.Enabled false }}
+gpu:
+  nvidiaDp:
+    enabled: {{ .Gpu.NvidiaEnable }}
+{{- end  }}
+{{- if eq .Gpu.HabanaDp.Enabled false }}
+  habanaDp:
+    enabled: {{ .Gpu.HabanaEnable }}
+{{- end }}
+
+
+logging:
+{{- if eq .Logging.FluentbitEnable false }}
+  fluentbit:
+    enabled: {{ .Logging.FluentbitEnable }}
+{{- end}}
+{{- if eq .Logging.ElastalertEnable false }}
+  elastalert:
+    enabled: {{ .Logging.ElastalertEnable }}
+    storageSize: {{ .Logging.ElastaStorageSize }}
+    storageClass: {{ .Logging.ElastaStorageClass }}
+    nodeSelector: {{ .Logging.ElastaNodeSelector }}
+{{- end }}
+{{- if eq .Logging.KibanaEnable false }}
+  kibana:
+    svcName: {{ .Logging.KibanaSvcName }}
+    enabled: {{ .Logging.KibanaEnable }}
+{{- end }}
 
 {{- if .Network.Https.Enabled }}
 networking:
