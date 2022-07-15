@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"text/template"
+	go get -u go.uber.org/zap
 
 	"github.com/spf13/cobra"
 )
@@ -287,24 +288,28 @@ type Template struct {
 }
 
 /* function used to leverage the ClusterDomain struct
-and to prompt user for all clusterDomain and image settings. This
-function will return a struct.
+and to prompt user for all clusterDomain wildcard dns entry
+and if they want to modify the internal cluster domain.
+This function will return a struct.
 */
 func gatherClusterDomain(cluster *ClusterDomain) {
 	fmt.Println("In the gatherClusterDomain func")
 	var clusterDomain string
 	var clusterInternalDomain string = "cluster.local"
 
-	// Ask what the wildcard domain
+	// Ask what the wildcard domain is
 	fmt.Print("What is your wildcard domain? ")
 	fmt.Scan(&clusterDomain)
 	cluster.ClusterDomain = clusterDomain
 
+	// Ask if they want to modify the internal cluster domain.
 	fmt.Printf("Do you want to change the internal cluster domain? yes/no [ default is %v ]? ", clusterInternalDomain)
 	fmt.Scan(&clusterInternalDomain)
 	if clusterInternalDomain == "no" {
 		cluster.ClusterInternalDomain = "cluster.local"
 	} else {
+		fmt.Print("Please enter the internal cluster domain: ")
+		fmt.Scan(&clusterInternalDomain)
 		cluster.ClusterInternalDomain = clusterInternalDomain
 	}
 
@@ -854,6 +859,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
 		fmt.Println("values called")
 		clusterdomain := ClusterDomain{}
 		gatherClusterDomain(&clusterdomain)
@@ -903,13 +909,5 @@ var temp *template.Template
 func init() {
 	createCmd.AddCommand(valuesCmd)
 	temp = template.Must(template.ParseFiles("values.tmpl"))
-	// Here you will define your flags and configuration settings.
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// valuesCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// valuesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
