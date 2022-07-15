@@ -5,6 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -24,13 +25,13 @@ type ClusterDomain struct {
 }
 
 type Labels struct {
-	Key   string
-	Value string
+	Key       []string
+	Stringify string
 }
 
 type Annotations struct {
-	Key   string
-	Value string
+	Key       []string
+	Stringify string
 }
 
 // Parent struct for the Backup values
@@ -269,7 +270,6 @@ type Istio struct {
 // Template struct for the values.tmpl file
 type Template struct {
 	ClusterDomain  ClusterDomain
-	Labels         Labels
 	Annotations    Annotations
 	Registry       Registry
 	Network        Networking
@@ -315,14 +315,28 @@ and to prompt user for all Labels settings this
 will return a struct
 */
 func gatherLabels(labels *Labels) {
-	fmt.Println("In the gatherLabels func")
-	var key string
-	var value string
+	scanner := bufio.NewScanner(os.Stdin)
 
-	fmt.Print("Do you want to add a label [format- key: value]? ")
-	fmt.Scanf("%s %s", &key, &value)
-	labels.Key = key
-	labels.Value = value
+	for {
+		fmt.Println("Do you want to add a label [format- key: value]?")
+		fmt.Print("(Hit enter when you have completed entering all of you key, values:) ")
+		scanner.Scan()
+
+		text := scanner.Text()
+
+		if len(text) != 0 {
+
+			fmt.Println(text)
+			labels.Key = append(labels.Key, text)
+		} else {
+			break
+		}
+	}
+
+	for _, v := range labels.Key {
+		labels.Stringify += fmt.Sprintf("%s, ", v)
+	}
+
 }
 
 /* function used to leverage the Logging struct
@@ -574,14 +588,27 @@ and to prompt user for all Annotations settings this
 will return a struct
 */
 func gatherAnnotations(annotations *Annotations) {
-	fmt.Println("In the gatherLabels func")
-	var key string
-	var value string
+	scanner := bufio.NewScanner(os.Stdin)
 
-	fmt.Print("Do you want to add an Annotation [format- key: value]? ")
-	fmt.Scanf("%s %s", &key, &value)
-	annotations.Key = key
-	annotations.Value = value
+	for {
+		fmt.Println("Do you want to add an annotation [format- key: value]?")
+		fmt.Print("(Hit enter when you have completed entering all of you key, values:) ")
+		scanner.Scan()
+
+		text := scanner.Text()
+
+		if len(text) != 0 {
+
+			fmt.Println(text)
+			annotations.Key = append(annotations.Key, text)
+		} else {
+			break
+		}
+	}
+
+	for _, v := range annotations.Key {
+		annotations.Stringify += fmt.Sprintf("%s, ", v)
+	}
 }
 
 /* function used to leverage the Backup struct
@@ -861,7 +888,7 @@ to quickly create a Cobra application.`,
 		controlplane := ControlPlane{}
 		gatherControlPlane(&controlplane)
 
-		finaltemp := Template{clusterdomain, labels, annotations, registry, network, sso, storage,
+		finaltemp := Template{clusterdomain, annotations, registry, network, sso, storage,
 			tenancy, configreloader, capsule, backup, gpu, logging, monitoring, dbs, controlplane}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
