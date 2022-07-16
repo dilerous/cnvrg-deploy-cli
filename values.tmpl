@@ -3,8 +3,8 @@ clusterInternalDomain: {{ .ClusterDomain.ClusterInternalDomain }}
 spec: {{ .ClusterDomain.Spec }} 
 imageHub: {{ .ClusterDomain.ImageHub }}
 
-labels:{ {{ .Labels.Key }} }
-annotations:{ {{ .Annotations.Key }} }
+labels:{ {{ .Labels.Stringify }} }
+annotations:{ {{ .Annotations.Stringify }} }
 
 {{- if eq .Gpu.NvidiaDp.Enabled false }}
 gpu:

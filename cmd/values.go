@@ -9,31 +9,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"text/template"
-	go get -u go.uber.org/zap
 
 	"github.com/spf13/cobra"
 )
-
-/* This struc includes clusterDomain, clusterInternalDomain,
-spec and imageHub
-*/
-type ClusterDomain struct {
-	ClusterDomain         string
-	ClusterInternalDomain string `default:"cluster.local"`
-	Spec                  string `default:"allinone"`
-	ImageHub              string `default:"docker.io/cnvrg"`
-}
-
-type Labels struct {
-	Key       []string
-	Stringify string
-}
-
-type Annotations struct {
-	Key       []string
-	Stringify string
-}
 
 // Parent struct for the Backup values
 type Backup struct {
@@ -270,9 +250,10 @@ type Istio struct {
 
 // Template struct for the values.tmpl file
 type Template struct {
-	ClusterDomain  ClusterDomain
-	Annotations    Annotations
-	Registry       Registry
+	ClusterDomain ClusterDomain
+	Labels        Labels
+	Annotations   Annotations
+	/*Registry       Registry
 	Network        Networking
 	Sso            Sso
 	Storage        Storage
@@ -285,6 +266,17 @@ type Template struct {
 	Monitoring     Monitoring
 	Dbs            Dbs
 	ControlPlane   ControlPlane
+	*/
+}
+
+/* This struc includes clusterDomain, clusterInternalDomain,
+spec and imageHub used with gatherClusterDomain function.
+*/
+type ClusterDomain struct {
+	ClusterDomain         string
+	ClusterInternalDomain string `default:"cluster.local"`
+	Spec                  string `default:"allinone"`
+	ImageHub              string `default:"docker.io/cnvrg"`
 }
 
 /* function used to leverage the ClusterDomain struct
@@ -293,26 +285,38 @@ and if they want to modify the internal cluster domain.
 This function will return a struct.
 */
 func gatherClusterDomain(cluster *ClusterDomain) {
-	fmt.Println("In the gatherClusterDomain func")
+	log.Println("In the gatherClusterDomain function")
 	var clusterDomain string
-	var clusterInternalDomain string = "cluster.local"
 
 	// Ask what the wildcard domain is
 	fmt.Print("What is your wildcard domain? ")
 	fmt.Scan(&clusterDomain)
 	cluster.ClusterDomain = clusterDomain
 
-	// Ask if they want to modify the internal cluster domain.
-	fmt.Printf("Do you want to change the internal cluster domain? yes/no [ default is %v ]? ", clusterInternalDomain)
-	fmt.Scan(&clusterInternalDomain)
-	if clusterInternalDomain == "no" {
-		cluster.ClusterInternalDomain = "cluster.local"
-	} else {
-		fmt.Print("Please enter the internal cluster domain: ")
-		fmt.Scan(&clusterInternalDomain)
-		cluster.ClusterInternalDomain = clusterInternalDomain
+	for {
+		consoleReader := bufio.NewReader(os.Stdin)
+		fmt.Print("Do you want to change the internal cluster domain? yes/no: ")
+		input, _ := consoleReader.ReadString('\n')
+		input = strings.ToLower(input)
+
+		if strings.HasPrefix(input, "yes") {
+			fmt.Print("Please enter the internal cluster domain: ")
+			clusterInput, _ := consoleReader.ReadString('\n')
+			clusterInput = strings.ToLower(clusterInput)
+			cluster.ClusterInternalDomain = clusterInput
+			break
+		}
+		if strings.HasPrefix(input, "no") {
+			cluster.ClusterInternalDomain = "cluster.local"
+			break
+		}
 	}
 
+}
+
+type Labels struct {
+	Key       []string
+	Stringify string
 }
 
 /* function used to leverage the Labels struct
@@ -320,28 +324,55 @@ and to prompt user for all Labels settings this
 will return a struct
 */
 func gatherLabels(labels *Labels) {
+	log.Println("In the gatherLabels function")
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Println("Do you want to add a label [format- key: value]?")
-		fmt.Print("(Hit enter when you have completed entering all of you key, values:) ")
+		fmt.Print("To add a Label enter with the format: [ key: value ]")
 		scanner.Scan()
 
 		text := scanner.Text()
 
 		if len(text) != 0 {
-
-			fmt.Println(text)
 			labels.Key = append(labels.Key, text)
 		} else {
 			break
 		}
 	}
-
 	for _, v := range labels.Key {
 		labels.Stringify += fmt.Sprintf("%s, ", v)
 	}
+}
 
+type Annotations struct {
+	Key       []string
+	Stringify string
+}
+
+/* function used to leverage the Annotations struct
+and to prompt user for all Annotations settings this
+will return a struct
+*/
+func gatherAnnotations(annotations *Annotations) {
+	log.Println("In the gatherAnnotations function")
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for {
+		fmt.Print("To add an Annotation enter with the format: [format- key: value] ")
+		scanner.Scan()
+
+		text := scanner.Text()
+
+		if len(text) != 0 {
+			annotations.Key = append(annotations.Key, text)
+		} else {
+			break
+		}
+	}
+
+	for _, v := range annotations.Key {
+		annotations.Stringify += fmt.Sprintf("%s, ", v)
+	}
 }
 
 /* function used to leverage the Logging struct
@@ -588,34 +619,6 @@ func gatherGpu(gpu *Gpu) {
 
 }
 
-/* function used to leverage the Annotations struct
-and to prompt user for all Annotations settings this
-will return a struct
-*/
-func gatherAnnotations(annotations *Annotations) {
-	scanner := bufio.NewScanner(os.Stdin)
-
-	for {
-		fmt.Println("Do you want to add an annotation [format- key: value]?")
-		fmt.Print("(Hit enter when you have completed entering all of you key, values:) ")
-		scanner.Scan()
-
-		text := scanner.Text()
-
-		if len(text) != 0 {
-
-			fmt.Println(text)
-			annotations.Key = append(annotations.Key, text)
-		} else {
-			break
-		}
-	}
-
-	for _, v := range annotations.Key {
-		annotations.Stringify += fmt.Sprintf("%s, ", v)
-	}
-}
-
 /* function used to leverage the Backup struct
 and to prompt user for all Backup settings this
 will return a struct
@@ -859,46 +862,47 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		fmt.Println("values called")
+		log.Println("You are in the values main function")
 		clusterdomain := ClusterDomain{}
 		gatherClusterDomain(&clusterdomain)
 		labels := Labels{}
 		gatherLabels(&labels)
 		annotations := Annotations{}
 		gatherAnnotations(&annotations)
-		registry := Registry{}
-		gatherRegistry(&registry)
-		network := Networking{}
-		gatherNetworking(&network)
-		sso := Sso{}
-		gatherSso(&sso)
-		storage := Storage{}
-		gatherStorage(&storage)
-		tenancy := Tenancy{}
-		gatherTenancy(&tenancy)
-		configreloader := ConfigReloader{}
-		gatherConfigReloader(&configreloader)
-		capsule := Capsule{}
-		gatherCapsule(&capsule)
-		backup := Backup{}
-		gatherBackup(&backup)
-		gpu := Gpu{}
-		gatherGpu(&gpu)
-		logging := Logging{}
-		gatherLogging(&logging)
-		monitoring := Monitoring{}
-		gatherMonitoring(&monitoring)
-		dbs := Dbs{}
-		gatherDbs(&dbs)
-		controlplane := ControlPlane{}
-		gatherControlPlane(&controlplane)
+		/*
 
-		finaltemp := Template{clusterdomain, annotations, registry, network, sso, storage,
-			tenancy, configreloader, capsule, backup, gpu, logging, monitoring, dbs, controlplane}
+			registry := Registry{}
+			gatherRegistry(&registry)
+			network := Networking{}
+			gatherNetworking(&network)
+			sso := Sso{}
+			gatherSso(&sso)
+			storage := Storage{}
+			gatherStorage(&storage)
+			tenancy := Tenancy{}
+			gatherTenancy(&tenancy)
+			configreloader := ConfigReloader{}
+			gatherConfigReloader(&configreloader)
+			capsule := Capsule{}
+			gatherCapsule(&capsule)
+			backup := Backup{}
+			gatherBackup(&backup)
+			gpu := Gpu{}
+			gatherGpu(&gpu)
+			logging := Logging{}
+			gatherLogging(&logging)
+			monitoring := Monitoring{}
+			gatherMonitoring(&monitoring)
+			dbs := Dbs{}
+			gatherDbs(&dbs)
+			controlplane := ControlPlane{}
+			gatherControlPlane(&controlplane)
+		*/
+		finaltemp := Template{clusterdomain, labels, annotations} /*registry, network, sso, storage,
+		tenancy, configreloader, capsule, backup, gpu, logging, monitoring, dbs, controlplane */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Print(err)
 		}
 	},
 }
