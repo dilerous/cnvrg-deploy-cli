@@ -28,28 +28,31 @@ type Gpu struct {
 }
 
 type Dbs struct {
-	CvatEnable        bool
-	EsEnable          bool
-	EsStorageSize     string
-	EsStorageClass    string
-	EsPatchNodes      bool
-	EsNodeSelector    string
-	CleanUpAll        string
-	CleanUpApp        string
-	CleanUpJobs       string
-	CleanUpEndpoints  string
+	CvatEnable bool
+
+	EsEnable         bool
+	EsStorageSize    string
+	EsStorageClass   string
+	EsPatchNodes     bool
+	EsNodeSelector   string
+	CleanUpAll       string
+	CleanUpApp       string
+	CleanUpJobs      string
+	CleanUpEndpoints string
+
 	MinioEnable       bool
 	MinioStorageSize  string
 	MinioStorageClass string
 	MinioNodeSelector string
 
-	PgEnable          bool
-	PgStorageSize     string
-	PgStorageClass    string
-	PgNodeSelector    string
-	PgPagesEnable     bool
-	PgPagesSize       string
-	PgPagesMemory     string
+	PgEnable       bool
+	PgStorageSize  string
+	PgStorageClass string
+	PgNodeSelector string
+	PgPagesEnable  bool
+	PgPagesSize    string
+	PgPagesMemory  string
+
 	RedisEnable       bool
 	RedisStorageSize  string
 	RedisStorageClass string
@@ -209,52 +212,13 @@ type Monitoring struct {
 	CnvrgIdleMetricsLabels   string
 }
 
-// Parent level of the Networking struct
-type Networking struct {
-	Https   HttpsValues
-	Proxy   Proxy
-	Ingress Ingress
-	Istio   Istio
-}
-
-// Used in the Networking struct
-type HttpsValues struct {
-	Enabled    bool
-	CertSecret string `yaml:"certSecret"`
-}
-
-// Used in the Networking struct
-type Proxy struct {
-	Enabled    bool
-	HttpProxy  []string
-	HttpsProxy []string
-	NoProxy    []string
-}
-
-// Used in the Networking struct
-type Ingress struct {
-	Type           string `default:"istio"`
-	IstioGwEnabled bool   `default:"true"`
-	IstioGwName    string `yaml:"IstioGwName"`
-	External       bool
-}
-
-// Used in the Networking struct
-type Istio struct {
-	Enabled               bool
-	ExternalIp            []string
-	IngressSvcAnnotations string //had {} need to figure out
-	IngressSvcExtraPorts  []string
-	LbSourceRanges        []string
-}
-
 // Template struct for the values.tmpl file
 type Template struct {
 	ClusterDomain ClusterDomain
 	Labels        Labels
 	Annotations   Annotations
+	Network       Networking
 	/*Registry       Registry
-	Network        Networking
 	Sso            Sso
 	Storage        Storage
 	Tenancy        Tenancy
@@ -373,6 +337,156 @@ func gatherAnnotations(annotations *Annotations) {
 	for _, v := range annotations.Key {
 		annotations.Stringify += fmt.Sprintf("%s, ", v)
 	}
+}
+
+// Parent level of the Networking struct
+type Networking struct {
+	Https   HttpsValues
+	Proxy   Proxy
+	Ingress Ingress
+	Istio   Istio
+}
+
+// Used in the Networking struct
+type HttpsValues struct {
+	Enabled    bool
+	CertSecret string `yaml:"certSecret"`
+}
+
+// Used in the Networking struct
+type Proxy struct {
+	Enabled    bool
+	HttpProxy  []string
+	HttpsProxy []string
+	NoProxy    []string
+}
+
+// Used in the Networking struct
+type Ingress struct {
+	Type           string `default:"istio"`
+	IstioGwEnabled bool   `default:"true"`
+	IstioGwName    string `yaml:"IstioGwName"`
+	External       bool
+}
+
+// Used in the Networking struct
+type Istio struct {
+	Enabled               bool
+	ExternalIp            []string
+	IngressSvcAnnotations string //had {} need to figure out
+	IngressSvcExtraPorts  []string
+	LbSourceRanges        []string
+}
+
+/* function used to leverate the Networking struct
+and to prompt user for all networking settings this
+will return a struct
+*/
+func gatherNetworking(network *Networking) {
+	log.Println("In the gatherNetworking function")
+	var enableProxy string
+	var externalIngress string
+	var diffIngress string
+
+	for {
+		consoleReader := bufio.NewReader(os.Stdin)
+		fmt.Println("Do you want to modify Network settings? ")
+		fmt.Print("[Settings include; Proxy, Istio Deployment, Ingress or HTTPS.] yes/no: ")
+		input, _ := consoleReader.ReadString('\n')
+		input = strings.ToLower(input)
+		if strings.HasPrefix(input, "no") {
+			fmt.Print("Making no changes")
+			break
+		}
+		if strings.HasPrefix(input, "yes") {
+			fmt.Println("Press '1' for Proxy Settings")
+			fmt.Println("Press '2' for Ingress Settings")
+			fmt.Println("Press '3' for HTTPS Settings")
+			fmt.Println("Press '4' for Istio Settings")
+			fmt.Print("Please make your selection: ")
+			var selection int
+			fmt.Scan(&selection)
+			fmt.Printf("You have selected \n")
+			switch selection {
+			case 1:
+				fmt.Println("In Case 1")
+			case 2:
+				fmt.Println("In Case 2")
+			case 3:
+				log.Println("In case statement 3 - HTTPS")
+				// Ask if they want to enable https and skip if "no"
+				fmt.Print("Do you want to enable HTTPS? ")
+				input, _ := consoleReader.ReadString('\n')
+				input = strings.ToLower(input)
+				if input == "yes\n" {
+					network.Https.Enabled = true
+					fmt.Printf("The HTTPS network setting is %v", network.Https.Enabled)
+				}
+				if input == "no" {
+					network.Https.Enabled = false
+					fmt.Printf("The HTTPS network setting is %v", network.Https.Enabled)
+				}
+				fmt.Print("Do you want to add a Certificate Secret? ")
+				certinput, _ := consoleReader.ReadString('\n')
+				certinput = strings.ToLower(certinput)
+				fmt.Print(certinput)
+				if certinput == "yes" {
+					fmt.Print("What do you want to name the secret?")
+					var certName string
+					fmt.Scan(&certName)
+					network.Https.CertSecret = certName
+					fmt.Printf("The secret name is %s", certName)
+				}
+			case 4:
+				fmt.Println("In Case 4")
+			default:
+				fmt.Print("In the default")
+
+			}
+			break
+		}
+	}
+
+	// Ask for Proxy details and skip if answer is "no"
+	fmt.Print("Do you want to enable a Proxy? ")
+	fmt.Scan(&enableProxy)
+	if enableProxy == "yes" {
+		network.Proxy.Enabled = true
+		network.Proxy.HttpProxy = []string{"hello,", "hows it going"}
+		network.Proxy.HttpsProxy = []string{"10.2.3.8,", "192.168.1.5"}
+		network.Proxy.NoProxy = []string{"proxy1,", "proxy2"}
+	}
+	if enableProxy == "no" {
+		network.Proxy.Enabled = false
+	}
+	// Ask for external Istio and skip if answer is "no"
+	fmt.Print("Do you have an external istio ingress controller? ")
+	fmt.Scan(&externalIngress)
+	if externalIngress == "yes" {
+		network.Ingress.Type = "istio"
+		network.Ingress.IstioGwEnabled = true
+		network.Ingress.IstioGwName = "istio-gw"
+		network.Ingress.External = true
+	}
+	if externalIngress == "no" {
+		network.Ingress.External = false
+	}
+
+	// Ask if they are using a different ingress controll skip if "no"
+	fmt.Print("Do you want to disable the istio deployment? ")
+	fmt.Scan(&diffIngress)
+	if diffIngress == "yes" {
+		network.Istio.Enabled = false
+
+	}
+	if diffIngress == "no" {
+		network.Istio.Enabled = true
+		network.Istio.ExternalIp = []string{"10.0.2.5,", "17.1.9.1"}
+		network.Istio.IngressSvcAnnotations = "istio-gw"
+		network.Istio.IngressSvcExtraPorts = []string{"10.0.2.5,", "17.1.9.1"}
+		network.Istio.LbSourceRanges = []string{"10.0.2.5,", "17.1.9.1"}
+	}
+
 }
 
 /* function used to leverage the Logging struct
@@ -788,69 +902,6 @@ func gatherSso(sso *Sso) {
 	}
 }
 
-/* function used to leverate the Networking struct
-and to prompt user for all networking settings this
-will return a struct
-*/
-func gatherNetworking(network *Networking) {
-	fmt.Println("In the gatherNetworking func")
-	var enableHttps string
-	var enableProxy string
-	var externalIngress string
-	var diffIngress string
-
-	// Ask if they want to enable https and skip if "no"
-	fmt.Print("Do you want to enable https? ")
-	fmt.Scan(&enableHttps)
-	if enableHttps == "no" {
-		network.Https.Enabled = false
-	}
-	if enableHttps == "yes" {
-		network.Https.Enabled = true
-		network.Https.CertSecret = "my secret"
-	}
-	// Ask for Proxy details and skip if answer is "no"
-	fmt.Print("Do you want to enable a Proxy? ")
-	fmt.Scan(&enableProxy)
-	if enableProxy == "yes" {
-		network.Proxy.Enabled = true
-		network.Proxy.HttpProxy = []string{"hello,", "hows it going"}
-		network.Proxy.HttpsProxy = []string{"10.2.3.8,", "192.168.1.5"}
-		network.Proxy.NoProxy = []string{"proxy1,", "proxy2"}
-	}
-	if enableProxy == "no" {
-		network.Proxy.Enabled = false
-	}
-	// Ask for external Istio and skip if answer is "no"
-	fmt.Print("Do you have an external istio ingress controller? ")
-	fmt.Scan(&externalIngress)
-	if externalIngress == "yes" {
-		network.Ingress.Type = "istio"
-		network.Ingress.IstioGwEnabled = true
-		network.Ingress.IstioGwName = "istio-gw"
-		network.Ingress.External = true
-	}
-	if externalIngress == "no" {
-		network.Ingress.External = false
-	}
-
-	// Ask if they are using a different ingress controll skip if "no"
-	fmt.Print("Do you want to disable the istio deployment? ")
-	fmt.Scan(&diffIngress)
-	if diffIngress == "yes" {
-		network.Istio.Enabled = false
-
-	}
-	if diffIngress == "no" {
-		network.Istio.Enabled = true
-		network.Istio.ExternalIp = []string{"10.0.2.5,", "17.1.9.1"}
-		network.Istio.IngressSvcAnnotations = "istio-gw"
-		network.Istio.IngressSvcExtraPorts = []string{"10.0.2.5,", "17.1.9.1"}
-		network.Istio.LbSourceRanges = []string{"10.0.2.5,", "17.1.9.1"}
-	}
-
-}
-
 // valuesCmd represents the values command
 var valuesCmd = &cobra.Command{
 	Use:   "values",
@@ -869,12 +920,13 @@ to quickly create a Cobra application.`,
 		gatherLabels(&labels)
 		annotations := Annotations{}
 		gatherAnnotations(&annotations)
+		network := Networking{}
+		gatherNetworking(&network)
 		/*
 
 			registry := Registry{}
 			gatherRegistry(&registry)
-			network := Networking{}
-			gatherNetworking(&network)
+
 			sso := Sso{}
 			gatherSso(&sso)
 			storage := Storage{}
@@ -898,7 +950,7 @@ to quickly create a Cobra application.`,
 			controlplane := ControlPlane{}
 			gatherControlPlane(&controlplane)
 		*/
-		finaltemp := Template{clusterdomain, labels, annotations} /*registry, network, sso, storage,
+		finaltemp := Template{clusterdomain, labels, annotations, network} /*registry, sso, storage,
 		tenancy, configreloader, capsule, backup, gpu, logging, monitoring, dbs, controlplane */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
