@@ -6,14 +6,19 @@ imageHub: {{ .ClusterDomain.ImageHub }}
 labels:{ {{ .Labels.Stringify }} }
 annotations:{ {{ .Annotations.Stringify }} }
 
-{{- if eq .Gpu.NvidiaDp.Enabled false }}
-gpu:
-  nvidiaDp:
-    enabled: {{ .Gpu.NvidiaEnable }}
-{{- end  }}
-{{- if eq .Gpu.HabanaDp.Enabled false }}
-  habanaDp:
-    enabled: {{ .Gpu.HabanaEnable }}
+{{- if .Network.Https.Enabled }}
+networking:
+  https:
+    enabled: {{ .Network.Https.Enabled }}
+    certSecret: {{ .Network.Https.CertSecret }}
+{{- end }}
+
+{{- if .Network.Proxy.Enabled }}
+  proxy:
+    enabled: {{ .Network.Proxy.Enabled }}
+    httpProxy: {{ .Network.Proxy.HttpProxy }}
+    httpsProxy: {{ .Network.Proxy.HttpsProxy }}
+    noProxy: {{ .Network.Proxy.NoProxy }}
 {{- end }}
 
 
@@ -35,21 +40,17 @@ logging:
     enabled: {{ .Logging.KibanaEnable }}
 {{- end }}
 
-{{- if .Network.Https.Enabled }}
-networking:
-  https:
-    enabled: {{ .Network.Https.Enabled }}
-    certSecret: {{ .Network.Https.CertSecret }}
-{{- end }}
 
-{{- if .Network.Proxy.Enabled }}
-  proxy:
-    enabled: {{ .Network.Proxy.Enabled }}
-    httpProxy: {{ .Network.Proxy.HttpProxy }}
-    httpsProxy: {{ .Network.Proxy.HttpsProxy }}
-    noProxy: {{ .Network.Proxy.NoProxy }}
-{{- end }}
 
+{{- if eq .Gpu.NvidiaDp.Enabled false }}
+gpu:
+  nvidiaDp:
+    enabled: {{ .Gpu.NvidiaEnable }}
+{{- end  }}
+{{- if eq .Gpu.HabanaDp.Enabled false }}
+  habanaDp:
+    enabled: {{ .Gpu.HabanaEnable }}
+{{- end }}
 
 monitoring:
 {{- if eq .Monitoring.DcgmExportEnable false }}

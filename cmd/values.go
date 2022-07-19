@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -378,6 +379,14 @@ type Istio struct {
 	LbSourceRanges        []string
 }
 
+func formatInput() string {
+	consoleReader := bufio.NewReader(os.Stdin)
+	input, _ := consoleReader.ReadString('\n')
+	input = strings.ToLower(input)
+	input = strings.TrimSpace(input)
+	return input
+}
+
 /* function used to leverate the Networking struct
 and to prompt user for all networking settings this
 will return a struct
@@ -389,53 +398,66 @@ func gatherNetworking(network *Networking) {
 	var diffIngress string
 
 	for {
-		consoleReader := bufio.NewReader(os.Stdin)
 		fmt.Println("Do you want to modify Network settings? ")
 		fmt.Print("[Settings include; Proxy, Istio Deployment, Ingress or HTTPS.] yes/no: ")
-		input, _ := consoleReader.ReadString('\n')
-		input = strings.ToLower(input)
-		if strings.HasPrefix(input, "no") {
+		input := formatInput()
+		if input == "no" {
+			log.Print("In the for loop and selected 'no'")
 			fmt.Print("Making no changes")
 			break
 		}
-		if strings.HasPrefix(input, "yes") {
+		if input == "yes" {
 			fmt.Println("Press '1' for Proxy Settings")
 			fmt.Println("Press '2' for Ingress Settings")
 			fmt.Println("Press '3' for HTTPS Settings")
 			fmt.Println("Press '4' for Istio Settings")
 			fmt.Print("Please make your selection: ")
-			var selection int
-			fmt.Scan(&selection)
-			fmt.Printf("You have selected \n")
-			switch selection {
+			caseInput := formatInput()
+			intVar, _ := strconv.Atoi(caseInput)
+			switch intVar {
 			case 1:
-				fmt.Println("In Case 1")
+				log.Println("In case statement 1 - Proxy")
+				fmt.Print("Do you want to enable a Proxy? ")
+				fmt.Scan(&enableProxy)
+				if enableProxy == "yes" {
+					network.Proxy.Enabled = true
+					network.Proxy.HttpProxy = []string{"hello,", "hows it going"}
+					network.Proxy.HttpsProxy = []string{"10.2.3.8,", "192.168.1.5"}
+					network.Proxy.NoProxy = []string{"proxy1,", "proxy2"}
+				}
+				if enableProxy == "no" {
+					network.Proxy.Enabled = false
+				}
+
 			case 2:
 				fmt.Println("In Case 2")
 			case 3:
 				log.Println("In case statement 3 - HTTPS")
-				// Ask if they want to enable https and skip if "no"
-				fmt.Print("Do you want to enable HTTPS? ")
-				input, _ := consoleReader.ReadString('\n')
-				input = strings.ToLower(input)
-				if input == "yes\n" {
-					network.Https.Enabled = true
-					fmt.Printf("The HTTPS network setting is %v", network.Https.Enabled)
-				}
-				if input == "no" {
-					network.Https.Enabled = false
-					fmt.Printf("The HTTPS network setting is %v", network.Https.Enabled)
+				for {
+					// Ask if they want to enable https and skip if "no"
+					fmt.Print("Do you want to enable HTTPS? ")
+					caseThreeInput := formatInput()
+
+					if caseThreeInput == "yes" {
+						network.Https.Enabled = true
+						fmt.Printf("The HTTPS network setting is %v \n", network.Https.Enabled)
+						break
+					}
+					if caseThreeInput == "no" {
+						network.Https.Enabled = false
+						fmt.Printf("The HTTPS network setting is %v \n", network.Https.Enabled)
+						break
+					}
+					fmt.Println("Please enter 'yes' or 'no' ")
 				}
 				fmt.Print("Do you want to add a Certificate Secret? ")
-				certinput, _ := consoleReader.ReadString('\n')
-				certinput = strings.ToLower(certinput)
-				fmt.Print(certinput)
+				certinput := formatInput()
 				if certinput == "yes" {
-					fmt.Print("What do you want to name the secret?")
+					fmt.Print("What do you want to name the secret? ")
 					var certName string
 					fmt.Scan(&certName)
 					network.Https.CertSecret = certName
-					fmt.Printf("The secret name is %s", certName)
+					fmt.Printf("The secret name is %s \n", certName)
 				}
 			case 4:
 				fmt.Println("In Case 4")
@@ -448,17 +470,7 @@ func gatherNetworking(network *Networking) {
 	}
 
 	// Ask for Proxy details and skip if answer is "no"
-	fmt.Print("Do you want to enable a Proxy? ")
-	fmt.Scan(&enableProxy)
-	if enableProxy == "yes" {
-		network.Proxy.Enabled = true
-		network.Proxy.HttpProxy = []string{"hello,", "hows it going"}
-		network.Proxy.HttpsProxy = []string{"10.2.3.8,", "192.168.1.5"}
-		network.Proxy.NoProxy = []string{"proxy1,", "proxy2"}
-	}
-	if enableProxy == "no" {
-		network.Proxy.Enabled = false
-	}
+
 	// Ask for external Istio and skip if answer is "no"
 	fmt.Print("Do you have an external istio ingress controller? ")
 	fmt.Scan(&externalIngress)
