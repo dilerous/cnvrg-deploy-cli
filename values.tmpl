@@ -16,10 +16,27 @@ networking:
 {{- if .Network.Proxy.Enabled }}
   proxy:
     enabled: {{ .Network.Proxy.Enabled }}
-    httpProxy: {{ .Network.Proxy.HttpProxy }}
-    httpsProxy: {{ .Network.Proxy.HttpsProxy }}
-    noProxy: {{ .Network.Proxy.NoProxy }}
+    httpProxy:[ {{ .Network.Proxy.HttpProxy }} ]
+    httpsProxy:[ {{ .Network.Proxy.HttpsProxy }} ]
+    noProxy:[ {{ .Network.Proxy.NoProxy }} ]
 {{- end }}
+
+{{- if .Network.Ingress.External }}
+  ingress:
+    type: {{ .Network.Ingress.Type }}
+    istioGwEnabled: {{ .Network.Ingress.IstioGwEnabled }} 
+    istioGwName: {{ .Network.Ingress.IstioGwName }} 
+{{- end }}
+
+{{- if eq .Network.Istio.Enabled false }}
+  istio:
+    enabled: {{ .Network.Istio.Enabled }}
+{{- end }}
+    externalIp: [ {{ .Network.Istio.ExternalIp }} ]
+    ingressSvcAnnotations: { {{ .Network.Istio.IngressSvcAnnotations }} }
+    ingressSvcExtraPorts: [ {{ .Network.Istio.IngressSvcExtraPorts }} ]
+    lbSourceRanges: [ {{ .Network.Istio.LbSourceRanges }} ]
+
 
 
 logging:

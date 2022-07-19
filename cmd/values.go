@@ -373,10 +373,10 @@ type Ingress struct {
 // Used in the Networking struct
 type Istio struct {
 	Enabled               bool
-	ExternalIp            []string
+	ExternalIp            string
 	IngressSvcAnnotations string //had {} need to figure out
-	IngressSvcExtraPorts  []string
-	LbSourceRanges        []string
+	IngressSvcExtraPorts  string
+	LbSourceRanges        string
 }
 
 // This function will format strings to lowercase and remove
@@ -419,9 +419,6 @@ will return a struct
 */
 func gatherNetworking(network *Networking) {
 	log.Println("In the gatherNetworking function")
-	var externalIngress string
-	var diffIngress string
-
 	for {
 		fmt.Println("Do you want to modify Network settings? ")
 		fmt.Print("[Settings include; Proxy, Istio Deployment, Ingress or HTTPS.] yes/no: ")
@@ -487,7 +484,24 @@ func gatherNetworking(network *Networking) {
 					}
 				}
 			case 2:
-				fmt.Println("In Case 2")
+				log.Println("In Case statement 2 - Ingress")
+				fmt.Print("Do you want to configure an ingress controller? ")
+				externalIngress := formatInput()
+				if externalIngress == "yes" {
+					fmt.Print("What is the ingress type [istio|ingress|openshift|nodeport]?: ")
+					ingressType := formatInput()
+					network.Ingress.Type = ingressType
+					if ingressType != "istio" {
+						network.Ingress.IstioGwEnabled = false
+						network.Ingress.IstioGwName = ""
+						network.Ingress.External = true
+					}
+					continue
+				}
+				if externalIngress == "no" {
+					network.Ingress.External = false
+					continue
+				}
 			case 3:
 				log.Println("In case statement 3 - HTTPS")
 				for {
@@ -517,43 +531,58 @@ func gatherNetworking(network *Networking) {
 					fmt.Printf("The secret name is %s \n", certName)
 				}
 			case 4:
-				fmt.Println("In Case 4")
+				log.Println("In Case 4")
+				fmt.Print("Do you want to disable the Istio deployment? ")
+				disableIstio := formatInput()
+				if disableIstio == "yes" {
+					network.Istio.Enabled = false
+				}
+				if disableIstio == "no" {
+					network.Istio.Enabled = true
+					fmt.Println("Do you need to modify any of the following? yes/no ")
+					fmt.Print("[Istio External IP, Ingress svc Annotations, Ingress Extra Ports or LB Source Ranges: ")
+					modifyIstio := formatInput()
+					if modifyIstio == "yes" {
+						for {
+							fmt.Println("Press '1' list IPs to use for istio ingress service")
+							fmt.Println("Press '2' list extra ports for istio ingress service")
+							fmt.Println("Press '3' list extra LB sources ranges")
+							fmt.Println("Press '4' map of strings for Istio SVC annotations")
+							fmt.Println("Press '5' to exit changing Proxy settings")
+							fmt.Print("Please make your selection: ")
+							caseInput := formatInput()
+							intVar, _ := strconv.Atoi(caseInput)
+							switch intVar {
+							case 1:
+								fmt.Print("Please enter a list of IPs to use for Istio ingress service: ")
+								slice := createSlice()
+								network.Istio.ExternalIp = slice
+							case 2:
+								fmt.Print("Please enter a list extra ports for Istio ingress service: ")
+								slice := createSlice()
+								network.Istio.IngressSvcExtraPorts = slice
+
+							case 3:
+								fmt.Print("Please enter a list of extra LB sources ranges: ")
+								slice := createSlice()
+								network.Istio.LbSourceRanges = slice
+							case 4:
+								fmt.Print("Please enter a map of strings for Istio SVC annotations: ")
+								slice := createSlice()
+								network.Istio.IngressSvcAnnotations = slice
+							}
+							if intVar == 5 {
+								break
+							}
+						}
+					}
+				}
 			default:
-				fmt.Print("In the default")
+				fmt.Print("In the default case section")
 
 			}
 			break
 		}
-	}
-
-	// Ask for Proxy details and skip if answer is "no"
-
-	// Ask for external Istio and skip if answer is "no"
-	fmt.Print("Do you have an external istio ingress controller? ")
-	fmt.Scan(&externalIngress)
-	if externalIngress == "yes" {
-		network.Ingress.Type = "istio"
-		network.Ingress.IstioGwEnabled = true
-		network.Ingress.IstioGwName = "istio-gw"
-		network.Ingress.External = true
-	}
-	if externalIngress == "no" {
-		network.Ingress.External = false
-	}
-
-	// Ask if they are using a different ingress controll skip if "no"
-	fmt.Print("Do you want to disable the istio deployment? ")
-	fmt.Scan(&diffIngress)
-	if diffIngress == "yes" {
-		network.Istio.Enabled = false
-
-	}
-	if diffIngress == "no" {
-		network.Istio.Enabled = true
-		network.Istio.ExternalIp = []string{"10.0.2.5,", "17.1.9.1"}
-		network.Istio.IngressSvcAnnotations = "istio-gw"
-		network.Istio.IngressSvcExtraPorts = []string{"10.0.2.5,", "17.1.9.1"}
-		network.Istio.LbSourceRanges = []string{"10.0.2.5,", "17.1.9.1"}
 	}
 
 }
