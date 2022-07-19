@@ -357,9 +357,9 @@ type HttpsValues struct {
 // Used in the Networking struct
 type Proxy struct {
 	Enabled    bool
-	HttpProxy  []string
-	HttpsProxy []string
-	NoProxy    []string
+	HttpProxy  string
+	HttpsProxy string
+	NoProxy    string
 }
 
 // Used in the Networking struct
@@ -447,36 +447,44 @@ func gatherNetworking(network *Networking) {
 					enableProxy := formatInput()
 					if enableProxy == "yes" {
 						network.Proxy.Enabled = true
-						fmt.Println("Press '1' for list of HTTP proxies to use")
-						fmt.Println("Press '2' for list of HTTPS proxies to use")
-						fmt.Println("Press '3' for list of extra No Proxy values to use")
-						fmt.Print("Please make your selection: ")
-						caseInput := formatInput()
-						intVar, _ := strconv.Atoi(caseInput)
-						switch intVar {
-						case 1:
-							fmt.Print("Please enter a list of HTTP proxies")
-							var httpProxy []string
-							fmt.Scan(&httpProxy)
-							network.Proxy.HttpProxy = httpProxy
-						case 2:
-							fmt.Print("Please enter a list of HTTPS proxies")
-							var httpsProxy []string
-							fmt.Scan(&httpsProxy)
-							network.Proxy.HttpsProxy = httpsProxy
-						case 3:
-							fmt.Print("Please enter a list of No proxies")
-							var noProxy []string
-							fmt.Scan(&noProxy)
-							network.Proxy.NoProxy = noProxy
-						}
+						for {
+							fmt.Println("Press '1' for list of HTTP proxies to use")
+							fmt.Println("Press '2' for list of HTTPS proxies to use")
+							fmt.Println("Press '3' for list of extra No Proxy values to use")
+							fmt.Println("Press '4' to exit changing Proxy settings")
+							fmt.Print("Please make your selection: ")
+							caseInput := formatInput()
+							intVar, _ := strconv.Atoi(caseInput)
+							switch intVar {
+							case 1:
+								fmt.Print("Please enter a list of HTTP proxies")
+								slice := createSlice()
+								network.Proxy.HttpProxy = slice
+							case 2:
+								fmt.Print("Please enter a list of HTTPS proxies")
+								slice := createSlice()
+								network.Proxy.HttpsProxy = slice
+							case 3:
+								fmt.Print("Please enter a list of No proxies")
+								slice := createSlice()
+								network.Proxy.NoProxy = slice
+							}
+							if intVar == 4 {
+								fmt.Println("Exiting modify Proxy section")
+								enableProxy = "exit"
+								break
+							}
 
+						}
 					}
+					fmt.Println("Please enter 'yes' or 'no':")
 					if enableProxy == "no" {
 						network.Proxy.Enabled = false
 						break
 					}
-					fmt.Println("Please enter 'yes' or 'no':")
+					if enableProxy == "exit" {
+						break
+					}
 				}
 			case 2:
 				fmt.Println("In Case 2")
