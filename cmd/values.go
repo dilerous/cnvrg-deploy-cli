@@ -379,6 +379,8 @@ type Istio struct {
 	LbSourceRanges        []string
 }
 
+// This function will format strings to lowercase and remove
+// any whitespace around the string the value is returned.
 func formatInput() string {
 	consoleReader := bufio.NewReader(os.Stdin)
 	input, _ := consoleReader.ReadString('\n')
@@ -387,13 +389,36 @@ func formatInput() string {
 	return input
 }
 
+// This function will return a slice as a string. You can enter
+// any number of values one line at a time.
+func createSlice() string {
+	log.Println("In the gatherLabels function")
+	fmt.Println("Enter 1 value per line. Press 'return' when done: ")
+	consoleScanner := bufio.NewScanner(os.Stdin)
+	var slice []string
+	var finalSlice string
+
+	for {
+		consoleScanner.Scan()
+		text := consoleScanner.Text()
+		if len(text) != 0 {
+			slice = append(slice, text)
+		} else {
+			break
+		}
+	}
+	for _, v := range slice {
+		finalSlice += fmt.Sprintf("%s, ", v)
+	}
+	return finalSlice
+}
+
 /* function used to leverate the Networking struct
 and to prompt user for all networking settings this
 will return a struct
 */
 func gatherNetworking(network *Networking) {
 	log.Println("In the gatherNetworking function")
-	var enableProxy string
 	var externalIngress string
 	var diffIngress string
 
@@ -417,18 +442,42 @@ func gatherNetworking(network *Networking) {
 			switch intVar {
 			case 1:
 				log.Println("In case statement 1 - Proxy")
-				fmt.Print("Do you want to enable a Proxy? ")
-				fmt.Scan(&enableProxy)
-				if enableProxy == "yes" {
-					network.Proxy.Enabled = true
-					network.Proxy.HttpProxy = []string{"hello,", "hows it going"}
-					network.Proxy.HttpsProxy = []string{"10.2.3.8,", "192.168.1.5"}
-					network.Proxy.NoProxy = []string{"proxy1,", "proxy2"}
-				}
-				if enableProxy == "no" {
-					network.Proxy.Enabled = false
-				}
+				for {
+					fmt.Print("Do you want to enable a Proxy? ")
+					enableProxy := formatInput()
+					if enableProxy == "yes" {
+						network.Proxy.Enabled = true
+						fmt.Println("Press '1' for list of HTTP proxies to use")
+						fmt.Println("Press '2' for list of HTTPS proxies to use")
+						fmt.Println("Press '3' for list of extra No Proxy values to use")
+						fmt.Print("Please make your selection: ")
+						caseInput := formatInput()
+						intVar, _ := strconv.Atoi(caseInput)
+						switch intVar {
+						case 1:
+							fmt.Print("Please enter a list of HTTP proxies")
+							var httpProxy []string
+							fmt.Scan(&httpProxy)
+							network.Proxy.HttpProxy = httpProxy
+						case 2:
+							fmt.Print("Please enter a list of HTTPS proxies")
+							var httpsProxy []string
+							fmt.Scan(&httpsProxy)
+							network.Proxy.HttpsProxy = httpsProxy
+						case 3:
+							fmt.Print("Please enter a list of No proxies")
+							var noProxy []string
+							fmt.Scan(&noProxy)
+							network.Proxy.NoProxy = noProxy
+						}
 
+					}
+					if enableProxy == "no" {
+						network.Proxy.Enabled = false
+						break
+					}
+					fmt.Println("Please enter 'yes' or 'no':")
+				}
 			case 2:
 				fmt.Println("In Case 2")
 			case 3:
