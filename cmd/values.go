@@ -219,6 +219,7 @@ type Template struct {
 	Labels        Labels
 	Annotations   Annotations
 	Network       Networking
+	Logging       Logging
 	/*Registry       Registry
 	Sso            Sso
 	Storage        Storage
@@ -227,7 +228,6 @@ type Template struct {
 	Capsule        Capsule
 	Backup         Backup
 	Gpu            Gpu
-	Logging        Logging
 	Monitoring     Monitoring
 	Dbs            Dbs
 	ControlPlane   ControlPlane
@@ -259,19 +259,16 @@ func gatherClusterDomain(cluster *ClusterDomain) {
 	cluster.ClusterDomain = clusterDomain
 
 	for {
-		consoleReader := bufio.NewReader(os.Stdin)
 		fmt.Print("Do you want to change the internal cluster domain? yes/no: ")
-		input, _ := consoleReader.ReadString('\n')
-		input = strings.ToLower(input)
+		input := formatInput()
 
-		if strings.HasPrefix(input, "yes") {
+		if input == "yes" {
 			fmt.Print("Please enter the internal cluster domain: ")
-			clusterInput, _ := consoleReader.ReadString('\n')
-			clusterInput = strings.ToLower(clusterInput)
+			clusterInput := formatInput()
 			cluster.ClusterInternalDomain = clusterInput
 			break
 		}
-		if strings.HasPrefix(input, "no") {
+		if input == "no" {
 			cluster.ClusterInternalDomain = "cluster.local"
 			break
 		}
@@ -372,9 +369,9 @@ type Ingress struct {
 
 // Used in the Networking struct
 type Istio struct {
-	Enabled               bool
+	Enabled               bool `default:"true"`
 	ExternalIp            string
-	IngressSvcAnnotations string //had {} need to figure out
+	IngressSvcAnnotations string
 	IngressSvcExtraPorts  string
 	LbSourceRanges        string
 }
@@ -424,8 +421,9 @@ func gatherNetworking(network *Networking) {
 		fmt.Print("[Settings include; Proxy, Istio Deployment, Ingress or HTTPS.] yes/no: ")
 		input := formatInput()
 		if input == "no" {
-			log.Print("In the for loop and selected 'no'")
-			fmt.Print("Making no changes")
+			log.Println("In the for loop and selected 'no'")
+			log.Println("Making no changes")
+			network.Istio.Enabled = true
 			break
 		}
 		if input == "yes" {
@@ -778,32 +776,49 @@ and to prompt user for all Logging settings this
 will return a struct
 */
 func gatherLogging(logging *Logging) {
-	fmt.Println("In the gatherLabels func")
-	var disableFluentbit string
-	var disableElastalert string
-	var disableKibana string
+	log.Println("In the gatherLabels func")
 
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Fluentbit? ")
-	fmt.Scan(&disableFluentbit)
-	if disableFluentbit == "yes" {
-		logging.FluentbitEnable = false
+	for {
+		fmt.Print("Do you want to disable Fluentbit? ")
+		input := formatInput()
+		if input == "yes" {
+			logging.FluentbitEnable = false
+			break
+		}
+		if input == "no" {
+			logging.FluentbitEnable = true
+			break
+		}
+		fmt.Println("Please enter 'yes' or 'no'.")
 	}
 
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Elastalert? ")
-	fmt.Scan(&disableElastalert)
-	if disableElastalert == "yes" {
-		logging.ElastalertEnable = false
+	for {
+		fmt.Print("Do you want to disable Elastalert? yes/no ")
+		input := formatInput()
+		if input == "yes" {
+			logging.ElastalertEnable = false
+			break
+		}
+		if input == "no" {
+			logging.ElastalertEnable = true
+			break
+		}
+		fmt.Println("Please enter 'yes' or 'no'.")
 	}
 
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Kibana? ")
-	fmt.Scan(&disableKibana)
-	if disableKibana == "yes" {
-		logging.KibanaEnable = false
+	for {
+		fmt.Print("Do you want to disable Kibana? yes/no ")
+		input := formatInput()
+		if input == "yes" {
+			logging.KibanaEnable = false
+			break
+		}
+		if input == "no" {
+			logging.KibanaEnable = true
+			break
+		}
+		fmt.Println("Please enter 'yes' or 'no'.")
 	}
-
 }
 
 /* function used to leverage the Gpu struct
@@ -1020,6 +1035,8 @@ to quickly create a Cobra application.`,
 		gatherAnnotations(&annotations)
 		network := Networking{}
 		gatherNetworking(&network)
+		logging := Logging{}
+		gatherLogging(&logging)
 		/*
 
 			registry := Registry{}
@@ -1039,8 +1056,7 @@ to quickly create a Cobra application.`,
 			gatherBackup(&backup)
 			gpu := Gpu{}
 			gatherGpu(&gpu)
-			logging := Logging{}
-			gatherLogging(&logging)
+
 			monitoring := Monitoring{}
 			gatherMonitoring(&monitoring)
 			dbs := Dbs{}
@@ -1048,7 +1064,7 @@ to quickly create a Cobra application.`,
 			controlplane := ControlPlane{}
 			gatherControlPlane(&controlplane)
 		*/
-		finaltemp := Template{clusterdomain, labels, annotations, network} /*registry, sso, storage,
+		finaltemp := Template{clusterdomain, labels, annotations, network, logging} /*registry, sso, storage,
 		tenancy, configreloader, capsule, backup, gpu, logging, monitoring, dbs, controlplane */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
