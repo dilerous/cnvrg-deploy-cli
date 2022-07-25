@@ -78,6 +78,25 @@ registry:
   user: {{ .Registry.User }}
   password: {{ .Registry.Password }}
 {{- end }}
+
+{{- if .Tenancy.Enabled }}
+tenancy:
+  enabled: {{ .Tenancy.Enabled }}
+  key: {{ .Tenancy.Key }}
+  value: {{ .Tenancy.Value }}
+{{- end }}
+
+{{- if .Sso.Enabled }}
+sso:
+  enabled: {{ .Sso.Enabled }}
+  adminUser: {{ .Sso.AdminUser }}
+  provider: {{ .Sso.Provider }}
+  emailDomain: {{ .Sso.EmailDomain }}
+  clientId: {{ .Sso.ClientId }}
+  clientSecret: {{ .Sso.ClientSecret }}
+  azureTenant: {{ .Sso.AzureTenant }}
+  oidcIssuerUrl: {{ .Sso.OidcIssuerUrl }}
+{{- end }}
     
 {{- if eq .Gpu.NvidiaDp.Enabled false }}
 gpu:
@@ -315,17 +334,6 @@ controlPlane:
     lbSourceRanges: {{.Network.Istio.LbSourceRanges }}
 {{- end }}
 
-{{- if .Sso.Enabled }}
-sso:
-  enabled: {{ .Sso.Enabled }}
-  adminUser: {{ .Sso.AdminUser }}
-  provider: {{ .Sso.Provider }}
-  emailDomain: {{ .Sso.EmailDomain }}
-  clientId: {{ .Sso.ClientId }}
-  clientSecret: {{ .Sso.ClientSecret }}
-  azureTenant: {{ .Sso.AzureTenant }}
-  oidcIssuerUrl: {{ .Sso.OidcIssuerUrl }}
-{{- end }}
 
 {{- if .Storage.Hostpath.Enabled }}
   hostpath:
@@ -345,12 +353,7 @@ sso:
     reclaimPolicy: {{ .Storage.Nfs.ReclaimPolicy }}
 {{- end }}
 
-{{- if .Tenancy.Enabled }}
-tenancy:
-  enabled: {{ .Tenancy.Enabled }}
-  key: {{ .Tenancy.Key }}
-  value: {{ .Tenancy.Value }}
-{{- end }}
+
 
 
 {{- if .ConfigReloader.Enabled }}

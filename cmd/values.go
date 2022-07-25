@@ -165,7 +165,7 @@ type Sso struct {
 	Enabled       bool
 	AdminUser     string
 	Provider      string
-	EmailDomain   []string
+	EmailDomain   string
 	ClientId      string
 	ClientSecret  string
 	AzureTenant   string
@@ -221,10 +221,12 @@ type Template struct {
 	Network       Networking
 	Logging       Logging
 	Registry      Registry
+	Tenancy       Tenancy
+	Sso           Sso
 	/*
-		Sso            Sso
+
 		Storage        Storage
-		Tenancy        Tenancy
+
 		ConfigReloader ConfigReloader
 		Capsule        Capsule
 		Backup         Backup
@@ -980,19 +982,25 @@ and to prompt user for all Tenancy settings this
 will return a struct
 */
 func gatherTenancy(tenancy *Tenancy) {
-	fmt.Println("In the gatherTenancy func")
-	var enableTenancy string
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to enable Tenancy? ")
-	fmt.Scan(&enableTenancy)
-	if enableTenancy == "no" {
-		tenancy.Enabled = false
-	}
-	if enableTenancy == "yes" {
-		tenancy.Enabled = true
-		tenancy.Key = "purpose"
-		tenancy.Value = "cnvrg-control-plane"
+	log.Println("In the gatherTenancy function")
+	for {
+		// Ask if they want to enable Tenancy skip if "no"
+		fmt.Print("Do you want to enable Tenancy? ")
+		input := formatInput()
+		if input == "no" {
+			tenancy.Enabled = false
+			break
+		}
+		if input == "yes" {
+			tenancy.Enabled = true
+			fmt.Print("Please enter the Tenancy node selector key")
+			key := formatInput()
+			tenancy.Key = key
+			fmt.Print("Please enter the Tenancy node selector value")
+			value := formatInput()
+			tenancy.Value = value
+			break
+		}
 	}
 }
 
@@ -1043,23 +1051,40 @@ will return a struct
 */
 func gatherSso(sso *Sso) {
 	fmt.Println("In the gatherSso func")
-	var enableSso string
-
 	// Ask if they want to enable SSO skip if "no"
-	fmt.Print("Do you want to enable SSO? ")
-	fmt.Scan(&enableSso)
-	if enableSso == "no" {
-		sso.Enabled = false
-	}
-	if enableSso == "yes" {
-		sso.Enabled = true
-		sso.AdminUser = ""
-		sso.Provider = ""
-		sso.EmailDomain = []string{"10.2.3.8,", "192.168.1.5"}
-		sso.ClientId = ""
-		sso.ClientSecret = ""
-		sso.AzureTenant = ""
-		sso.OidcIssuerUrl = ""
+	for {
+		fmt.Print("Do you want to enable SSO? ")
+		input := formatInput()
+		if input == "no" {
+			sso.Enabled = false
+			break
+		}
+		if input == "yes" {
+			sso.Enabled = true
+			fmt.Print("Please input the Admin User: ")
+			admin := formatInput()
+			sso.AdminUser = admin
+			fmt.Print("Please input the SSO Provider: ")
+			provider := formatInput()
+			sso.Provider = provider
+			fmt.Print("Please input the Email Domain: ")
+			domain := createSlice()
+			sso.EmailDomain = domain
+			fmt.Print("Please input the Client ID: ")
+			clientid := formatInput()
+			sso.ClientId = clientid
+			fmt.Print("Please input the Client Secret: ")
+			var clientsecret string
+			fmt.Scan(&clientsecret)
+			sso.ClientSecret = clientsecret
+			fmt.Print("Please input the Azure Tenant: ")
+			azure := formatInput()
+			sso.AzureTenant = azure
+			fmt.Print("Please input the OIDC Issuer URL: ")
+			oidc := formatInput()
+			sso.OidcIssuerUrl = oidc
+			break
+		}
 	}
 }
 
@@ -1074,26 +1099,32 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		colorGreen := "\033[32m"
+		//colorYellow := "\033[33m"
+		colorBlue := "\033[34m"
 		labels := Labels{}
 		annotations := Annotations{}
 		network := Networking{Istio: Istio{Enabled: true}}
 		logging := Logging{FluentbitEnable: true, ElastalertEnable: true, KibanaEnable: true}
 		registry := Registry{}
+		tenancy := Tenancy{}
+		sso := Sso{}
 
 		log.Println("You are in the values main function")
 		fmt.Println("Welcome, we will gather your information to build a values file")
 		clusterdomain := ClusterDomain{}
 		gatherClusterDomain(&clusterdomain)
 		for {
-			fmt.Println("----------------- Main Menu ---------------- ")
-			fmt.Println("Please make a selection to modify the values\n",
-				"file for the cnvrg.io install")
-			fmt.Println("Press '1' To add Labels and Annotations")
-			fmt.Println("Press '2' To modify Networks settings E.g. Istio, NodePort, HTTPS")
-			fmt.Println("Press '3' To modify Logging settings E.g. Kibana, ElasticAlert, Fluentbit")
-			fmt.Println("Press '4' To modify Registry settings E.g. URL, Username, Password")
-			fmt.Println("Press '5' To Exit and generate values file")
-			fmt.Print("Please make your selection: ")
+			fmt.Println((colorGreen), "  ----------------------------- Main Menu -----------------------------")
+			fmt.Println((colorGreen), "Please make a selection to modify the values file for the cnvrg.io install")
+			fmt.Println((colorBlue), "Press '1' To add Labels and Annotations")
+			fmt.Println((colorBlue), "Press '2' To modify Networks settings E.g. Istio, NodePort, HTTPS")
+			fmt.Println((colorBlue), "Press '3' To modify Logging settings E.g. Kibana, ElasticAlert, Fluentbit")
+			fmt.Println((colorBlue), "Press '4' To modify Registry settings E.g. URL, Username, Password")
+			fmt.Println((colorBlue), "Press '5' To modify Tenancy settings")
+			fmt.Println((colorBlue), "Press '6' To modify Single Sign On settings")
+			fmt.Println((colorBlue), "Press '7' To Exit and generate Values file")
+			fmt.Print((colorBlue), "Please make your selection: ")
 			caseInput := formatInput()
 			intVar, _ := strconv.Atoi(caseInput)
 			switch intVar {
@@ -1111,8 +1142,14 @@ to quickly create a Cobra application.`,
 			case 4:
 				fmt.Print("Please update your Registry credentials: ")
 				gatherRegistry(&registry)
+			case 5:
+				fmt.Print("Please update your Tenancy settings: ")
+				gatherTenancy(&tenancy)
+			case 6:
+				fmt.Print("Please update your Single Sign On settings: ")
+				gatherSso(&sso)
 			}
-			if intVar == 5 {
+			if intVar == 7 {
 				break
 			}
 			fmt.Println("Please make a numerical selection")
@@ -1121,12 +1158,10 @@ to quickly create a Cobra application.`,
 		/*
 
 
-			sso := Sso{}
-			gatherSso(&sso)
+
 			storage := Storage{}
 			gatherStorage(&storage)
-			tenancy := Tenancy{}
-			gatherTenancy(&tenancy)
+
 			configreloader := ConfigReloader{}
 			gatherConfigReloader(&configreloader)
 			capsule := Capsule{}
@@ -1143,8 +1178,8 @@ to quickly create a Cobra application.`,
 			controlplane := ControlPlane{}
 			gatherControlPlane(&controlplane)
 		*/
-		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry} /* sso, storage,
-		tenancy, configreloader, capsule, backup, gpu, monitoring, dbs, controlplane */
+		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso} /* , storage,
+		configreloader, capsule, backup, gpu, monitoring, dbs, controlplane */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			fmt.Print(err)
