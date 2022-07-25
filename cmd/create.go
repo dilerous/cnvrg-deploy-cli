@@ -13,7 +13,7 @@ import (
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "A brief description of your command",
+	Short: "Create values or other resource for cnvrg.io deployment",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 

@@ -1066,7 +1066,7 @@ func gatherSso(sso *Sso) {
 // valuesCmd represents the values command
 var valuesCmd = &cobra.Command{
 	Use:   "values",
-	Short: "A brief description of your command",
+	Short: "Command to generate a values file through user input",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
