@@ -184,7 +184,7 @@ type Hostpath struct {
 	DefaultSc     bool
 	Path          string
 	ReclaimPolicy string
-	NodeSelector  []string // Need to figure out how to define "{ }"
+	NodeSelector  string
 }
 
 // Used in the Storage struct
@@ -194,6 +194,7 @@ type Nfs struct {
 	Path          string
 	DefaultSc     bool
 	ReclaimPolicy string
+	Image         string
 }
 
 type Monitoring struct {
@@ -223,9 +224,10 @@ type Template struct {
 	Registry      Registry
 	Tenancy       Tenancy
 	Sso           Sso
+	Storage       Storage
 	/*
 
-		Storage        Storage
+
 
 		ConfigReloader ConfigReloader
 		Capsule        Capsule
@@ -929,7 +931,7 @@ and to prompt user for all Tenancy settings this
 will return a struct
 */
 func gatherConfigReloader(configReloader *ConfigReloader) {
-	fmt.Println("In the gatherTenancy func")
+	fmt.Println("In the gatherConfigReloader func")
 	var enableConfigReloader string
 
 	// Ask if they want to enable Tenancy skip if "no"
@@ -993,10 +995,10 @@ func gatherTenancy(tenancy *Tenancy) {
 		}
 		if input == "yes" {
 			tenancy.Enabled = true
-			fmt.Print("Please enter the Tenancy node selector key")
+			fmt.Print("Please enter the Tenancy node selector key: ")
 			key := formatInput()
 			tenancy.Key = key
-			fmt.Print("Please enter the Tenancy node selector value")
+			fmt.Print("Please enter the Tenancy node selector value: ")
 			value := formatInput()
 			tenancy.Value = value
 			break
@@ -1009,39 +1011,105 @@ and to prompt user for all Storage settings this
 will return a struct
 */
 func gatherStorage(storage *Storage) {
-	fmt.Println("In the gatherStorage func")
-	var enableHostpath string
-	var enableNfs string
+	log.Println("In the gatherStorage function")
 
-	// Ask if they want to enable Hostpath for storage skip if "no"
-	fmt.Print("Do you want to enable Hostpath for storage? ")
-	fmt.Scan(&enableHostpath)
-	if enableHostpath == "no" {
-		storage.Hostpath.Enabled = false
-	}
-	if enableHostpath == "yes" {
+	for {
+		// Ask if they want to enable Hostpath for storage skip if "no"
+		fmt.Println("Press '1' to modify HostPath settings")
+		fmt.Println("Press '2' to modify NFS settings")
+		fmt.Println("Press '3' when  your done making Networking changes")
+		fmt.Print("Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			fmt.Print("Do you want to enable Hostpath for storage? ")
+			input := formatInput()
+			if input == "no" {
+				storage.Hostpath.Enabled = false
+				break
+			}
+			if input == "yes" {
 
-		storage.Hostpath.Enabled = true
-		storage.Hostpath.DefaultSc = false
-		storage.Hostpath.Path = "/cnvrg-hostpath-storage"
-		storage.Hostpath.ReclaimPolicy = "Retain"
-		storage.Hostpath.NodeSelector = []string{}
-	}
+				storage.Hostpath.Enabled = true
+				fmt.Print("Do you want to set the hostpath as the default storage class? yes/no: ")
+				hostpath := formatInput()
+				if hostpath == "no" {
+					storage.Hostpath.DefaultSc = false
+				}
+				if hostpath == "yes" {
+					storage.Hostpath.DefaultSc = true
+				}
+				fmt.Print("Please enter host directory path. [default=/cnvrg-hostpath-storage]: ")
+				path := formatInput()
+				if path == "" {
+					storage.Hostpath.Path = "/cnvrg-hostpath-storage"
+				} else {
+					storage.Hostpath.Path = path
+				}
+				fmt.Print("Please enter the retain policy for the host path. [default=Retain]: ")
+				var reclaim string
+				fmt.Scan(&reclaim)
+				if reclaim == "" {
+					storage.Hostpath.ReclaimPolicy = "Retain"
+				} else {
+					storage.Hostpath.ReclaimPolicy = reclaim
+				}
+				fmt.Print("Please enter your NodeSelector if needed: ")
+				nodeselector := createSlice()
+				storage.Hostpath.NodeSelector = nodeselector
+				break
+			}
+		case 2:
+			fmt.Print("Do you want to enable NFS for storage? yes/no: ")
+			input := formatInput()
+			if input == "no" {
+				storage.Nfs.Enabled = false
+				break
+			}
+			if input == "yes" {
+				storage.Nfs.Enabled = true
+				fmt.Print("What is the NFS server IP address? ")
+				ip := formatInput()
+				storage.Nfs.Server = ip
 
-	// Ask if they want to enable NFS for storage skip if "no"
-	fmt.Print("Do you want to enable NFS for storage? ")
-	fmt.Scan(&enableNfs)
-	if enableNfs == "no" {
-		storage.Nfs.Enabled = false
-	}
-	if enableNfs == "yes" {
+				fmt.Print("What is the NFS export path? ")
+				path := formatInput()
+				storage.Nfs.Path = path
+				fmt.Print("Do you want to make NFS the default SC? yes/no: ")
+				sc := formatInput()
+				if sc == "yes" {
+					storage.Nfs.DefaultSc = true
+				}
+				if sc == "no" {
+					storage.Nfs.DefaultSc = false
+				}
+				fmt.Print("Do you want to change the default NFS image\n",
+					" [default=gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.0]? yes/no: ")
+				image := formatInput()
+				if image == "yes" {
+					fmt.Print("Enter new NFS image")
+					nfsimagepath := formatInput()
+					storage.Nfs.Image = nfsimagepath
+				}
+				if image == "no" {
+					storage.Nfs.Image = "gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.0"
+				}
+				fmt.Print("Please enter the retain policy for the NFS export. [default=Retain]: ")
+				var reclaim string
+				fmt.Scanln(&reclaim)
+				if reclaim == "" {
+					storage.Hostpath.ReclaimPolicy = "Retain"
+				} else {
+					storage.Hostpath.ReclaimPolicy = reclaim
+				}
+				break
+			}
 
-		storage.Nfs.Enabled = true
-		storage.Nfs.Server = ""
-		storage.Nfs.Path = ""
-		storage.Nfs.DefaultSc = false
-		storage.Nfs.ReclaimPolicy = "Retain"
-
+		}
+		if intVar == 3 {
+			break
+		}
 	}
 }
 
@@ -1050,7 +1118,7 @@ and to prompt user for all SSO settings this
 will return a struct
 */
 func gatherSso(sso *Sso) {
-	fmt.Println("In the gatherSso func")
+	log.Println("In the gatherSso function")
 	// Ask if they want to enable SSO skip if "no"
 	for {
 		fmt.Print("Do you want to enable SSO? ")
@@ -1100,7 +1168,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		colorGreen := "\033[32m"
-		//colorYellow := "\033[33m"
+		colorYellow := "\033[33m"
 		colorBlue := "\033[34m"
 		labels := Labels{}
 		annotations := Annotations{}
@@ -1109,6 +1177,7 @@ to quickly create a Cobra application.`,
 		registry := Registry{}
 		tenancy := Tenancy{}
 		sso := Sso{}
+		storage := Storage{}
 
 		log.Println("You are in the values main function")
 		fmt.Println("Welcome, we will gather your information to build a values file")
@@ -1123,7 +1192,8 @@ to quickly create a Cobra application.`,
 			fmt.Println((colorBlue), "Press '4' To modify Registry settings E.g. URL, Username, Password")
 			fmt.Println((colorBlue), "Press '5' To modify Tenancy settings")
 			fmt.Println((colorBlue), "Press '6' To modify Single Sign On settings")
-			fmt.Println((colorBlue), "Press '7' To Exit and generate Values file")
+			fmt.Println((colorBlue), "Press '7' To modify Storage settings")
+			fmt.Println((colorBlue), "Press '8' To Exit and generate Values file")
 			fmt.Print((colorBlue), "Please make your selection: ")
 			caseInput := formatInput()
 			intVar, _ := strconv.Atoi(caseInput)
@@ -1148,11 +1218,14 @@ to quickly create a Cobra application.`,
 			case 6:
 				fmt.Print("Please update your Single Sign On settings: ")
 				gatherSso(&sso)
+			case 7:
+				fmt.Print("Please update your Storage settings: ")
+				gatherStorage(&storage)
 			}
-			if intVar == 7 {
+			if intVar == 8 {
 				break
 			}
-			fmt.Println("Please make a numerical selection")
+			fmt.Println((colorYellow), "Please make a numerical selection")
 		}
 
 		/*
@@ -1160,7 +1233,7 @@ to quickly create a Cobra application.`,
 
 
 			storage := Storage{}
-			gatherStorage(&storage)
+
 
 			configreloader := ConfigReloader{}
 			gatherConfigReloader(&configreloader)
@@ -1178,7 +1251,7 @@ to quickly create a Cobra application.`,
 			controlplane := ControlPlane{}
 			gatherControlPlane(&controlplane)
 		*/
-		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso} /* , storage,
+		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage} /* , storage,
 		configreloader, capsule, backup, gpu, monitoring, dbs, controlplane */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {

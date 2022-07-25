@@ -97,6 +97,29 @@ sso:
   azureTenant: {{ .Sso.AzureTenant }}
   oidcIssuerUrl: {{ .Sso.OidcIssuerUrl }}
 {{- end }}
+
+{{- if .Storage.Nfs.Enabled }}
+storage:
+  nfs:
+    enabled: {{ .Storage.Nfs.Enabled }}
+    server: {{ .Storage.Nfs.Server }}
+    path: {{ .Storage.Nfs.Path }}
+    defaultSc: {{ .Storage.Nfs.DefaultSc }}
+    reclaimPolicy: {{ .Storage.Nfs.ReclaimPolicy }}
+    image: {{ .Storage.Nfs.Image }}
+{{- end }}
+
+{{- if .Storage.Hostpath.Enabled }}
+storage:
+  hostpath:
+    enabled: {{ .Storage.Hostpath.Enabled }}
+    defaultSc: {{ .Storage.Hostpath.DefaultSc }}
+    path: {{ .Storage.Hostpath.Path }}
+    reclaimPolicy: {{ .Storage.Hostpath.ReclaimPolicy }}
+    nodeSelector: {{ .Storage.Hostpath.NodeSelector }}
+{{- end }}
+
+
     
 {{- if eq .Gpu.NvidiaDp.Enabled false }}
 gpu:
@@ -335,23 +358,7 @@ controlPlane:
 {{- end }}
 
 
-{{- if .Storage.Hostpath.Enabled }}
-  hostpath:
-    enabled: {{ .Storage.Hostpath.Enabled }}
-    defaultSc: {{ .Storage.Hostpath.DefaultSc }}
-    path: {{ .Storage.Hostpath.Path }}
-    reclaimPolicy: {{ .Storage.Hostpath.ReclaimPolicy }}
-    nodeSelector: {{ .Storage.Hostpath.NodeSelector }}
-{{- end }}
 
-{{- if .Storage.Nfs.Enabled }}
-  nfs:
-    enabled: {{ .Storage.Nfs.Enabled }}
-    server: {{ .Storage.Nfs.Server }}
-    path: {{ .Storage.Nfs.Path }}
-    defaultSc: {{ .Storage.Nfs.DefaultSc }}
-    reclaimPolicy: {{ .Storage.Nfs.ReclaimPolicy }}
-{{- end }}
 
 
 
