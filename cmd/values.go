@@ -779,7 +779,7 @@ func gatherLogging(logging *Logging) {
 	log.Println("In the gatherLabels func")
 
 	for {
-		fmt.Print("Do you want to disable Fluentbit? ")
+		fmt.Print("Do you want to disable Fluentbit? yes/no: ")
 		input := formatInput()
 		if input == "yes" {
 			logging.FluentbitEnable = false
@@ -793,21 +793,7 @@ func gatherLogging(logging *Logging) {
 	}
 
 	for {
-		fmt.Print("Do you want to disable Elastalert? yes/no ")
-		input := formatInput()
-		if input == "yes" {
-			logging.ElastalertEnable = false
-			break
-		}
-		if input == "no" {
-			logging.ElastalertEnable = true
-			break
-		}
-		fmt.Println("Please enter 'yes' or 'no'.")
-	}
-
-	for {
-		fmt.Print("Do you want to disable Kibana? yes/no ")
+		fmt.Print("Do you want to disable Kibana? yes/no: ")
 		input := formatInput()
 		if input == "yes" {
 			logging.KibanaEnable = false
@@ -819,6 +805,55 @@ func gatherLogging(logging *Logging) {
 		}
 		fmt.Println("Please enter 'yes' or 'no'.")
 	}
+
+	for {
+		fmt.Print("Do you want to disable Elastalert? yes/no: ")
+		input := formatInput()
+		if input == "yes" {
+			logging.ElastalertEnable = false
+			break
+		}
+		if input == "no" {
+			logging.ElastalertEnable = true
+			break
+		}
+		fmt.Println("Please enter 'yes' or 'no'.")
+	}
+	for {
+		fmt.Print("Do you want to configure Elastalert? yes/no: ")
+		input := formatInput()
+		if input == "yes" {
+			fmt.Println("Press '1' to change the Storage Size:")
+			fmt.Println("Press '2' to change the Storage Class:")
+			fmt.Println("Press '3' to change the node Selector:")
+			fmt.Print("Please make your selection: ")
+			caseInput := formatInput()
+			intVar, _ := strconv.Atoi(caseInput)
+			switch intVar {
+			case 1:
+				fmt.Print("Please enter the new Storage Size in Gi: ")
+				var storageSize string
+				fmt.Scan(&storageSize)
+				logging.ElastaStorageSize = storageSize + "Gi"
+			case 2:
+				fmt.Print("Please enter the new Storage Class: ")
+				var storageClass string
+				fmt.Scan(&storageClass)
+				logging.ElastaStorageClass = storageClass
+			case 3:
+				fmt.Print("Please enter the new Node Selector: ")
+				storageClass := createSlice()
+				logging.ElastaNodeSelector = storageClass
+				//default:
+				//	fmt.Println("You entered an incorrect option please try again.")
+			}
+		}
+		if input == "no" {
+			break
+		}
+		fmt.Println("Please enter 'yes' or 'no'.")
+	}
+
 }
 
 /* function used to leverage the Gpu struct
@@ -1026,22 +1061,51 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		labels := Labels{}
+		annotations := Annotations{}
+		network := Networking{Istio: Istio{Enabled: true}}
+		logging := Logging{FluentbitEnable: true, ElastalertEnable: true, KibanaEnable: true}
+
 		log.Println("You are in the values main function")
+		fmt.Println("Welcome, we will gather your information to build a values file")
 		clusterdomain := ClusterDomain{}
 		gatherClusterDomain(&clusterdomain)
-		labels := Labels{}
-		gatherLabels(&labels)
-		annotations := Annotations{}
-		gatherAnnotations(&annotations)
-		network := Networking{}
-		gatherNetworking(&network)
-		logging := Logging{}
-		gatherLogging(&logging)
-		/*
+		for {
+			fmt.Println("----------------- Main Menu ---------------- ")
+			fmt.Println("Please make a selection to modify the values \n",
+				"file for the cnvrg.io install")
+			fmt.Println("Press '1' To add Labels and Annotations")
+			fmt.Println("Press '2' To modify Networks settings E.g. Istio, Nodeport, HTTPS")
+			fmt.Println("Press '3' To modify Logging settings E.g. Kibana, ElasticAlert, Fluentbit")
+			fmt.Println("Press '4' Currently a placeholder")
+			fmt.Println("Press '5' To Exit and generate values file")
+			fmt.Print("Please make your selection: ")
+			caseInput := formatInput()
+			intVar, _ := strconv.Atoi(caseInput)
+			switch intVar {
+			case 1:
+				fmt.Print("Please add your Labels and Annotations: ")
+				gatherLabels(&labels)
+				gatherAnnotations(&annotations)
+			case 2:
+				fmt.Print("Please update your Network settings: ")
+				gatherNetworking(&network)
 
+			case 3:
+				fmt.Print("Please update your Logging settings: ")
+				gatherLogging(&logging)
+			case 4:
+				fmt.Print("Currently a placeholder: ")
+			}
+			if intVar == 5 {
+				break
+			}
+			fmt.Println("Please make a numerical selection")
+		}
+
+		/*
 			registry := Registry{}
 			gatherRegistry(&registry)
-
 			sso := Sso{}
 			gatherSso(&sso)
 			storage := Storage{}
@@ -1065,7 +1129,7 @@ to quickly create a Cobra application.`,
 			gatherControlPlane(&controlplane)
 		*/
 		finaltemp := Template{clusterdomain, labels, annotations, network, logging} /*registry, sso, storage,
-		tenancy, configreloader, capsule, backup, gpu, logging, monitoring, dbs, controlplane */
+		tenancy, configreloader, capsule, backup, gpu, monitoring, dbs, controlplane */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			fmt.Print(err)

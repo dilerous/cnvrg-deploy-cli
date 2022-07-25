@@ -1,10 +1,25 @@
+---
 clusterDomain: {{ .ClusterDomain.ClusterDomain }}
-clusterInternalDomain: {{ .ClusterDomain.ClusterInternalDomain }}
-spec: {{ .ClusterDomain.Spec }} 
-imageHub: {{ .ClusterDomain.ImageHub }}
 
+{{- if ne .ClusterDomain.ClusterInternalDomain "cluster.local" }}
+clusterInternalDomain: {{ .ClusterDomain.ClusterInternalDomain }}
+{{- end }}
+
+{{- if ne .ClusterDomain.Spec ""}} 
+spec: {{ .ClusterDomain.Spec }} 
+{{- end }}
+
+{{- if ne .ClusterDomain.ImageHub ""}}
+imageHub: {{ .ClusterDomain.ImageHub }}
+{{- end }}
+
+{{- if ne .Labels.Stringify ""}} 
 labels:{ {{ .Labels.Stringify }} }
+{{- end }}
+
+{{- if ne .Annotations.Stringify ""}} 
 annotations:{ {{ .Annotations.Stringify }} }
+{{- end }}
 
 {{- if .Network.Https.Enabled }}
 networking:
@@ -31,20 +46,18 @@ networking:
 {{- if eq .Network.Istio.Enabled false }}
   istio:
     enabled: {{ .Network.Istio.Enabled }}
-{{- end }}
     externalIp: [ {{ .Network.Istio.ExternalIp }} ]
     ingressSvcAnnotations: { {{ .Network.Istio.IngressSvcAnnotations }} }
     ingressSvcExtraPorts: [ {{ .Network.Istio.IngressSvcExtraPorts }} ]
     lbSourceRanges: [ {{ .Network.Istio.LbSourceRanges }} ]
-
-
-
+{{- end }}
 
 logging:
 {{- if eq .Logging.FluentbitEnable false }}
   fluentbit:
     enabled: {{ .Logging.FluentbitEnable }}
 {{- end}}
+
 {{- if eq .Logging.ElastalertEnable false }}
   elastalert:
     enabled: {{ .Logging.ElastalertEnable }}
@@ -52,11 +65,14 @@ logging:
     storageClass: {{ .Logging.ElastaStorageClass }}
     nodeSelector: { {{ .Logging.ElastaNodeSelector }} }
 {{- end }}
+
 {{- if eq .Logging.KibanaEnable false }}
   kibana:
-    svcName: {{ .Logging.KibanaSvcName }}
     enabled: {{ .Logging.KibanaEnable }}
+    svcName: {{ .Logging.KibanaSvcName }}
 {{- end }}
+    
+
 
 
 
