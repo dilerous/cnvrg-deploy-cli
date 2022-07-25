@@ -220,17 +220,18 @@ type Template struct {
 	Annotations   Annotations
 	Network       Networking
 	Logging       Logging
-	/*Registry       Registry
-	Sso            Sso
-	Storage        Storage
-	Tenancy        Tenancy
-	ConfigReloader ConfigReloader
-	Capsule        Capsule
-	Backup         Backup
-	Gpu            Gpu
-	Monitoring     Monitoring
-	Dbs            Dbs
-	ControlPlane   ControlPlane
+	Registry      Registry
+	/*
+		Sso            Sso
+		Storage        Storage
+		Tenancy        Tenancy
+		ConfigReloader ConfigReloader
+		Capsule        Capsule
+		Backup         Backup
+		Gpu            Gpu
+		Monitoring     Monitoring
+		Dbs            Dbs
+		ControlPlane   ControlPlane
 	*/
 }
 
@@ -945,20 +946,32 @@ and to prompt user for all Registry settings this
 will return a struct
 */
 func gatherRegistry(registry *Registry) {
-	fmt.Println("In the gatherRegistry func")
-	var enableRegistry string
-
-	// Ask if they want to enable SSO skip if "no"
-	fmt.Print("Do you want to include specific registry credentials? ")
-	fmt.Scan(&enableRegistry)
-	if enableRegistry == "no" {
-		registry.Enabled = false
-	}
-	if enableRegistry == "yes" {
-		registry.Enabled = true
-		registry.Url = "docker.io"
-		registry.User = "dockeruser"
-		registry.Password = "dockerpassword"
+	log.Println("In the gatherRegistry function")
+	for {
+		// Ask if they want to enable SSO skip if "no"
+		fmt.Print("Do you want to include specific registry credentials? yes/no: ")
+		input := formatInput()
+		if input == "no" {
+			registry.Enabled = false
+			break
+		}
+		if input == "yes" {
+			registry.Enabled = true
+			fmt.Print("What is your registry URL? [default docker.io]: ")
+			url := formatInput()
+			if url == "" {
+				registry.Url = "docker.io"
+			} else {
+				registry.Url = url
+			}
+			fmt.Print("What is the registry username: ")
+			user := formatInput()
+			registry.User = user
+			fmt.Print("What is the password: ")
+			password := formatInput()
+			registry.Password = password
+			break
+		}
 	}
 }
 
@@ -1065,6 +1078,7 @@ to quickly create a Cobra application.`,
 		annotations := Annotations{}
 		network := Networking{Istio: Istio{Enabled: true}}
 		logging := Logging{FluentbitEnable: true, ElastalertEnable: true, KibanaEnable: true}
+		registry := Registry{}
 
 		log.Println("You are in the values main function")
 		fmt.Println("Welcome, we will gather your information to build a values file")
@@ -1072,12 +1086,12 @@ to quickly create a Cobra application.`,
 		gatherClusterDomain(&clusterdomain)
 		for {
 			fmt.Println("----------------- Main Menu ---------------- ")
-			fmt.Println("Please make a selection to modify the values \n",
+			fmt.Println("Please make a selection to modify the values\n",
 				"file for the cnvrg.io install")
 			fmt.Println("Press '1' To add Labels and Annotations")
-			fmt.Println("Press '2' To modify Networks settings E.g. Istio, Nodeport, HTTPS")
+			fmt.Println("Press '2' To modify Networks settings E.g. Istio, NodePort, HTTPS")
 			fmt.Println("Press '3' To modify Logging settings E.g. Kibana, ElasticAlert, Fluentbit")
-			fmt.Println("Press '4' Currently a placeholder")
+			fmt.Println("Press '4' To modify Registry settings E.g. URL, Username, Password")
 			fmt.Println("Press '5' To Exit and generate values file")
 			fmt.Print("Please make your selection: ")
 			caseInput := formatInput()
@@ -1095,7 +1109,8 @@ to quickly create a Cobra application.`,
 				fmt.Print("Please update your Logging settings: ")
 				gatherLogging(&logging)
 			case 4:
-				fmt.Print("Currently a placeholder: ")
+				fmt.Print("Please update your Registry credentials: ")
+				gatherRegistry(&registry)
 			}
 			if intVar == 5 {
 				break
@@ -1104,8 +1119,8 @@ to quickly create a Cobra application.`,
 		}
 
 		/*
-			registry := Registry{}
-			gatherRegistry(&registry)
+
+
 			sso := Sso{}
 			gatherSso(&sso)
 			storage := Storage{}
@@ -1128,7 +1143,7 @@ to quickly create a Cobra application.`,
 			controlplane := ControlPlane{}
 			gatherControlPlane(&controlplane)
 		*/
-		finaltemp := Template{clusterdomain, labels, annotations, network, logging} /*registry, sso, storage,
+		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry} /* sso, storage,
 		tenancy, configreloader, capsule, backup, gpu, monitoring, dbs, controlplane */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {

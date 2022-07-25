@@ -71,11 +71,14 @@ logging:
     enabled: {{ .Logging.KibanaEnable }}
     svcName: {{ .Logging.KibanaSvcName }}
 {{- end }}
+
+{{- if .Registry.Enabled }}
+registry:
+  url: {{ .Registry.Url }}
+  user: {{ .Registry.User }}
+  password: {{ .Registry.Password }}
+{{- end }}
     
-
-
-
-
 {{- if eq .Gpu.NvidiaDp.Enabled false }}
 gpu:
   nvidiaDp:
@@ -349,12 +352,6 @@ tenancy:
   value: {{ .Tenancy.Value }}
 {{- end }}
 
-{{- if .Registry.Enabled }}
-registry:
-  url: {{ .Registry.Url }}
-  user: {{ .Registry.User }}
-  password: {{ .Registry.Password }}
-{{- end }}
 
 {{- if .ConfigReloader.Enabled }}
 configReloader:
