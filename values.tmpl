@@ -341,21 +341,7 @@ controlPlane:
       user: {{ .ControlPlane.MpiRegistryUser }}
       password: {{ .ControlPlane.MpiRegistryPassword }}
 
-{{- if .Network.Ingress.External }}
-  ingress:
-    type: {{ .Network.Ingress.Type }}
-    istioGwEnabled: {{ .Network.Ingress.IstioGwEnabled }}
-    istioGwName: {{ .Network.Ingress.IstioGwName }}
-{{- end }}
 
-{{- if eq .Network.Istio.Enabled false }}
-  istio:
-    enabled: {{.Network.Istio.Enabled }}
-    externalIp: {{.Network.Istio.ExternalIp }}
-    ingressSvcAnnotations: {{.Network.Istio.IngressSvcAnnotations }}
-    ingressSvcExtraPorts: {{.Network.Istio.IngressSvcExtraPorts }}
-    lbSourceRanges: {{.Network.Istio.LbSourceRanges }}
-{{- end }}
 
 
 
@@ -379,4 +365,25 @@ backup:
   enabled: {{ .Backup.Enabled }}
   rotation: {{ .Backup.Rotation }}
   period: {{ .Backup.Period }}
+{{- end }}
+
+
+
+
+
+
+{{- if .Network.Ingress.External }}
+  ingress:
+    type: {{ .Network.Ingress.Type }}
+    istioGwEnabled: {{ .Network.Ingress.IstioGwEnabled }}
+    istioGwName: {{ .Network.Ingress.IstioGwName }}
+{{- end }}
+
+{{- if eq .Network.Istio.Enabled false }}
+  istio:
+    enabled: {{.Network.Istio.Enabled }}
+    externalIp: {{.Network.Istio.ExternalIp }}
+    ingressSvcAnnotations: {{.Network.Istio.IngressSvcAnnotations }}
+    ingressSvcExtraPorts: {{.Network.Istio.IngressSvcExtraPorts }}
+    lbSourceRanges: {{.Network.Istio.LbSourceRanges }}
 {{- end }}

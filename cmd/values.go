@@ -1049,7 +1049,7 @@ func gatherStorage(storage *Storage) {
 				}
 				fmt.Print("Please enter the retain policy for the host path. [default=Retain]: ")
 				var reclaim string
-				fmt.Scan(&reclaim)
+				fmt.Scanln(&reclaim)
 				if reclaim == "" {
 					storage.Hostpath.ReclaimPolicy = "Retain"
 				} else {
