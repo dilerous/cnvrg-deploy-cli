@@ -1167,9 +1167,11 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Set colors for text
 		colorGreen := "\033[32m"
 		colorYellow := "\033[33m"
 		colorBlue := "\033[34m"
+		// set variables for each struct defined above - Used in gather functions for each menu item
 		labels := Labels{}
 		annotations := Annotations{}
 		network := Networking{Istio: Istio{Enabled: true}}
@@ -1178,6 +1180,10 @@ to quickly create a Cobra application.`,
 		tenancy := Tenancy{}
 		sso := Sso{}
 		storage := Storage{}
+		gpu := Gpu{}
+		backup := Backup{}
+		capsule := Capsule{}
+		configreloader := ConfigReloader{}
 
 		log.Println("You are in the values main function")
 		fmt.Println("Welcome, we will gather your information to build a values file")
@@ -1193,7 +1199,8 @@ to quickly create a Cobra application.`,
 			fmt.Println((colorBlue), "Press '5' To modify Tenancy settings")
 			fmt.Println((colorBlue), "Press '6' To modify Single Sign On settings")
 			fmt.Println((colorBlue), "Press '7' To modify Storage settings")
-			fmt.Println((colorBlue), "Press '8' To Exit and generate Values file")
+			fmt.Println((colorBlue), "Press '8' To modify Backup, GPU, ConfigLoader or Capsule settings")
+			fmt.Println((colorBlue), "Press '9' To Exit and generate Values file")
 			fmt.Print((colorBlue), "Please make your selection: ")
 			caseInput := formatInput()
 			intVar, _ := strconv.Atoi(caseInput)
@@ -1221,29 +1228,40 @@ to quickly create a Cobra application.`,
 			case 7:
 				fmt.Print("Please update your Storage settings: ")
 				gatherStorage(&storage)
+			case 8:
+				for {
+					fmt.Println((colorBlue), "Press '1' To disable GPU for nvidiaDp or habanaDp")
+					fmt.Println((colorBlue), "Press '2' To modify backup settings")
+					fmt.Println((colorBlue), "Press '3' To disable Capsule")
+					fmt.Println((colorBlue), "Press '4' To disable ConfigReloader")
+					fmt.Println((colorBlue), "Press '5' To Exit modifying settings")
+					fmt.Print((colorBlue), "Please make your selection: ")
+					caseInput := formatInput()
+					intVar, _ := strconv.Atoi(caseInput)
+					switch intVar {
+					case 1:
+						gatherGpu(&gpu)
+					case 2:
+						gatherBackup(&backup)
+					case 3:
+						gatherCapsule(&capsule)
+					case 4:
+						gatherConfigReloader(&configreloader)
+					}
+					if intVar == 5 {
+						fmt.Print("Saving changes and exiting")
+						break
+					}
+				}
 			}
-			if intVar == 8 {
+			if intVar == 9 {
+				fmt.Print((colorYellow), "Exiting and generating the values.yaml file")
 				break
 			}
 			fmt.Println((colorYellow), "Please make a numerical selection")
 		}
 
 		/*
-
-
-
-			storage := Storage{}
-
-
-			configreloader := ConfigReloader{}
-			gatherConfigReloader(&configreloader)
-			capsule := Capsule{}
-			gatherCapsule(&capsule)
-			backup := Backup{}
-			gatherBackup(&backup)
-			gpu := Gpu{}
-			gatherGpu(&gpu)
-
 			monitoring := Monitoring{}
 			gatherMonitoring(&monitoring)
 			dbs := Dbs{}
@@ -1251,8 +1269,8 @@ to quickly create a Cobra application.`,
 			controlplane := ControlPlane{}
 			gatherControlPlane(&controlplane)
 		*/
-		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage} /* , storage,
-		configreloader, capsule, backup, gpu, monitoring, dbs, controlplane */
+		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage} /*
+			configreloader, capsule, backup, gpu, monitoring, dbs, controlplane */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			fmt.Print(err)
