@@ -16,6 +16,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var temp *template.Template
+
+func init() {
+
+	createCmd.AddCommand(valuesCmd)
+	temp = template.Must(template.ParseFiles("values.tmpl"))
+
+}
+
 // Parent struct for the Backup values
 type Backup struct {
 	Enabled  bool
@@ -216,23 +225,25 @@ type Monitoring struct {
 
 // Template struct for the values.tmpl file
 type Template struct {
-	ClusterDomain ClusterDomain
-	Labels        Labels
-	Annotations   Annotations
-	Network       Networking
-	Logging       Logging
-	Registry      Registry
-	Tenancy       Tenancy
-	Sso           Sso
-	Storage       Storage
+	ClusterDomain  ClusterDomain
+	Labels         Labels
+	Annotations    Annotations
+	Network        Networking
+	Logging        Logging
+	Registry       Registry
+	Tenancy        Tenancy
+	Sso            Sso
+	Storage        Storage
+	ConfigReloader ConfigReloader
+	Capsule        Capsule
+	Backup         Backup
+	Gpu            Gpu
 	/*
 
 
 
-		ConfigReloader ConfigReloader
-		Capsule        Capsule
-		Backup         Backup
-		Gpu            Gpu
+
+
 		Monitoring     Monitoring
 		Dbs            Dbs
 		ControlPlane   ControlPlane
@@ -256,11 +267,11 @@ This function will return a struct.
 */
 func gatherClusterDomain(cluster *ClusterDomain) {
 	log.Println("In the gatherClusterDomain function")
-	var clusterDomain string
+	colorWhite := "\033[37m"
 
 	// Ask what the wildcard domain is
-	fmt.Print("What is your wildcard domain? ")
-	fmt.Scan(&clusterDomain)
+	fmt.Print((colorWhite), "What is your wildcard domain? ")
+	clusterDomain := formatInput()
 	cluster.ClusterDomain = clusterDomain
 
 	for {
@@ -595,79 +606,49 @@ and to prompt user for all Logging settings this
 will return a struct
 */
 func gatherMonitoring(monitoring *Monitoring) {
-	fmt.Println("In the gatherLabels func")
-	var disableDcgmExport string
-	var disableHabana string
-	var disableNodeExport string
-	var disableKubeState string
-	var disableGrafana string
-	var disablePromOperator string
-	var disablePrometheus string
-	var disableDefaultSvcMonitor string
-	var disableCnvrgIDMetrics string
+	log.Println("In the gatherMonitoring function")
+	colorBlue := "\033[34m"
+	colorWhite := "\033[37m"
 
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable dcgm Export? ")
-	fmt.Scan(&disableDcgmExport)
-	if disableDcgmExport == "yes" {
-		monitoring.DcgmExportEnable = false
+	for {
+		fmt.Println((colorBlue), "Press '1' To disable dcgm Export Monitoring")
+		fmt.Println((colorBlue), "Press '2' To disable Habana Monitoring")
+		fmt.Println((colorBlue), "Press '3' To disable Node Export Monitoring")
+		fmt.Println((colorBlue), "Press '4' To disable Kube State Metric Monitoring")
+		fmt.Println((colorBlue), "Press '5' To disable Grafana Monitoring")
+		fmt.Println((colorBlue), "Press '6' To disable the Prometheus Operator")
+		fmt.Println((colorBlue), "Press '7' To disable Prometheus")
+		fmt.Println((colorBlue), "Press '8' To disable Default Svc Monitoring")
+		fmt.Println((colorBlue), "Press '9' To disable cnvrg Idle Metrics")
+		fmt.Println((colorBlue), "Press '10' To Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			monitoring.DcgmExportEnable = false
+		case 2:
+			monitoring.HabanaExportEnable = false
+		case 3:
+			monitoring.NodeExportEnable = false
+		case 4:
+			monitoring.KubeStateMetricEnable = false
+		case 5:
+			monitoring.GrafanaEnable = false
+		case 6:
+			monitoring.PrometheusOperatorEnable = false
+		case 7:
+			monitoring.PrometheusEnable = false
+		case 8:
+			monitoring.DefaultSvcMonitorsEnable = false
+		case 9:
+			monitoring.CnvrgIdleMetricsEnable = false
+		}
+		if intVar == 10 {
+			fmt.Print((colorWhite), "Saving and Exiting Menu")
+			break
+		}
 	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Habana? ")
-	fmt.Scan(&disableHabana)
-	if disableHabana == "yes" {
-		monitoring.HabanaExportEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Kibana? ")
-	fmt.Scan(&disableNodeExport)
-	if disableNodeExport == "yes" {
-		monitoring.NodeExportEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Kibana? ")
-	fmt.Scan(&disableKubeState)
-	if disableKubeState == "yes" {
-		monitoring.KubeStateMetricEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Kibana? ")
-	fmt.Scan(&disableGrafana)
-	if disableGrafana == "yes" {
-		monitoring.GrafanaEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Kibana? ")
-	fmt.Scan(&disablePromOperator)
-	if disablePromOperator == "yes" {
-		monitoring.PrometheusOperatorEnable = false
-	}
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Kibana? ")
-	fmt.Scan(&disablePrometheus)
-	if disablePrometheus == "yes" {
-		monitoring.PrometheusEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Kibana? ")
-	fmt.Scan(&disableDefaultSvcMonitor)
-	if disableDefaultSvcMonitor == "yes" {
-		monitoring.DefaultSvcMonitorsEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Kibana? ")
-	fmt.Scan(&disableCnvrgIDMetrics)
-	if disableCnvrgIDMetrics == "yes" {
-		monitoring.CnvrgIdleMetricsEnable = false
-	}
-
 }
 
 func gatherControlPlane(controlplane *ControlPlane) {
@@ -862,24 +843,21 @@ func gatherLogging(logging *Logging) {
 }
 
 /* function used to leverage the Gpu struct
-and to prompt user for all Gpu settings this
-will return a struct
+and to prompt user for all Gpu settings
 */
 func gatherGpu(gpu *Gpu) {
-	fmt.Println("In the gatherLabels func")
-	var disableNvidia string
-	var disableHabana string
+	log.Println("In the gatherGpu function")
 
 	// Ask if they want to enable Tenancy skip if "no"
 	fmt.Print("Do you want to disable Nvidia GPU? ")
-	fmt.Scan(&disableNvidia)
+	disableNvidia := formatInput()
 	if disableNvidia == "yes" {
 		gpu.NvidiaEnable = false
 	}
 
 	// Ask if they want to enable Tenancy skip if "no"
 	fmt.Print("Do you want to disable Habana GPU? ")
-	fmt.Scan(&disableHabana)
+	disableHabana := formatInput()
 	if disableHabana == "yes" {
 		gpu.HabanaEnable = false
 	}
@@ -887,16 +865,14 @@ func gatherGpu(gpu *Gpu) {
 }
 
 /* function used to leverage the Backup struct
-and to prompt user for all Backup settings this
-will return a struct
+and to prompt user for all Backup settings
 */
 func gatherBackup(backup *Backup) {
-	fmt.Println("In the gatherCapsule func")
-	var disableBackup string
+	log.Println("In the gatherBackup function")
 
 	// Ask if they want to enable Tenancy skip if "no"
 	fmt.Print("Do you want to disable backups? ")
-	fmt.Scan(&disableBackup)
+	disableBackup := formatInput()
 	if disableBackup == "yes" {
 		backup.Enabled = false
 	}
@@ -912,36 +888,27 @@ and to prompt user for all Capsule settings this
 will return a struct
 */
 func gatherCapsule(capsule *Capsule) {
-	fmt.Println("In the gatherCapsule func")
-	var disableCapsule string
+	log.Println("In the gatherCapsule function")
 
 	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable capsule? ")
-	fmt.Scan(&disableCapsule)
+	fmt.Print("Do you want to disable capsule? yes/no: ")
+	disableCapsule := formatInput()
 	if disableCapsule == "yes" {
 		capsule.Enabled = false
 	}
-	if disableCapsule == "no" {
-		capsule.Enabled = true
-	}
 }
 
-/* function used to leverate the Tenancy struct
-and to prompt user for all Tenancy settings this
-will return a struct
+/* function used to leverate the ConfigReloader struct
+and to prompt user for all ConfigReloader settings
 */
 func gatherConfigReloader(configReloader *ConfigReloader) {
-	fmt.Println("In the gatherConfigReloader func")
-	var enableConfigReloader string
+	log.Println("In the gatherConfigReloader func")
 
 	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to enable ConfigReloader? ")
-	fmt.Scan(&enableConfigReloader)
-	if enableConfigReloader == "no" {
-		configReloader.Enabled = false
-	}
+	fmt.Print("Do you want to disable ConfigReloader? yes/no: ")
+	enableConfigReloader := formatInput()
 	if enableConfigReloader == "yes" {
-		configReloader.Enabled = true
+		configReloader.Enabled = false
 	}
 }
 
@@ -1171,6 +1138,7 @@ to quickly create a Cobra application.`,
 		colorGreen := "\033[32m"
 		colorYellow := "\033[33m"
 		colorBlue := "\033[34m"
+		colorWhite := "\033[37m"
 		// set variables for each struct defined above - Used in gather functions for each menu item
 		labels := Labels{}
 		annotations := Annotations{}
@@ -1184,9 +1152,10 @@ to quickly create a Cobra application.`,
 		backup := Backup{}
 		capsule := Capsule{}
 		configreloader := ConfigReloader{}
+		monitoring := Monitoring{}
 
-		log.Println("You are in the values main function")
-		fmt.Println("Welcome, we will gather your information to build a values file")
+		log.Println((colorWhite), "You are in the values main function")
+		fmt.Println((colorGreen), "Welcome, we will gather your information to build a values file")
 		clusterdomain := ClusterDomain{}
 		gatherClusterDomain(&clusterdomain)
 		for {
@@ -1200,8 +1169,9 @@ to quickly create a Cobra application.`,
 			fmt.Println((colorBlue), "Press '6' To modify Single Sign On settings")
 			fmt.Println((colorBlue), "Press '7' To modify Storage settings")
 			fmt.Println((colorBlue), "Press '8' To modify Backup, GPU, ConfigLoader or Capsule settings")
-			fmt.Println((colorBlue), "Press '9' To Exit and generate Values file")
-			fmt.Print((colorBlue), "Please make your selection: ")
+			fmt.Println((colorBlue), "Press '9' To modify Monitoring settings")
+			fmt.Println((colorBlue), "Press '10' To Exit and generate Values file")
+			fmt.Print((colorWhite), "Please make your selection: ")
 			caseInput := formatInput()
 			intVar, _ := strconv.Atoi(caseInput)
 			switch intVar {
@@ -1253,8 +1223,11 @@ to quickly create a Cobra application.`,
 						break
 					}
 				}
+			case 9:
+				fmt.Print((colorWhite), "Please update your Monitoring settings: ")
+				gatherMonitoring(&monitoring)
 			}
-			if intVar == 9 {
+			if intVar == 10 {
 				fmt.Print((colorYellow), "Exiting and generating the values.yaml file")
 				break
 			}
@@ -1262,27 +1235,16 @@ to quickly create a Cobra application.`,
 		}
 
 		/*
-			monitoring := Monitoring{}
-			gatherMonitoring(&monitoring)
 			dbs := Dbs{}
 			gatherDbs(&dbs)
 			controlplane := ControlPlane{}
 			gatherControlPlane(&controlplane)
 		*/
-		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage} /*
-			configreloader, capsule, backup, gpu, monitoring, dbs, controlplane */
+		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu} /*
+			monitoring, dbs, controlplane */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			fmt.Print(err)
 		}
 	},
-}
-
-// Figure out why this is a thing
-var temp *template.Template
-
-func init() {
-	createCmd.AddCommand(valuesCmd)
-	temp = template.Must(template.ParseFiles("values.tmpl"))
-
 }

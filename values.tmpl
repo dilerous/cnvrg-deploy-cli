@@ -118,8 +118,6 @@ storage:
     reclaimPolicy: {{ .Storage.Hostpath.ReclaimPolicy }}
     nodeSelector: {{ .Storage.Hostpath.NodeSelector }}
 {{- end }}
-
-
     
 {{- if eq .Gpu.NvidiaDp.Enabled false }}
 gpu:
@@ -130,6 +128,28 @@ gpu:
   habanaDp:
     enabled: {{ .Gpu.HabanaEnable }}
 {{- end }}
+
+
+{{- if eq .ConfigReloader.Enabled false }}
+configReloader:
+  enabled: {{ .ConfigReloader.Enabled }}
+{{- end }}
+
+{{- if eq .Capsule.Enabled false }}
+capsule:
+  enabled: {{ .Capsule.Enabled }}
+  image: {{ .Capsule.Image }}
+{{- end }}
+
+{{- if eq .Backup.Enabled false }}
+backup:
+  enabled: {{ .Backup.Enabled }}
+  rotation: {{ .Backup.Rotation }}
+  period: {{ .Backup.Period }}
+{{- end }}
+
+
+
 
 monitoring:
 {{- if eq .Monitoring.DcgmExportEnable false }}
@@ -162,7 +182,6 @@ monitoring:
   prometheusOperator:
     enabled: {{ .Monitoring.PrometheusOperatorEnable }}
 {{- end }}
-
 
 {{- if eq .Monitoring.PrometheusEnable false }}
   prometheus:
@@ -349,23 +368,7 @@ controlPlane:
 
 
 
-{{- if .ConfigReloader.Enabled }}
-configReloader:
-  enabled: {{ .ConfigReloader.Enabled }}
-{{- end }}
 
-{{- if eq .Capsule.Enabled false }}
-capsule:
-  enabled: {{ .Capsule.Enabled }}
-  image: {{ .Capsule.Image }}
-{{- end }}
-
-{{- if eq .Backup.Enabled false }}
-backup:
-  enabled: {{ .Backup.Enabled }}
-  rotation: {{ .Backup.Rotation }}
-  period: {{ .Backup.Period }}
-{{- end }}
 
 
 
