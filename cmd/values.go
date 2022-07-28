@@ -609,6 +609,7 @@ func gatherMonitoring(monitoring *Monitoring) {
 	log.Println("In the gatherMonitoring function")
 	colorBlue := "\033[34m"
 	colorWhite := "\033[37m"
+	colorYellow := "\033[33m"
 
 	for {
 		fmt.Println((colorBlue), "Press '1' To disable dcgm Export Monitoring")
@@ -627,25 +628,34 @@ func gatherMonitoring(monitoring *Monitoring) {
 		switch intVar {
 		case 1:
 			monitoring.DcgmExportEnable = false
+			fmt.Println((colorYellow), "DCGM Export Disabled")
 		case 2:
 			monitoring.HabanaExportEnable = false
+			fmt.Println((colorYellow), "Habana Export Disabled")
 		case 3:
 			monitoring.NodeExportEnable = false
+			fmt.Println((colorYellow), "Node Export Disabled")
 		case 4:
 			monitoring.KubeStateMetricEnable = false
+			fmt.Println((colorYellow), "Kube State Metrics Disabled")
 		case 5:
 			monitoring.GrafanaEnable = false
+			fmt.Println((colorYellow), "Grafana Disabled")
 		case 6:
 			monitoring.PrometheusOperatorEnable = false
+			fmt.Println((colorYellow), "Prometheus Operator Disabled")
 		case 7:
 			monitoring.PrometheusEnable = false
+			fmt.Println((colorYellow), "Prometheus Disabled")
 		case 8:
 			monitoring.DefaultSvcMonitorsEnable = false
+			fmt.Println((colorYellow), "Default svc Monitor Disabled")
 		case 9:
 			monitoring.CnvrgIdleMetricsEnable = false
+			fmt.Println((colorYellow), "cnvrg Idle Metrics Disabled")
 		}
 		if intVar == 10 {
-			fmt.Print((colorWhite), "Saving and Exiting Menu")
+			fmt.Print((colorYellow), "Saving and Exiting Menu")
 			break
 		}
 	}

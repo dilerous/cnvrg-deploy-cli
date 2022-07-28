@@ -119,12 +119,12 @@ storage:
     nodeSelector: {{ .Storage.Hostpath.NodeSelector }}
 {{- end }}
     
-{{- if eq .Gpu.NvidiaDp.Enabled false }}
+{{- if eq .Gpu.NvidiaEnable false }}
 gpu:
   nvidiaDp:
     enabled: {{ .Gpu.NvidiaEnable }}
 {{- end  }}
-{{- if eq .Gpu.HabanaDp.Enabled false }}
+{{- if eq .Gpu.HabanaEnable false }}
   habanaDp:
     enabled: {{ .Gpu.HabanaEnable }}
 {{- end }}
