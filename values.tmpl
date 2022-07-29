@@ -149,8 +149,6 @@ backup:
 {{- end }}
 
 
-
-
 monitoring:
 {{- if eq .Monitoring.DcgmExportEnable false }}
   dcgmExporter:
@@ -200,7 +198,7 @@ monitoring:
   cnvrgIdleMetricsExporter:
     enabled: {{ .Monitoring.CnvrgIdleMetricsEnable }}
     labels: { {{ .Monitoring.CnvrgIdleMetricsLabels }} }
-  {{- end }}
+{{- end }}
 
 
 dbs:

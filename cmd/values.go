@@ -238,13 +238,14 @@ type Template struct {
 	Capsule        Capsule
 	Backup         Backup
 	Gpu            Gpu
+	Monitoring     Monitoring
 	/*
 
 
 
 
 
-		Monitoring     Monitoring
+
 		Dbs            Dbs
 		ControlPlane   ControlPlane
 	*/
@@ -275,7 +276,7 @@ func gatherClusterDomain(cluster *ClusterDomain) {
 	cluster.ClusterDomain = clusterDomain
 
 	for {
-		fmt.Print("Do you want to change the internal cluster domain? yes/no: ")
+		fmt.Print("Do you want to change the internal cluster domain? [default: cluster.local] yes/no: ")
 		input := formatInput()
 
 		if input == "yes" {
@@ -1163,6 +1164,7 @@ to quickly create a Cobra application.`,
 		capsule := Capsule{}
 		configreloader := ConfigReloader{}
 		monitoring := Monitoring{}
+		controlplane := ControlPlane{}
 
 		log.Println((colorWhite), "You are in the values main function")
 		fmt.Println((colorGreen), "Welcome, we will gather your information to build a values file")
@@ -1180,7 +1182,8 @@ to quickly create a Cobra application.`,
 			fmt.Println((colorBlue), "Press '7' To modify Storage settings")
 			fmt.Println((colorBlue), "Press '8' To modify Backup, GPU, ConfigLoader or Capsule settings")
 			fmt.Println((colorBlue), "Press '9' To modify Monitoring settings")
-			fmt.Println((colorBlue), "Press '10' To Exit and generate Values file")
+			fmt.Println((colorBlue), "Press '10' To modify Control Plane settings")
+			fmt.Println((colorBlue), "Press '11' To Exit and generate Values file")
 			fmt.Print((colorWhite), "Please make your selection: ")
 			caseInput := formatInput()
 			intVar, _ := strconv.Atoi(caseInput)
@@ -1229,15 +1232,17 @@ to quickly create a Cobra application.`,
 						gatherConfigReloader(&configreloader)
 					}
 					if intVar == 5 {
-						fmt.Print("Saving changes and exiting")
+						fmt.Print((colorYellow), "Saving changes and exiting")
 						break
 					}
 				}
 			case 9:
-				fmt.Print((colorWhite), "Please update your Monitoring settings: ")
+				fmt.Print((colorWhite), "Please update your Monitoring settings:")
 				gatherMonitoring(&monitoring)
+			case 10:
+				fmt.Print("Please update the Control Plane settings:")
 			}
-			if intVar == 10 {
+			if intVar == 11 {
 				fmt.Print((colorYellow), "Exiting and generating the values.yaml file")
 				break
 			}
@@ -1247,11 +1252,11 @@ to quickly create a Cobra application.`,
 		/*
 			dbs := Dbs{}
 			gatherDbs(&dbs)
-			controlplane := ControlPlane{}
+
 			gatherControlPlane(&controlplane)
 		*/
-		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu} /*
-			monitoring, dbs, controlplane */
+		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu, monitoring} /*
+			, dbs, controlplane */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			fmt.Print(err)
