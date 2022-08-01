@@ -85,8 +85,14 @@ logging:
 
 {{- if .Registry.Enabled }}
 registry:
+{{- end }}
+{{- if .Registry.Url }}
   url: {{ .Registry.Url }}
+{{- end }}
+{{- if .Registry.User }}
   user: {{ .Registry.User }}
+{{- end }}
+{{- if .Registry.Password }}
   password: {{ .Registry.Password }}
 {{- end }}
 
