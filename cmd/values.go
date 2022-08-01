@@ -18,6 +18,12 @@ import (
 
 var temp *template.Template
 
+// Set colors for text
+var colorBlue = "\033[34m"
+var colorWhite = "\033[37m"
+var colorYellow = "\033[33m"
+var colorGreen = "\033[32m"
+
 func init() {
 
 	createCmd.AddCommand(valuesCmd)
@@ -264,8 +270,6 @@ and if they want to modify the internal cluster domain.
 func gatherClusterDomain(cluster *ClusterDomain) {
 	log.Println("In the gatherClusterDomain function")
 
-	colorBlue := "\033[34m"
-
 	// Ask what the wildcard domain is
 	fmt.Print((colorBlue), "What is your wildcard domain? ")
 	clusterDomain := formatInput()
@@ -275,8 +279,6 @@ func gatherClusterDomain(cluster *ClusterDomain) {
 
 func gatherInternalDomain(domain *ClusterInteralDomain) {
 	log.Println("In the gatherInternalDomain function")
-
-	colorBlue := "\033[34m"
 
 	for {
 		fmt.Print((colorBlue), "Do you want to change the internal cluster domain? [default: cluster.local] (yes/no): ")
@@ -309,7 +311,6 @@ will return a struct
 func gatherLabels(labels *Labels) {
 	log.Println("In the gatherLabels function")
 	scanner := bufio.NewScanner(os.Stdin)
-	colorBlue := "\033[34m"
 
 	for {
 		fmt.Print((colorBlue), "To add a Label, enter with the format[ key: value ]; 'return' when done: ")
@@ -339,7 +340,6 @@ will return a struct
 func gatherAnnotations(annotations *Annotations) {
 	log.Println("In the gatherAnnotations function")
 	scanner := bufio.NewScanner(os.Stdin)
-	colorBlue := "\033[34m"
 
 	for {
 		fmt.Print((colorBlue), "To add an Annotation enter with the format: [format- key: value]; 'return' when done: ")
@@ -613,9 +613,6 @@ will return a struct
 */
 func gatherMonitoring(monitoring *Monitoring) {
 	log.Println("In the gatherMonitoring function")
-	colorBlue := "\033[34m"
-	colorWhite := "\033[37m"
-	colorYellow := "\033[33m"
 
 	for {
 		fmt.Println((colorBlue), "Press '1' To disable dcgm Export Monitoring")
@@ -908,8 +905,6 @@ func gatherRegistry(registry *Registry) {
 	log.Println("In the gatherRegistry function")
 
 	var password string
-	colorBlue := "\033[34m"
-	colorWhite := "\033[37m"
 
 	for {
 		fmt.Println((colorBlue), "Press '1' to update Registry URL")
@@ -941,7 +936,7 @@ func gatherRegistry(registry *Registry) {
 			registry.Enabled = true
 		}
 		if intVar == 4 {
-			fmt.Println("Saved and Exiting Registry menu")
+			fmt.Println((colorYellow), "Saving and Exiting Registry menu")
 			break
 		}
 	}
@@ -1135,12 +1130,16 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Set colors for text
-		colorGreen := "\033[32m"
-		colorYellow := "\033[33m"
-		colorBlue := "\033[34m"
-		colorWhite := "\033[37m"
+
+		// Create and configure a log.txt file to capture all errors and logs
+		file, error := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		if error != nil {
+			log.Fatal(error)
+		}
+		log.SetOutput(file)
+
 		// set variables for each struct defined above - Used in gather functions for each menu item
+		// This also sets any defaults needed for templating
 		internalDomain := ClusterInteralDomain{Domain: "cluster.local"}
 		labels := Labels{}
 		annotations := Annotations{}
@@ -1185,28 +1184,28 @@ to quickly create a Cobra application.`,
 			intVar, _ := strconv.Atoi(caseInput)
 			switch intVar {
 			case 1:
-				fmt.Print("Please add your Labels and Annotations: ")
+				fmt.Println((colorGreen), "Please add your Labels and Annotations: ")
 				gatherLabels(&labels)
 				gatherAnnotations(&annotations)
 				gatherInternalDomain(&internalDomain)
 			case 2:
-				fmt.Print("Please update your Network settings: ")
+				fmt.Println((colorGreen), "Please update your Network settings: ")
 				gatherNetworking(&network)
 
 			case 3:
-				fmt.Print("Please update your Logging settings: ")
+				fmt.Println((colorGreen), "Please update your Logging settings: ")
 				gatherLogging(&logging)
 			case 4:
-				fmt.Print("Please update your Registry credentials: ")
+				fmt.Println((colorGreen), "Please update your Registry credentials: ")
 				gatherRegistry(&registry)
 			case 5:
-				fmt.Print("Please update your Tenancy settings: ")
+				fmt.Println((colorGreen), "Please update your Tenancy settings: ")
 				gatherTenancy(&tenancy)
 			case 6:
-				fmt.Print("Please update your Single Sign On settings: ")
+				fmt.Println((colorGreen), "Please update your Single Sign On settings: ")
 				gatherSso(&sso)
 			case 7:
-				fmt.Print("Please update your Storage settings: ")
+				fmt.Println((colorGreen), "Please update your Storage settings: ")
 				gatherStorage(&storage)
 			case 8:
 				for {
@@ -1234,13 +1233,13 @@ to quickly create a Cobra application.`,
 					}
 				}
 			case 9:
-				fmt.Print((colorWhite), "Please update your Monitoring settings:")
+				fmt.Println((colorGreen), "Please update your Monitoring settings:")
 				gatherMonitoring(&monitoring)
 			case 10:
-				fmt.Print((colorWhite), "Please update the Control Plane settings:")
+				fmt.Println((colorGreen), "Please update the Control Plane settings:")
 				gatherControlPlane(&controlplane)
 			case 11:
-				fmt.Print((colorWhite), "Please update the Database settings:")
+				fmt.Println((colorGreen), "Please update the Database settings:")
 				gatherDbs(&dbs)
 			}
 			if intVar == 12 {
@@ -1249,10 +1248,11 @@ to quickly create a Cobra application.`,
 			}
 		}
 
-		finaltemp := Template{clusterdomain, internalDomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane, dbs}
+		finaltemp := Template{clusterdomain, internalDomain, labels, annotations, network, logging, registry, tenancy,
+			sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane, dbs}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
-			fmt.Print(err)
+			log.Print(err)
 		}
 	},
 }
