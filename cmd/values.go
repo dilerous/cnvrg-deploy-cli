@@ -1160,7 +1160,7 @@ to quickly create a Cobra application.`,
 		monitoring := Monitoring{DcgmExportEnable: true, HabanaExportEnable: true, NodeExportEnable: true, KubeStateMetricEnable: true,
 			GrafanaEnable: true, PrometheusOperatorEnable: true, PrometheusEnable: true, DefaultSvcMonitorsEnable: true, CnvrgIdleMetricsEnable: true}
 		controlplane := ControlPlane{HyperEnable: true, CnvrgScheduleEnable: true, SearchkiqEnable: true, SidekiqEnable: true, SystemkiqEnable: true,
-			WebappEnable: true, MpiEnable: true}
+			WebappEnable: true, MpiEnable: true, SearchkiqHpaEnable: true, SidekiqHpaEnable: true, SystemkiqHpaEnable: true, WebappHpaEnable: true}
 		dbs := Dbs{EsEnable: true, MinioEnable: true, PgEnable: true, RedisEnable: true}
 
 		//Start of program to ask user for Input
