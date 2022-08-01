@@ -766,84 +766,67 @@ and to prompt user for all Logging settings this
 will return a struct
 */
 func gatherLogging(logging *Logging) {
-	log.Println("In the gatherLabels func")
+	log.Println("In the gatherLogging function")
+
+	colorYellow := "\033[33m"
+	colorBlue := "\033[34m"
+	colorWhite := "\033[37m"
 
 	for {
-		fmt.Print("Do you want to disable Fluentbit? yes/no: ")
-		input := formatInput()
-		if input == "yes" {
+		fmt.Println((colorBlue), "Press '1' To disable Fluentbit")
+		fmt.Println((colorBlue), "Press '2' To disable Kibana")
+		fmt.Println((colorBlue), "Press '3' To configure or disable Elastalert")
+		fmt.Println((colorBlue), "Press '4' To Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
 			logging.FluentbitEnable = false
-			break
-		}
-		if input == "no" {
-			logging.FluentbitEnable = true
-			break
-		}
-		fmt.Println("Please enter 'yes' or 'no'.")
-	}
-
-	for {
-		fmt.Print("Do you want to disable Kibana? yes/no: ")
-		input := formatInput()
-		if input == "yes" {
+			fmt.Println((colorYellow), "Fluentbit is disabled")
+		case 2:
 			logging.KibanaEnable = false
-			break
-		}
-		if input == "no" {
-			logging.KibanaEnable = true
-			break
-		}
-		fmt.Println("Please enter 'yes' or 'no'.")
-	}
-
-	for {
-		fmt.Print("Do you want to disable Elastalert? yes/no: ")
-		input := formatInput()
-		if input == "yes" {
-			logging.ElastalertEnable = false
-			break
-		}
-		if input == "no" {
-			logging.ElastalertEnable = true
-			break
-		}
-		fmt.Println("Please enter 'yes' or 'no'.")
-	}
-	for {
-		fmt.Print("Do you want to configure Elastalert? yes/no: ")
-		input := formatInput()
-		if input == "yes" {
-			fmt.Println("Press '1' to change the Storage Size:")
-			fmt.Println("Press '2' to change the Storage Class:")
-			fmt.Println("Press '3' to change the node Selector:")
-			fmt.Print("Please make your selection: ")
-			caseInput := formatInput()
-			intVar, _ := strconv.Atoi(caseInput)
-			switch intVar {
-			case 1:
-				fmt.Print("Please enter the new Storage Size in Gi: ")
-				var storageSize string
-				fmt.Scan(&storageSize)
-				logging.ElastaStorageSize = storageSize + "Gi"
-			case 2:
-				fmt.Print("Please enter the new Storage Class: ")
-				var storageClass string
-				fmt.Scan(&storageClass)
-				logging.ElastaStorageClass = storageClass
-			case 3:
-				fmt.Print("Please enter the new Node Selector: ")
-				storageClass := createSlice()
-				logging.ElastaNodeSelector = storageClass
-				//default:
-				//	fmt.Println("You entered an incorrect option please try again.")
+			fmt.Println((colorYellow), "Kibana is disabled")
+		case 3:
+			for {
+				fmt.Println((colorBlue), "Press '1' to change the Storage Size")
+				fmt.Println((colorBlue), "Press '2' to change the Storage Class")
+				fmt.Println((colorBlue), "Press '3' to change the node Selector")
+				fmt.Println((colorBlue), "Press '4' to disable Elastalert")
+				fmt.Println((colorBlue), "Press '5' to Save and Exit")
+				fmt.Print((colorWhite), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
+					fmt.Print("Please enter the new Storage Size in Gi: ")
+					var storageSize string
+					fmt.Scan(&storageSize)
+					logging.ElastaStorageSize = storageSize + "Gi"
+				case 2:
+					fmt.Print("Please enter the new Storage Class: ")
+					var storageClass string
+					fmt.Scan(&storageClass)
+					logging.ElastaStorageClass = storageClass
+				case 3:
+					fmt.Print("Please enter the new Node Selector: ")
+					storageClass := createSlice()
+					logging.ElastaNodeSelector = storageClass
+				case 4:
+					logging.ElastalertEnable = false
+					fmt.Println((colorYellow), "Elastalert is disabled")
+				}
+				if intVar == 5 {
+					fmt.Println((colorYellow), "Saving and Exiting Elastalert menu")
+					break
+				}
 			}
 		}
-		if input == "no" {
+		if intVar == 4 {
+			fmt.Println((colorYellow), "Saving and Exiting Logging menu")
 			break
 		}
-		fmt.Println("Please enter 'yes' or 'no'.")
 	}
-
 }
 
 /* function used to leverage the Gpu struct
