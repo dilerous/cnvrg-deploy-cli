@@ -309,11 +309,11 @@ will return a struct
 func gatherLabels(labels *Labels) {
 	log.Println("In the gatherLabels function")
 	scanner := bufio.NewScanner(os.Stdin)
+	colorBlue := "\033[34m"
 
 	for {
-		fmt.Print("To add a Label enter with the format: [ key: value ]")
+		fmt.Print((colorBlue), "To add a Label, enter with the format[ key: value ]; 'return' when done: ")
 		scanner.Scan()
-
 		text := scanner.Text()
 
 		if len(text) != 0 {
@@ -339,9 +339,10 @@ will return a struct
 func gatherAnnotations(annotations *Annotations) {
 	log.Println("In the gatherAnnotations function")
 	scanner := bufio.NewScanner(os.Stdin)
+	colorBlue := "\033[34m"
 
 	for {
-		fmt.Print("To add an Annotation enter with the format: [format- key: value] ")
+		fmt.Print((colorBlue), "To add an Annotation enter with the format: [format- key: value]; 'return' when done: ")
 		scanner.Scan()
 
 		text := scanner.Text()
@@ -410,7 +411,7 @@ func formatInput() string {
 // This function will return a slice as a string. You can enter
 // any number of values one line at a time.
 func createSlice() string {
-	log.Println("In the gatherLabels function")
+	log.Println("In the createSlice function")
 	fmt.Println("Enter 1 value per line. Press 'return' when done: ")
 	consoleScanner := bufio.NewScanner(os.Stdin)
 	var slice []string
@@ -892,7 +893,7 @@ func gatherConfigReloader(configReloader *ConfigReloader) {
 	log.Println("In the gatherConfigReloader func")
 
 	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable ConfigReloader? yes/no: ")
+	fmt.Print("Do you want to disable ConfigReloader? (yes/no): ")
 	enableConfigReloader := formatInput()
 	if enableConfigReloader == "yes" {
 		configReloader.Enabled = false
@@ -905,29 +906,42 @@ will return a struct
 */
 func gatherRegistry(registry *Registry) {
 	log.Println("In the gatherRegistry function")
+
+	var password string
+	colorBlue := "\033[34m"
+	colorWhite := "\033[37m"
+
 	for {
-		// Ask if they want to enable SSO skip if "no"
-		fmt.Print("Do you want to include specific registry credentials? yes/no: ")
-		input := formatInput()
-		if input == "no" {
-			registry.Enabled = false
-			break
-		}
-		if input == "yes" {
-			registry.Enabled = true
-			fmt.Print("What is your registry URL? [default docker.io]: ")
+		fmt.Println((colorBlue), "Press '1' to update Registry URL")
+		fmt.Println((colorBlue), "Press '2' to update Registry User Name")
+		fmt.Println((colorBlue), "Press '3' to update Registry Password")
+		fmt.Println((colorBlue), "Press '4' to Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			fmt.Print((colorBlue), "Input the registry URL [default docker.io]: ")
 			url := formatInput()
 			if url == "" {
 				registry.Url = "docker.io"
 			} else {
+				registry.Enabled = true
 				registry.Url = url
 			}
-			fmt.Print("What is the registry username: ")
+		case 2:
+			fmt.Print("Input the registry User Name: ")
 			user := formatInput()
 			registry.User = user
-			fmt.Print("What is the password: ")
-			password := formatInput()
+			registry.Enabled = true
+		case 3:
+			fmt.Print("Input the registry Password: ")
+			fmt.Scanln(&password)
 			registry.Password = password
+			registry.Enabled = true
+		}
+		if intVar == 4 {
+			fmt.Println("Saved and Exiting Registry menu")
 			break
 		}
 	}
@@ -1154,7 +1168,7 @@ to quickly create a Cobra application.`,
 		for {
 			fmt.Println((colorGreen), "  ----------------------------- Main Menu -----------------------------")
 			fmt.Println((colorGreen), "Please make a selection to modify the values file for the cnvrg.io install")
-			fmt.Println((colorBlue), "Press '1' To add Labels and Annotations or Internal Domain")
+			fmt.Println((colorBlue), "Press '1' To add Labels and Annotations or change the Internal Domain")
 			fmt.Println((colorBlue), "Press '2' To modify Networks settings E.g. Istio, NodePort, HTTPS")
 			fmt.Println((colorBlue), "Press '3' To modify Logging settings E.g. Kibana, ElasticAlert, Fluentbit")
 			fmt.Println((colorBlue), "Press '4' To modify Registry settings E.g. URL, Username, Password")
