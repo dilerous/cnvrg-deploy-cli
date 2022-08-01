@@ -2,11 +2,7 @@
 clusterDomain: {{ .ClusterDomain.ClusterDomain }}
 
 {{- if ne .ClusterInteralDomain.Domain "cluster.local" }}
-clusterInternalDomain: {{ .ClusterDomain.ClusterInternalDomain }}
-{{- end }}
-
-{{- if ne .ClusterDomain.Spec ""}} 
-spec: {{ .ClusterDomain.Spec }} 
+clusterInternalDomain: {{ .ClusterInteralDomain.Domain }}
 {{- end }}
 
 {{- if ne .ClusterDomain.ImageHub ""}}
@@ -52,7 +48,10 @@ networking:
     lbSourceRanges: [ {{ .Network.Istio.LbSourceRanges }} ]
 {{- end }}
 
+{{- if or (not .Logging.FluentbitEnable) (not .Logging.ElastalertEnable) (not .Logging.KibanaEnable) }}
 logging:
+{{- end }}
+
 {{- if eq .Logging.FluentbitEnable false }}
   fluentbit:
     enabled: {{ .Logging.FluentbitEnable }}
@@ -148,40 +147,44 @@ backup:
   period: {{ .Backup.Period }}
 {{- end }}
 
-
+{{- if or (not .Monitoring.DcgmExportEnable) (not .Monitoring.HabanaExportEnable) (not .Monitoring.NodeExportEnable) 
+(not .Monitoring.KubeStateMetricEnable) (not .Monitoring.GrafanaEnable) (not .Monitoring.PrometheusOperatorEnable) 
+(not .Monitoring.PrometheusEnable) (not .Monitoring.DefaultSvcMonitorsEnable) (not .Monitoring.CnvrgIdleMetricsEnable) }}
 monitoring:
-{{- if not .Monitoring.DcgmExportEnable  }}
+{{- end }}
+
+{{- if eq .Monitoring.DcgmExportEnable false }}
   dcgmExporter:
     enabled: {{ .Monitoring.DcgmExportEnable }}
 {{- end }}
 
-{{- if not .Monitoring.HabanaExportEnable  }}
+{{- if eq .Monitoring.HabanaExportEnable false }}
   habanaExporter:
     enabled: {{ .Monitoring.HabanaExportEnable }}
 {{- end }}
 
-{{- if not .Monitoring.NodeExportEnable  }}
+{{- if eq .Monitoring.NodeExportEnable false }}
   nodeExporter:
     enabled: {{ .Monitoring.NodeExportEnable }}
 {{- end }}
 
-{{- if not .Monitoring.KubeStateMetricEnable  }}
+{{- if eq .Monitoring.KubeStateMetricEnable false }}
   kubeStateMetrics:
     enabled: {{ .Monitoring.KubeStateMetricEnable }}
 {{- end }}
 
-{{- if not .Monitoring.GrafanaEnable  }}
+{{- if eq .Monitoring.GrafanaEnable  false }}
   grafana:
     enabled: {{ .Monitoring.GrafanaEnable }}
     svcName: {{ .Monitoring.GrafanaSvcName }}
 {{- end }}
 
-{{- if not .Monitoring.PrometheusOperatorEnable  }}
+{{- if eq .Monitoring.PrometheusOperatorEnable false }}
   prometheusOperator:
     enabled: {{ .Monitoring.PrometheusOperatorEnable }}
 {{- end }}
 
-{{- if not .Monitoring.PrometheusEnable }}
+{{- if eq .Monitoring.PrometheusEnable false }}
   prometheus:
     enabled: {{ .Monitoring.PrometheusEnable }}
     storageSize: {{ .Monitoring.PrometheusStorageSize }}
@@ -189,12 +192,12 @@ monitoring:
     nodeSelector: { {{ .Monitoring.PrometheusNodeSelector }} }
 {{- end }}
 
-{{- if not .Monitoring.DefaultSvcMonitorsEnable  }}
+{{- if eq .Monitoring.DefaultSvcMonitorsEnable false }}
   defaultServiceMonitors:
     enabled: {{ .Monitoring.DefaultSvcMonitorsEnable }}
-  {{- end }}
+{{- end }}
 
-{{- if not .Monitoring.CnvrgIdleMetricsEnable  }}
+{{- if eq .Monitoring.CnvrgIdleMetricsEnable false }}
   cnvrgIdleMetricsExporter:
     enabled: {{ .Monitoring.CnvrgIdleMetricsEnable }}
     labels: { {{ .Monitoring.CnvrgIdleMetricsLabels }} }
@@ -229,7 +232,7 @@ dbs:
     nodeSelector: { {{ .Dbs.MinioNodeSelector }} }
 {{- end }}
 
- {{- if eq .Dbs.PgEnable false }}    
+{{- if eq .Dbs.PgEnable false }}    
   pg:
     enabled: {{ .Dbs.PgEnable }}
     storageSize: {{ .Dbs.PgStorageSize }}
@@ -305,13 +308,13 @@ controlPlane:
     split: {{ .ControlPlane.SidekiqSplit }}
 {{- end }}
 
-{{ if eq .ControlPlane.SidekiqHpaEnable false }}
+{{- if eq .ControlPlane.SidekiqHpaEnable false }}
     hpa:
       enabled: {{ .ControlPlane.SidekiqHpaEnable }}
       maxReplicas: {{ .ControlPlane.SidekiqHpaMaxReplicas }}
 {{- end }}
 
-{{ if .ControlPlane.CnvrgRouterEnable }}
+{{- if .ControlPlane.CnvrgRouterEnable }}
   cnvrgRouter:
     enabled: {{ .ControlPlane.CnvrgRouterEnable }}
     image: {{ .ControlPlane.CnvrgRouterImage }}
@@ -328,31 +331,31 @@ controlPlane:
     sender: {{ .ControlPlane.SmtpSender }}
 {{- end }}
 
-{{ if eq .ControlPlane.SystemkiqEnable false }}
+{{- if eq .ControlPlane.SystemkiqEnable false }}
   systemkiq:
     enabled: {{ .ControlPlane.SystemkiqEnable }}
 {{- end }}
 
-{{ if eq .ControlPlane.SystemkiqHpaEnable false }}
+{{- if eq .ControlPlane.SystemkiqHpaEnable false }}
     hpa:
       enabled: {{ .ControlPlane.SystemkiqHpaEnable }}
       maxReplicas: {{ .ControlPlane.SystemkiqHpaMaxReplicas }}
 {{- end }}
 
-{{ if eq .ControlPlane.WebappEnable false }}
+{{- if eq .ControlPlane.WebappEnable false }}
   webapp:
     enabled: {{ .ControlPlane.WebappEnable }}
     svcName: {{ .ControlPlane.WebappSvcName }}
     replicas: {{ .ControlPlane.WebappReplicas }}
 {{- end }}
 
-{{ if eq .ControlPlane.WebappHpaEnable false }}
+{{- if eq .ControlPlane.WebappHpaEnable false }}
     hpa:
       enabled: {{ .ControlPlane.WebappHpaEnable }}
       maxReplicas: {{ .ControlPlane.WebappHpaMaxReplicas }}
 {{- end }}
 
-{{ if eq .ControlPlane.MpiEnable false }}     
+{{- if eq .ControlPlane.MpiEnable false }}     
   mpi: 
     enabled: {{ .ControlPlane.MpiEnable }}
     image: {{ .ControlPlane.MpiImage }}

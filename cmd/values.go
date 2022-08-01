@@ -1247,10 +1247,9 @@ to quickly create a Cobra application.`,
 				gatherDbs(&dbs)
 			}
 			if intVar == 12 {
-				fmt.Print((colorYellow), "Exiting and generating the values.yaml file")
+				fmt.Println((colorWhite), "Exiting and generating the values.yaml file")
 				break
 			}
-			fmt.Println((colorYellow), "Please make a numerical selection")
 		}
 
 		finaltemp := Template{clusterdomain, internalDomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane, dbs}
