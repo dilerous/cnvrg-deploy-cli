@@ -949,21 +949,29 @@ will return a struct
 func gatherTenancy(tenancy *Tenancy) {
 	log.Println("In the gatherTenancy function")
 	for {
-		// Ask if they want to enable Tenancy skip if "no"
-		fmt.Print("Do you want to enable Tenancy? ")
-		input := formatInput()
-		if input == "no" {
-			tenancy.Enabled = false
-			break
-		}
-		if input == "yes" {
+		fmt.Println((colorBlue), "Press '1' to enable Tenancy")
+		fmt.Println((colorBlue), "Press '2' to add Tenancy node selector key")
+		fmt.Println((colorBlue), "Press '3' to add Tenancy node selector value")
+		fmt.Println((colorBlue), "Press '4' to Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
 			tenancy.Enabled = true
-			fmt.Print("Please enter the Tenancy node selector key: ")
+		case 2:
+			fmt.Print((colorBlue), "Please enter the Tenancy node selector key: ")
 			key := formatInput()
 			tenancy.Key = key
-			fmt.Print("Please enter the Tenancy node selector value: ")
+			tenancy.Enabled = true
+		case 3:
+			fmt.Print((colorBlue), "Please enter the Tenancy node selector value: ")
 			value := formatInput()
 			tenancy.Value = value
+			tenancy.Enabled = true
+		}
+		if intVar == 4 {
+			fmt.Println("Saving and Exiting Tenancy menu")
 			break
 		}
 	}
