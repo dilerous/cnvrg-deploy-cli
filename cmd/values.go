@@ -27,7 +27,7 @@ func init() {
 
 // Parent struct for the Backup values
 type Backup struct {
-	Enabled  bool `yaml:",omitempty"`
+	Enabled  bool
 	Rotation int
 	Period   string
 }
@@ -225,64 +225,76 @@ type Monitoring struct {
 
 // Template struct for the values.tmpl file
 type Template struct {
-	ClusterDomain  ClusterDomain
-	Labels         Labels
-	Annotations    Annotations
-	Network        Networking
-	Logging        Logging
-	Registry       Registry
-	Tenancy        Tenancy
-	Sso            Sso
-	Storage        Storage
-	ConfigReloader ConfigReloader
-	Capsule        Capsule
-	Backup         Backup
-	Gpu            Gpu
-	Monitoring     Monitoring
-	ControlPlane   ControlPlane
-	Dbs            Dbs
+	ClusterDomain        ClusterDomain
+	ClusterInteralDomain ClusterInteralDomain
+	Labels               Labels
+	Annotations          Annotations
+	Network              Networking
+	Logging              Logging
+	Registry             Registry
+	Tenancy              Tenancy
+	Sso                  Sso
+	Storage              Storage
+	ConfigReloader       ConfigReloader
+	Capsule              Capsule
+	Backup               Backup
+	Gpu                  Gpu
+	Monitoring           Monitoring
+	ControlPlane         ControlPlane
+	Dbs                  Dbs
 }
 
 /* This struc includes clusterDomain, clusterInternalDomain,
 spec and imageHub used with gatherClusterDomain function.
 */
 type ClusterDomain struct {
-	ClusterDomain         string
-	ClusterInternalDomain string `default:"cluster.local"`
-	Spec                  string `default:"allinone"`
-	ImageHub              string `default:"docker.io/cnvrg"`
+	ClusterDomain string
+	Spec          string
+	ImageHub      string
+}
+
+type ClusterInteralDomain struct {
+	Domain string
 }
 
 /* function used to leverage the ClusterDomain struct
 and to prompt user for all clusterDomain wildcard dns entry
 and if they want to modify the internal cluster domain.
-This function will return a struct.
 */
 func gatherClusterDomain(cluster *ClusterDomain) {
 	log.Println("In the gatherClusterDomain function")
-	colorWhite := "\033[37m"
+
+	colorBlue := "\033[34m"
 
 	// Ask what the wildcard domain is
-	fmt.Print((colorWhite), "What is your wildcard domain? ")
+	fmt.Print((colorBlue), "What is your wildcard domain? ")
 	clusterDomain := formatInput()
 	cluster.ClusterDomain = clusterDomain
 
+}
+
+func gatherInternalDomain(domain *ClusterInteralDomain) {
+	log.Println("In the gatherInternalDomain function")
+
+	colorBlue := "\033[34m"
+
 	for {
-		fmt.Print("Do you want to change the internal cluster domain? [default: cluster.local] yes/no: ")
+		fmt.Print((colorBlue), "Do you want to change the internal cluster domain? [default: cluster.local] (yes/no): ")
 		input := formatInput()
 
 		if input == "yes" {
-			fmt.Print("Please enter the internal cluster domain: ")
+			fmt.Print((colorBlue), "Please enter the internal cluster domain: ")
 			clusterInput := formatInput()
-			cluster.ClusterInternalDomain = clusterInput
+			domain.Domain = clusterInput
+			fmt.Printf("Setting the internal cluster domain to %v\n", domain.Domain)
 			break
 		}
 		if input == "no" {
-			cluster.ClusterInternalDomain = "cluster.local"
+			domain.Domain = "cluster.local"
+			fmt.Printf("Setting the internal cluster domain to %v\n", domain.Domain)
 			break
 		}
 	}
-
 }
 
 type Labels struct {
@@ -1132,6 +1144,7 @@ to quickly create a Cobra application.`,
 		colorBlue := "\033[34m"
 		colorWhite := "\033[37m"
 		// set variables for each struct defined above - Used in gather functions for each menu item
+		internalDomain := ClusterInteralDomain{}
 		labels := Labels{}
 		annotations := Annotations{}
 		network := Networking{Istio: Istio{Enabled: true}}
@@ -1158,7 +1171,7 @@ to quickly create a Cobra application.`,
 		for {
 			fmt.Println((colorGreen), "  ----------------------------- Main Menu -----------------------------")
 			fmt.Println((colorGreen), "Please make a selection to modify the values file for the cnvrg.io install")
-			fmt.Println((colorBlue), "Press '1' To add Labels and Annotations")
+			fmt.Println((colorBlue), "Press '1' To add Labels and Annotations or Internal Domain")
 			fmt.Println((colorBlue), "Press '2' To modify Networks settings E.g. Istio, NodePort, HTTPS")
 			fmt.Println((colorBlue), "Press '3' To modify Logging settings E.g. Kibana, ElasticAlert, Fluentbit")
 			fmt.Println((colorBlue), "Press '4' To modify Registry settings E.g. URL, Username, Password")
@@ -1178,6 +1191,7 @@ to quickly create a Cobra application.`,
 				fmt.Print("Please add your Labels and Annotations: ")
 				gatherLabels(&labels)
 				gatherAnnotations(&annotations)
+				gatherInternalDomain(&internalDomain)
 			case 2:
 				fmt.Print("Please update your Network settings: ")
 				gatherNetworking(&network)
@@ -1239,7 +1253,7 @@ to quickly create a Cobra application.`,
 			fmt.Println((colorYellow), "Please make a numerical selection")
 		}
 
-		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane, dbs}
+		finaltemp := Template{clusterdomain, internalDomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane, dbs}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			fmt.Print(err)

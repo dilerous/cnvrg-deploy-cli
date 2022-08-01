@@ -1,7 +1,7 @@
 ---
 clusterDomain: {{ .ClusterDomain.ClusterDomain }}
 
-{{- if ne .ClusterDomain.ClusterInternalDomain "cluster.local" }}
+{{- if ne .ClusterInteralDomain.Domain "cluster.local" }}
 clusterInternalDomain: {{ .ClusterDomain.ClusterInternalDomain }}
 {{- end }}
 
