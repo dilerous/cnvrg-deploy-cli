@@ -240,9 +240,7 @@ type Template struct {
 	Gpu            Gpu
 	Monitoring     Monitoring
 	ControlPlane   ControlPlane
-	/*
-		Dbs            Dbs
-	*/
+	Dbs            Dbs
 }
 
 /* This struc includes clusterDomain, clusterInternalDomain,
@@ -711,40 +709,44 @@ func gatherControlPlane(controlplane *ControlPlane) {
 }
 
 func gatherDbs(dbs *Dbs) {
-	fmt.Println("In the gatherLabels func")
-	var disableCvat string
-	var disableEs string
-	var disableMinio string
-	var disablePg string
+	log.Println("In the gatherLabels func")
+	colorYellow := "\033[33m"
+	colorBlue := "\033[34m"
+	colorWhite := "\033[37m"
 
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to enable CVAT? ")
-	fmt.Scan(&disableCvat)
-	if disableCvat == "yes" {
-		dbs.CvatEnable = true
+	for {
+
+		fmt.Println((colorBlue), "Press '1' To enable CVAT")
+		fmt.Println((colorBlue), "Press '2' To disable Elastic Search")
+		fmt.Println((colorBlue), "Press '3' To disable Minio")
+		fmt.Println((colorBlue), "Press '4' To disable Postgres")
+		fmt.Println((colorBlue), "Press '5' To disable Redis")
+		fmt.Println((colorBlue), "Press '6' To Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			dbs.CvatEnable = true
+			fmt.Println((colorYellow), "CVAT enabled")
+		case 2:
+			dbs.EsEnable = false
+			fmt.Println((colorYellow), "Elastic Search disabled")
+		case 3:
+			dbs.MinioEnable = false
+			fmt.Println((colorYellow), "Minio disabled")
+		case 4:
+			dbs.PgEnable = false
+			fmt.Println((colorYellow), "Postgres disabled")
+		case 5:
+			dbs.RedisEnable = false
+			fmt.Println((colorYellow), "Postgres disabled")
+		}
+		if intVar == 6 {
+			fmt.Println((colorYellow), "Saving and Exiting Database Settings")
+			break
+		}
 	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Elastic Search? ")
-	fmt.Scan(&disableEs)
-	if disableEs == "yes" {
-		dbs.EsEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Minio? ")
-	fmt.Scan(&disableMinio)
-	if disableMinio == "yes" {
-		dbs.MinioEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Postgres? ")
-	fmt.Scan(&disablePg)
-	if disablePg == "yes" {
-		dbs.PgEnable = false
-	}
-
 }
 
 /* function used to leverage the Logging struct
@@ -1140,11 +1142,15 @@ to quickly create a Cobra application.`,
 		storage := Storage{}
 		gpu := Gpu{NvidiaEnable: true, HabanaEnable: true}
 		backup := Backup{Enabled: true}
-		capsule := Capsule{}
-		configreloader := ConfigReloader{}
-		monitoring := Monitoring{}
-		controlplane := ControlPlane{}
+		capsule := Capsule{Enabled: true}
+		configreloader := ConfigReloader{Enabled: true}
+		monitoring := Monitoring{DcgmExportEnable: true, HabanaExportEnable: true, NodeExportEnable: true, KubeStateMetricEnable: true,
+			GrafanaEnable: true, PrometheusOperatorEnable: true, PrometheusEnable: true, DefaultSvcMonitorsEnable: true, CnvrgIdleMetricsEnable: true}
+		controlplane := ControlPlane{HyperEnable: true, CnvrgScheduleEnable: true, SearchkiqEnable: true, SidekiqEnable: true, SystemkiqEnable: true,
+			WebappEnable: true, MpiEnable: true}
+		dbs := Dbs{EsEnable: true, MinioEnable: true, PgEnable: true, RedisEnable: true}
 
+		//Start of program to ask user for Input
 		log.Println((colorWhite), "You are in the values main function")
 		fmt.Println((colorGreen), "Welcome, we will gather your information to build a values file")
 		clusterdomain := ClusterDomain{}
@@ -1162,7 +1168,8 @@ to quickly create a Cobra application.`,
 			fmt.Println((colorBlue), "Press '8' To modify Backup, GPU, ConfigLoader or Capsule settings")
 			fmt.Println((colorBlue), "Press '9' To modify Monitoring settings")
 			fmt.Println((colorBlue), "Press '10' To modify Control Plane settings")
-			fmt.Println((colorBlue), "Press '11' To Exit and generate Values file")
+			fmt.Println((colorBlue), "Press '11' To modify Database settings")
+			fmt.Println((colorBlue), "Press '12' To Exit and generate Values file")
 			fmt.Print((colorWhite), "Please make your selection: ")
 			caseInput := formatInput()
 			intVar, _ := strconv.Atoi(caseInput)
@@ -1219,24 +1226,20 @@ to quickly create a Cobra application.`,
 				fmt.Print((colorWhite), "Please update your Monitoring settings:")
 				gatherMonitoring(&monitoring)
 			case 10:
-				fmt.Print("Please update the Control Plane settings:")
+				fmt.Print((colorWhite), "Please update the Control Plane settings:")
 				gatherControlPlane(&controlplane)
+			case 11:
+				fmt.Print((colorWhite), "Please update the Database settings:")
+				gatherDbs(&dbs)
 			}
-			if intVar == 11 {
+			if intVar == 12 {
 				fmt.Print((colorYellow), "Exiting and generating the values.yaml file")
 				break
 			}
 			fmt.Println((colorYellow), "Please make a numerical selection")
 		}
 
-		/*
-			dbs := Dbs{}
-			gatherDbs(&dbs)
-
-
-		*/
-		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane} /*
-		 dbs,  */
+		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane, dbs}
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			fmt.Print(err)

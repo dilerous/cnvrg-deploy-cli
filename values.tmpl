@@ -141,47 +141,47 @@ capsule:
   image: {{ .Capsule.Image }}
 {{- end }}
 
-
+{{- if not .Backup.Enabled  }}
 backup:
   enabled: {{ .Backup.Enabled }}
   rotation: {{ .Backup.Rotation }}
   period: {{ .Backup.Period }}
-
+{{- end }}
 
 
 monitoring:
-{{- if eq .Monitoring.DcgmExportEnable false }}
+{{- if not .Monitoring.DcgmExportEnable  }}
   dcgmExporter:
     enabled: {{ .Monitoring.DcgmExportEnable }}
 {{- end }}
 
-{{- if eq .Monitoring.HabanaExportEnable false }}
+{{- if not .Monitoring.HabanaExportEnable  }}
   habanaExporter:
     enabled: {{ .Monitoring.HabanaExportEnable }}
 {{- end }}
 
-{{- if eq .Monitoring.NodeExportEnable false }}
+{{- if not .Monitoring.NodeExportEnable  }}
   nodeExporter:
     enabled: {{ .Monitoring.NodeExportEnable }}
 {{- end }}
 
-{{- if eq .Monitoring.KubeStateMetricEnable false }}
+{{- if not .Monitoring.KubeStateMetricEnable  }}
   kubeStateMetrics:
     enabled: {{ .Monitoring.KubeStateMetricEnable }}
 {{- end }}
 
-{{- if eq .Monitoring.GrafanaEnable false }}
+{{- if not .Monitoring.GrafanaEnable  }}
   grafana:
     enabled: {{ .Monitoring.GrafanaEnable }}
     svcName: {{ .Monitoring.GrafanaSvcName }}
 {{- end }}
 
-{{- if eq .Monitoring.PrometheusOperatorEnable false }}
+{{- if not .Monitoring.PrometheusOperatorEnable  }}
   prometheusOperator:
     enabled: {{ .Monitoring.PrometheusOperatorEnable }}
 {{- end }}
 
-{{- if eq .Monitoring.PrometheusEnable false }}
+{{- if not .Monitoring.PrometheusEnable }}
   prometheus:
     enabled: {{ .Monitoring.PrometheusEnable }}
     storageSize: {{ .Monitoring.PrometheusStorageSize }}
@@ -189,12 +189,12 @@ monitoring:
     nodeSelector: { {{ .Monitoring.PrometheusNodeSelector }} }
 {{- end }}
 
-{{- if eq .Monitoring.DefaultSvcMonitorsEnable false }}
+{{- if not .Monitoring.DefaultSvcMonitorsEnable  }}
   defaultServiceMonitors:
     enabled: {{ .Monitoring.DefaultSvcMonitorsEnable }}
   {{- end }}
 
-{{- if eq .Monitoring.CnvrgIdleMetricsEnable false }}
+{{- if not .Monitoring.CnvrgIdleMetricsEnable  }}
   cnvrgIdleMetricsExporter:
     enabled: {{ .Monitoring.CnvrgIdleMetricsEnable }}
     labels: { {{ .Monitoring.CnvrgIdleMetricsLabels }} }
@@ -210,7 +210,6 @@ dbs:
 {{- if eq .Dbs.EsEnable false }}
   es:
     enabled: {{ .Dbs.EsEnable }}
-{{- end }}
     storageSize: {{ .Dbs.EsStorageSize }}
     storageClass: {{ .Dbs.EsStorageClass }}
     patchEsNodes: {{ .Dbs.EsPatchNodes }}
@@ -220,19 +219,19 @@ dbs:
       app: {{ .Dbs.CleanUpApp }}
       jobs: {{ .Dbs.CleanUpJobs }}
       endpoints: {{ .Dbs.CleanUpEndpoints }} 
+{{- end }}
 
 {{- if eq .Dbs.MinioEnable false }} 
   minio:
     enabled: {{ .Dbs.MinioEnable }}
-{{- end }}
     storageSize: {{ .Dbs.MinioStorageSize }}
     storageClass: {{ .Dbs.MinioStorageClass }}
     nodeSelector: { {{ .Dbs.MinioNodeSelector }} }
+{{- end }}
 
- {{- if eq .Dbs.MinioEnable false }}    
+ {{- if eq .Dbs.PgEnable false }}    
   pg:
     enabled: {{ .Dbs.PgEnable }}
-{{- end }}
     storageSize: {{ .Dbs.PgStorageSize }}
     storageClass: {{ .Dbs.PgStorageClass }}
     nodeSelector: { {{ .Dbs.PgNodeSelector }} }
@@ -240,16 +239,17 @@ dbs:
       enabled: {{ .Dbs.PgPagesEnable }}
       size: {{ .Dbs.PgPagesSize }}
       memory: {{ .Dbs.PgPagesMemory }}
+{{- end }}
 
 {{- if eq .Dbs.RedisEnable false }}
   redis:
     enabled: {{ .Dbs.RedisEnable }}
-{{- end }}
     storageSize: {{ .Dbs.RedisStorageSize }}
     storageClass: {{ .Dbs.RedisStorageClass }}
     nodeSelector: {{ .Dbs.RedisNodeSelector }}
+{{- end }}
 
-
+{{- if .ControlPlane.Image }}
 controlPlane:
   image: {{ .ControlPlane.Image }}
   baseConfig:
@@ -257,6 +257,7 @@ controlPlane:
     intercom: {{ .ControlPlane.BaseConfigIntercom }}
     featureFlags: { {{ .ControlPlane.BaseConfigFeatureFlags }} }
     cnvrgPrivilegedJob: {{ .ControlPlane.BaseConfigCnvrgPrivileged }}
+{{- end }}
 
 {{- if eq .ControlPlane.HyperEnable false }}
   hyper:
@@ -268,11 +269,12 @@ controlPlane:
     enabled: {{ .ControlPlane.CnvrgScheduleEnable }}
 {{- end }}
 
-{{ if .ControlPlane.CnvrgClusterProvisionerEnable }}
+{{- if .ControlPlane.CnvrgClusterProvisionerEnable }}
   cnvrgClusterProvisionerOperator:
     enabled: {{ .ControlPlane.CnvrgClusterProvisionerEnable }}
 {{- end }}
 
+{{- if .ControlPlane.ObjectStorageType }}
   objectStorage:
     type: {{ .ControlPlane.ObjectStorageType }}
     bucket: {{ .ControlPlane.ObjectStorageBucket }}
@@ -284,6 +286,7 @@ controlPlane:
     azureContainer: {{ .ControlPlane.ObjectStorageAzureContainer }}
     gcpSecretRef: {{ .ControlPlane.ObjectStorageGcpSecretRef }}
     gcpProject: {{ .ControlPlane.ObjectStorageGcpProject }}
+{{- end }}
 
 {{- if eq .ControlPlane.SearchkiqEnable false }}
   searchkiq:
@@ -293,27 +296,28 @@ controlPlane:
 {{- if eq .ControlPlane.SearchkiqHpaEnable false }}
     hpa:
       enabled: {{ .ControlPlane.SearchkiqHpaEnable }}
-{{- end }}
       maxReplicas: {{ .ControlPlane.SearchkiqHpaMaxReplicas }}
+{{- end }}
 
 {{- if eq .ControlPlane.SidekiqEnable false }}
   sidekiq:
     enabled: {{ .ControlPlane.SidekiqEnable }}
-{{- end }}
     split: {{ .ControlPlane.SidekiqSplit }}
+{{- end }}
 
 {{ if eq .ControlPlane.SidekiqHpaEnable false }}
     hpa:
       enabled: {{ .ControlPlane.SidekiqHpaEnable }}
-{{- end }}
       maxReplicas: {{ .ControlPlane.SidekiqHpaMaxReplicas }}
+{{- end }}
 
 {{ if .ControlPlane.CnvrgRouterEnable }}
   cnvrgRouter:
     enabled: {{ .ControlPlane.CnvrgRouterEnable }}
-{{- end }}
     image: {{ .ControlPlane.CnvrgRouterImage }}
+{{- end }}
 
+{{- if .ControlPlane.SmtpServer }}
   smtp:
     server: {{ .ControlPlane.SmtpServer }}
     port: {{ .ControlPlane.SmtpPort }}
@@ -322,34 +326,35 @@ controlPlane:
     domain: {{ .ControlPlane.SmtpDomain }}
     opensslVerifyMode: {{ .ControlPlane.SmtpOpenSslMode }}
     sender: {{ .ControlPlane.SmtpSender }}
+{{- end }}
 
 {{ if eq .ControlPlane.SystemkiqEnable false }}
   systemkiq:
     enabled: {{ .ControlPlane.SystemkiqEnable }}
 {{- end }}
+
 {{ if eq .ControlPlane.SystemkiqHpaEnable false }}
     hpa:
       enabled: {{ .ControlPlane.SystemkiqHpaEnable }}
-{{- end }}
       maxReplicas: {{ .ControlPlane.SystemkiqHpaMaxReplicas }}
+{{- end }}
 
 {{ if eq .ControlPlane.WebappEnable false }}
   webapp:
     enabled: {{ .ControlPlane.WebappEnable }}
-{{- end }}
     svcName: {{ .ControlPlane.WebappSvcName }}
     replicas: {{ .ControlPlane.WebappReplicas }}
+{{- end }}
 
 {{ if eq .ControlPlane.WebappHpaEnable false }}
     hpa:
       enabled: {{ .ControlPlane.WebappHpaEnable }}
-{{- end }}
       maxReplicas: {{ .ControlPlane.WebappHpaMaxReplicas }}
+{{- end }}
 
 {{ if eq .ControlPlane.MpiEnable false }}     
   mpi: 
     enabled: {{ .ControlPlane.MpiEnable }}
-{{- end }}
     image: {{ .ControlPlane.MpiImage }}
     kubectlDeliveryImage: {{ .ControlPlane.MpiKubectlImage }}
     extraArgs: { {{ .ControlPlane.MpiExtraArgs }} }
@@ -357,5 +362,5 @@ controlPlane:
       url: {{ .ControlPlane.MpiRegistryUrl }}
       user: {{ .ControlPlane.MpiRegistryUser }}
       password: {{ .ControlPlane.MpiRegistryPassword }}
-
+{{- end }}
 
