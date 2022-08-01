@@ -48,7 +48,8 @@ networking:
     lbSourceRanges: [ {{ .Network.Istio.LbSourceRanges }} ]
 {{- end }}
 
-{{- if or (not .Logging.FluentbitEnable) (not .Logging.ElastalertEnable) (not .Logging.KibanaEnable) }}
+{{- if or (not .Logging.FluentbitEnable) (not .Logging.ElastalertEnable) (not .Logging.KibanaEnable)
+(.Logging.ElastaStorageSize) (.Logging.ElastaStorageClass) (.Logging.ElastaNodeSelector) (.Logging.KibanaSvcName) }}
 logging:
 {{- end }}
 
@@ -57,17 +58,28 @@ logging:
     enabled: {{ .Logging.FluentbitEnable }}
 {{- end}}
 
-{{- if eq .Logging.ElastalertEnable false }}
+{{- if or (eq .Logging.ElastalertEnable false) (.Logging.ElastaStorageSize) (.Logging.ElastaStorageClass) (.Logging.ElastaNodeSelector) }}
   elastalert:
     enabled: {{ .Logging.ElastalertEnable }}
+{{- end }}
+
+{{- if .Logging.ElastaStorageSize }}
     storageSize: {{ .Logging.ElastaStorageSize }}
+{{- end }}
+
+{{- if (.Logging.ElastaStorageClass) }}
     storageClass: {{ .Logging.ElastaStorageClass }}
+{{- end }}
+
+{{- if (.Logging.ElastaNodeSelector) }}
     nodeSelector: { {{ .Logging.ElastaNodeSelector }} }
 {{- end }}
 
-{{- if eq .Logging.KibanaEnable false }}
+{{- if or (eq .Logging.KibanaEnable false) (.Logging.KibanaSvcName) }}
   kibana:
     enabled: {{ .Logging.KibanaEnable }}
+{{- end }}
+{{- if .Logging.KibanaSvcName }}
     svcName: {{ .Logging.KibanaSvcName }}
 {{- end }}
 

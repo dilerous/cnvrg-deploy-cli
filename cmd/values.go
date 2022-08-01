@@ -146,7 +146,7 @@ type Logging struct {
 //Parent struct for the Capsule values
 type Capsule struct {
 	Enabled bool
-	Image   string `default:"cnvrg-capsule:1.0.2"`
+	Image   string
 }
 
 // Parent level of ConfigReloader struct
@@ -158,7 +158,7 @@ type ConfigReloader struct {
 type Registry struct {
 	User     string
 	Password string
-	Url      string `default:"docker.io"`
+	Url      string
 	Enabled  bool
 }
 
@@ -1127,7 +1127,7 @@ to quickly create a Cobra application.`,
 		colorBlue := "\033[34m"
 		colorWhite := "\033[37m"
 		// set variables for each struct defined above - Used in gather functions for each menu item
-		internalDomain := ClusterInteralDomain{}
+		internalDomain := ClusterInteralDomain{Domain: "cluster.local"}
 		labels := Labels{}
 		annotations := Annotations{}
 		network := Networking{Istio: Istio{Enabled: true}}
