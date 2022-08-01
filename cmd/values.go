@@ -27,7 +27,7 @@ func init() {
 
 // Parent struct for the Backup values
 type Backup struct {
-	Enabled  bool
+	Enabled  bool `yaml:",omitempty"`
 	Rotation int
 	Period   string
 }
@@ -239,15 +239,9 @@ type Template struct {
 	Backup         Backup
 	Gpu            Gpu
 	Monitoring     Monitoring
+	ControlPlane   ControlPlane
 	/*
-
-
-
-
-
-
 		Dbs            Dbs
-		ControlPlane   ControlPlane
 	*/
 }
 
@@ -663,72 +657,57 @@ func gatherMonitoring(monitoring *Monitoring) {
 }
 
 func gatherControlPlane(controlplane *ControlPlane) {
-	fmt.Println("In the gatherLabels func")
-	var disableHyper string
-	var disableCnvrgScheduler string
-	var disableCnvrgClusterProvisioner string
-	var disableSearchkiq string
-	var disableSidekiq string
-	var disableSystemkiq string
-	var disableWebapp string
-	var disableMpi string
+	log.Println("In the gatherControlPlane function")
 
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Hyper? ")
-	fmt.Scan(&disableHyper)
-	if disableHyper == "yes" {
-		controlplane.HyperEnable = false
+	colorYellow := "\033[33m"
+	colorBlue := "\033[34m"
+	colorWhite := "\033[37m"
+
+	for {
+		fmt.Println((colorBlue), "Press '1' To disable Hyper")
+		fmt.Println((colorBlue), "Press '2' To disable cnvrg Scheduler")
+		fmt.Println((colorBlue), "Press '3' To disable cnvrg Cluster Provisioner")
+		fmt.Println((colorBlue), "Press '4' To disable Searchkiq")
+		fmt.Println((colorBlue), "Press '5' To disable Sidekiq")
+		fmt.Println((colorBlue), "Press '6' To disable Systemkiq")
+		fmt.Println((colorBlue), "Press '7' To disable Webapp")
+		fmt.Println((colorBlue), "Press '8' To disable MPI")
+		fmt.Println((colorBlue), "Press '9' To Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			controlplane.HyperEnable = false
+			fmt.Println((colorYellow), "Hyper Disabled")
+		case 2:
+			controlplane.CnvrgScheduleEnable = false
+			fmt.Println((colorYellow), "cnvrg.io Scheduler Disabled")
+		case 3:
+			controlplane.CnvrgClusterProvisionerEnable = false
+			fmt.Println((colorYellow), "cnvrg.io Cluster Provisioner Disabled")
+		case 4:
+			controlplane.SearchkiqEnable = false
+			fmt.Println((colorYellow), "Searchkiq Disabled")
+		case 5:
+			controlplane.SidekiqEnable = false
+			fmt.Println((colorYellow), "Sidekiq Disabled")
+		case 6:
+			controlplane.SystemkiqEnable = false
+			fmt.Println((colorYellow), "Systemkiq Disabled")
+		case 7:
+			controlplane.WebappEnable = false
+			fmt.Println((colorYellow), "Webapp Disabled")
+		case 8:
+			controlplane.MpiEnable = false
+			fmt.Println((colorYellow), "MPI Disabled")
+
+		}
+		if intVar == 9 {
+			fmt.Println((colorYellow), "Saving and Exiting ControlPlane Settings")
+			break
+		}
 	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable cnvrg Scheduler? ")
-	fmt.Scan(&disableCnvrgScheduler)
-	if disableCnvrgScheduler == "yes" {
-		controlplane.CnvrgScheduleEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable the cnvrg cluster provisioner? ")
-	fmt.Scan(&disableCnvrgClusterProvisioner)
-	if disableCnvrgClusterProvisioner == "yes" {
-		controlplane.CnvrgClusterProvisionerEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Searchkiq? ")
-	fmt.Scan(&disableSearchkiq)
-	if disableSearchkiq == "yes" {
-		controlplane.SearchkiqEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Sidekiq? ")
-	fmt.Scan(&disableSidekiq)
-	if disableSidekiq == "yes" {
-		controlplane.SidekiqEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Searchkiq? ")
-	fmt.Scan(&disableSystemkiq)
-	if disableSystemkiq == "yes" {
-		controlplane.SystemkiqEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Webapp? ")
-	fmt.Scan(&disableWebapp)
-	if disableWebapp == "yes" {
-		controlplane.WebappEnable = false
-	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable MPI? ")
-	fmt.Scan(&disableMpi)
-	if disableMpi == "yes" {
-		controlplane.MpiEnable = false
-	}
-
 }
 
 func gatherDbs(dbs *Dbs) {
@@ -880,7 +859,7 @@ and to prompt user for all Backup settings
 */
 func gatherBackup(backup *Backup) {
 	log.Println("In the gatherBackup function")
-
+	//settings := ["enabled", "rotation", "period"]
 	// Ask if they want to enable Tenancy skip if "no"
 	fmt.Print("Do you want to disable backups? ")
 	disableBackup := formatInput()
@@ -1159,8 +1138,8 @@ to quickly create a Cobra application.`,
 		tenancy := Tenancy{}
 		sso := Sso{}
 		storage := Storage{}
-		gpu := Gpu{}
-		backup := Backup{}
+		gpu := Gpu{NvidiaEnable: true, HabanaEnable: true}
+		backup := Backup{Enabled: true}
 		capsule := Capsule{}
 		configreloader := ConfigReloader{}
 		monitoring := Monitoring{}
@@ -1241,6 +1220,7 @@ to quickly create a Cobra application.`,
 				gatherMonitoring(&monitoring)
 			case 10:
 				fmt.Print("Please update the Control Plane settings:")
+				gatherControlPlane(&controlplane)
 			}
 			if intVar == 11 {
 				fmt.Print((colorYellow), "Exiting and generating the values.yaml file")
@@ -1253,10 +1233,10 @@ to quickly create a Cobra application.`,
 			dbs := Dbs{}
 			gatherDbs(&dbs)
 
-			gatherControlPlane(&controlplane)
+
 		*/
-		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu, monitoring} /*
-			, dbs, controlplane */
+		finaltemp := Template{clusterdomain, labels, annotations, network, logging, registry, tenancy, sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane} /*
+		 dbs,  */
 		err := temp.Execute(os.Stdout, finaltemp)
 		if err != nil {
 			fmt.Print(err)

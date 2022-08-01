@@ -130,23 +130,23 @@ gpu:
 {{- end }}
 
 
-{{- if eq .ConfigReloader.Enabled false }}
+{{- if not .ConfigReloader.Enabled  }}
 configReloader:
   enabled: {{ .ConfigReloader.Enabled }}
 {{- end }}
 
-{{- if eq .Capsule.Enabled false }}
+{{- if not .Capsule.Enabled  }}
 capsule:
   enabled: {{ .Capsule.Enabled }}
   image: {{ .Capsule.Image }}
 {{- end }}
 
-{{- if eq .Backup.Enabled false }}
+
 backup:
   enabled: {{ .Backup.Enabled }}
   rotation: {{ .Backup.Rotation }}
   period: {{ .Backup.Period }}
-{{- end }}
+
 
 
 monitoring:
@@ -347,7 +347,7 @@ controlPlane:
       maxReplicas: {{ .ControlPlane.WebappHpaMaxReplicas }}
 
 {{ if eq .ControlPlane.MpiEnable false }}     
-  mpi:
+  mpi: 
     enabled: {{ .ControlPlane.MpiEnable }}
 {{- end }}
     image: {{ .ControlPlane.MpiImage }}
@@ -359,32 +359,3 @@ controlPlane:
       password: {{ .ControlPlane.MpiRegistryPassword }}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{{- if .Network.Ingress.External }}
-  ingress:
-    type: {{ .Network.Ingress.Type }}
-    istioGwEnabled: {{ .Network.Ingress.IstioGwEnabled }}
-    istioGwName: {{ .Network.Ingress.IstioGwName }}
-{{- end }}
-
-{{- if eq .Network.Istio.Enabled false }}
-  istio:
-    enabled: {{.Network.Istio.Enabled }}
-    externalIp: {{.Network.Istio.ExternalIp }}
-    ingressSvcAnnotations: {{.Network.Istio.IngressSvcAnnotations }}
-    ingressSvcExtraPorts: {{.Network.Istio.IngressSvcExtraPorts }}
-    lbSourceRanges: {{.Network.Istio.LbSourceRanges }}
-{{- end }}
