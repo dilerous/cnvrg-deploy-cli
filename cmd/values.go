@@ -371,7 +371,7 @@ type Networking struct {
 // Used in the Networking struct
 type HttpsValues struct {
 	Enabled    bool
-	CertSecret string `yaml:"certSecret"`
+	CertSecret string
 }
 
 // Used in the Networking struct
@@ -384,15 +384,15 @@ type Proxy struct {
 
 // Used in the Networking struct
 type Ingress struct {
-	Type           string `default:"istio"`
-	IstioGwEnabled bool   `default:"true"`
-	IstioGwName    string `yaml:"IstioGwName"`
+	Type           string
+	IstioGwEnabled bool
+	IstioGwName    string
 	External       bool
 }
 
 // Used in the Networking struct
 type Istio struct {
-	Enabled               bool `default:"true"`
+	Enabled               bool
 	ExternalIp            string
 	IngressSvcAnnotations string
 	IngressSvcExtraPorts  string
@@ -441,6 +441,8 @@ func gatherNetworking(network *Networking) {
 	log.Println("In the gatherNetworking function")
 
 	for {
+		fmt.Println((colorGreen), "----Networking Menu----")
+		fmt.Println((colorGreen), "Update Networking values")
 		fmt.Println((colorBlue), "Press '1' for Proxy Settings")
 		fmt.Println((colorBlue), "Press '2' for Ingress Settings")
 		fmt.Println((colorBlue), "Press '3' for HTTPS Settings")
@@ -604,6 +606,8 @@ func gatherMonitoring(monitoring *Monitoring) {
 	log.Println("In the gatherMonitoring function")
 
 	for {
+		fmt.Println((colorGreen), "----Monitoring Menu----")
+		fmt.Println((colorGreen), "Update Monitoring values")
 		fmt.Println((colorBlue), "Press '1' To disable dcgm Export Monitoring")
 		fmt.Println((colorBlue), "Press '2' To disable Habana Monitoring")
 		fmt.Println((colorBlue), "Press '3' To disable Node Export Monitoring")
@@ -661,6 +665,8 @@ func gatherControlPlane(controlplane *ControlPlane) {
 	colorWhite := "\033[37m"
 
 	for {
+		fmt.Println((colorGreen), "----ControlPlane Menu----")
+		fmt.Println((colorGreen), "Update ControlPlane values")
 		fmt.Println((colorBlue), "Press '1' To disable Hyper")
 		fmt.Println((colorBlue), "Press '2' To disable cnvrg Scheduler")
 		fmt.Println((colorBlue), "Press '3' To disable cnvrg Cluster Provisioner")
@@ -714,6 +720,8 @@ func gatherDbs(dbs *Dbs) {
 	log.Println("In the gatherLabels func")
 
 	for {
+		fmt.Println((colorGreen), "----Database Menu----")
+		fmt.Println((colorGreen), "Update Database values")
 		fmt.Println((colorBlue), "Press '1' To enable CVAT")
 		fmt.Println((colorBlue), "Press '2' To modify Elastic Search")
 		fmt.Println((colorBlue), "Press '3' To modify Minio")
@@ -729,6 +737,8 @@ func gatherDbs(dbs *Dbs) {
 			fmt.Println((colorYellow), "CVAT enabled")
 		case 2:
 			for {
+				fmt.Println((colorGreen), "----Elastic Search Menu----")
+				fmt.Println((colorGreen), "Update Elastic Search values")
 				fmt.Println((colorBlue), "Press '1' To disable Elastic Search")
 				fmt.Println((colorBlue), "Press '2' To modify Storage Size [default: 80Gi]")
 				fmt.Println((colorBlue), "Press '3' To modify Storage Class")
@@ -770,6 +780,8 @@ func gatherDbs(dbs *Dbs) {
 
 		case 3:
 			for {
+				fmt.Println((colorGreen), "----Minio Menu----")
+				fmt.Println((colorGreen), "Update Minio values")
 				fmt.Println((colorBlue), "Press '1' To disable Minio")
 				fmt.Println((colorBlue), "Press '2' To modify Storage Size [default: 100Gi]")
 				fmt.Println((colorBlue), "Press '3' To modify Storage Class")
@@ -802,6 +814,8 @@ func gatherDbs(dbs *Dbs) {
 			}
 		case 4:
 			for {
+				fmt.Println((colorGreen), "----Postgres Menu----")
+				fmt.Println((colorGreen), "Update Postgres values")
 				fmt.Println((colorBlue), "Press '1' To disable Postgres")
 				fmt.Println((colorBlue), "Press '2' To modify Storage Size [default: 100Gi]")
 				fmt.Println((colorBlue), "Press '3' To modify Storage Class")
@@ -834,6 +848,8 @@ func gatherDbs(dbs *Dbs) {
 			}
 		case 5:
 			for {
+				fmt.Println((colorGreen), "----Redis Menu----")
+				fmt.Println((colorGreen), "Update Redis values")
 				fmt.Println((colorBlue), "Press '1' To disable Redis")
 				fmt.Println((colorBlue), "Press '2' To modify Storage Size [default: 10Gi]")
 				fmt.Println((colorBlue), "Press '3' To modify Storage Class")
@@ -880,6 +896,8 @@ func gatherLogging(logging *Logging) {
 	log.Println("In the gatherLogging function")
 
 	for {
+		fmt.Println((colorGreen), "----Logging Menu----")
+		fmt.Println((colorGreen), "Update Logging values")
 		fmt.Println((colorBlue), "Press '1' To disable Fluentbit")
 		fmt.Println((colorBlue), "Press '2' To disable Kibana")
 		fmt.Println((colorBlue), "Press '3' To configure or disable Elastalert")
@@ -896,6 +914,8 @@ func gatherLogging(logging *Logging) {
 			fmt.Println((colorYellow), "Kibana is disabled")
 		case 3:
 			for {
+				fmt.Println((colorGreen), "----Elastic Search Menu----")
+				fmt.Println((colorGreen), "Update Elastic Search values")
 				fmt.Println((colorBlue), "Press '1' to change the Storage Size")
 				fmt.Println((colorBlue), "Press '2' to change the Storage Class")
 				fmt.Println((colorBlue), "Press '3' to change the node Selector")
@@ -943,6 +963,8 @@ func gatherGpu(gpu *Gpu) {
 	log.Println("In the gatherGpu function")
 
 	for {
+		fmt.Println((colorGreen), "----GPU Menu----")
+		fmt.Println((colorGreen), "Update GPU values")
 		fmt.Println((colorBlue), "Press '1' to disable Nvidia GPU")
 		fmt.Println((colorBlue), "Press '2' to disable Habana GPU")
 		fmt.Println((colorBlue), "Press '3' to Save and Exit")
@@ -971,6 +993,8 @@ func gatherBackup(backup *Backup) {
 	log.Println("In the gatherBackup function")
 
 	for {
+		fmt.Println((colorGreen), "----Backup Menu----")
+		fmt.Println((colorGreen), "Update Backup values")
 		fmt.Println((colorBlue), "Press '1' to disable Backups")
 		fmt.Println((colorBlue), "Press '2' to modify Backup Rotation [default: 5]")
 		fmt.Println((colorBlue), "Press '3' to modify Backup Period [default: 24h]")
@@ -1011,6 +1035,8 @@ func gatherCapsule(capsule *Capsule) {
 	log.Println("In the gatherCapsule function")
 
 	for {
+		fmt.Println((colorGreen), "----Capsule Menu----")
+		fmt.Println((colorGreen), "Update Capsule values")
 		fmt.Println((colorBlue), "Press '1' to disable Capsule")
 		fmt.Println((colorBlue), "Press '2' to modify Capsule image")
 		fmt.Println((colorBlue), "Press '3' to Save and Exit")
@@ -1053,6 +1079,8 @@ func gatherRegistry(registry *Registry) {
 	var password string
 
 	for {
+		fmt.Println((colorGreen), "----Registry Menu----")
+		fmt.Println((colorGreen), "Update Registry values")
 		fmt.Println((colorBlue), "Press '1' to update Registry URL")
 		fmt.Println((colorBlue), "Press '2' to update Registry User Name")
 		fmt.Println((colorBlue), "Press '3' to update Registry Password")
@@ -1096,6 +1124,8 @@ func gatherTenancy(tenancy *Tenancy) {
 	log.Println("In the gatherTenancy function")
 
 	for {
+		fmt.Println((colorGreen), "----Tenancy Menu----")
+		fmt.Println((colorGreen), "Update Tenancy values")
 		fmt.Println((colorBlue), "Press '1' to enable Tenancy")
 		fmt.Println((colorBlue), "Press '2' to add Tenancy node selector key")
 		fmt.Println((colorBlue), "Press '3' to add Tenancy node selector value")
@@ -1132,7 +1162,8 @@ func gatherStorage(storage *Storage) {
 	log.Println("In the gatherStorage function")
 
 	for {
-		// Ask if they want to enable Hostpath for storage skip if "no"
+		fmt.Println((colorGreen), "----Storage Menu----")
+		fmt.Println((colorGreen), "Update Storage values")
 		fmt.Println("Press '1' to modify HostPath settings")
 		fmt.Println("Press '2' to modify NFS settings")
 		fmt.Println("Press '3' when  your done making Networking changes")
@@ -1237,6 +1268,8 @@ func gatherSso(sso *Sso) {
 	log.Println("In the gatherSso function")
 
 	for {
+		fmt.Println((colorGreen), "----Single Sign On Menu----")
+		fmt.Println((colorGreen), "Update Single Sign On values")
 		fmt.Println((colorBlue), "Press '1' to enable Single Sign On")
 		fmt.Println((colorBlue), "Press '2' to modify Admin User")
 		fmt.Println((colorBlue), "Press '3' to modify SSO Provider")
@@ -1387,6 +1420,8 @@ to quickly create a Cobra application.`,
 				gatherStorage(&storage)
 			case 8:
 				for {
+					fmt.Println((colorGreen), "----Backup, GPU, Capsule and GPU Menu----")
+					fmt.Println((colorGreen), "Update Backup, GPU, Capsule and GPU values")
 					fmt.Println((colorBlue), "Press '1' To modify Backup settings")
 					fmt.Println((colorBlue), "Press '2' To modify Capsule settings")
 					fmt.Println((colorBlue), "Press '3' To disable NvidiaDp or HabanaDp GPU")
