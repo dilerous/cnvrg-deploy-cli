@@ -439,173 +439,161 @@ will return a struct
 */
 func gatherNetworking(network *Networking) {
 	log.Println("In the gatherNetworking function")
+
 	for {
-		fmt.Println("Do you want to modify Network settings? ")
-		fmt.Print("[Settings include; Proxy, Istio Deployment, Ingress or HTTPS.] yes/no: ")
-		input := formatInput()
-		if input == "no" {
-			log.Println("In the for loop and selected 'no'")
-			log.Println("Making no changes")
-			network.Istio.Enabled = true
-			break
-		}
-		if input == "yes" {
-			fmt.Println("Press '1' for Proxy Settings")
-			fmt.Println("Press '2' for Ingress Settings")
-			fmt.Println("Press '3' for HTTPS Settings")
-			fmt.Println("Press '4' for Istio Settings")
-			fmt.Print("Please make your selection: ")
-			caseInput := formatInput()
-			intVar, _ := strconv.Atoi(caseInput)
-			switch intVar {
-			case 1:
-				log.Println("In case statement 1 - Proxy")
-				for {
-					fmt.Print("Do you want to enable a Proxy? ")
-					enableProxy := formatInput()
-					if enableProxy == "yes" {
-						network.Proxy.Enabled = true
-						for {
-							fmt.Println("Press '1' for list of HTTP proxies to use")
-							fmt.Println("Press '2' for list of HTTPS proxies to use")
-							fmt.Println("Press '3' for list of extra No Proxy values to use")
-							fmt.Println("Press '4' to exit changing Proxy settings")
-							fmt.Print("Please make your selection: ")
-							caseInput := formatInput()
-							intVar, _ := strconv.Atoi(caseInput)
-							switch intVar {
-							case 1:
-								fmt.Print("Please enter a list of HTTP proxies")
-								slice := createSlice()
-								network.Proxy.HttpProxy = slice
-							case 2:
-								fmt.Print("Please enter a list of HTTPS proxies")
-								slice := createSlice()
-								network.Proxy.HttpsProxy = slice
-							case 3:
-								fmt.Print("Please enter a list of No proxies")
-								slice := createSlice()
-								network.Proxy.NoProxy = slice
-							}
-							if intVar == 4 {
-								fmt.Println("Exiting modify Proxy section")
-								enableProxy = "exit"
-								break
-							}
-
+		fmt.Println((colorBlue), "Press '1' for Proxy Settings")
+		fmt.Println((colorBlue), "Press '2' for Ingress Settings")
+		fmt.Println((colorBlue), "Press '3' for HTTPS Settings")
+		fmt.Println((colorBlue), "Press '4' for Istio Settings")
+		fmt.Println((colorBlue), "Press '5' to Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			log.Println("In case statement 1 - Proxy")
+			for {
+				fmt.Print("Do you want to enable a Proxy? ")
+				enableProxy := formatInput()
+				if enableProxy == "yes" {
+					network.Proxy.Enabled = true
+					for {
+						fmt.Println((colorBlue), "Press '1' to input HTTP proxies to use")
+						fmt.Println((colorBlue), "Press '2' to input HTTPS proxies to use")
+						fmt.Println((colorBlue), "Press '3' to input extra No Proxy values to use")
+						fmt.Println((colorBlue), "Press '4' to Save and Exit Proxy settings")
+						fmt.Print((colorWhite), "Please make your selection: ")
+						caseInput := formatInput()
+						intVar, _ := strconv.Atoi(caseInput)
+						switch intVar {
+						case 1:
+							fmt.Print((colorWhite), "Please enter a list of HTTP proxies")
+							slice := createSlice()
+							network.Proxy.HttpProxy = slice
+						case 2:
+							fmt.Print((colorWhite), "Please enter a list of HTTPS proxies")
+							slice := createSlice()
+							network.Proxy.HttpsProxy = slice
+						case 3:
+							fmt.Print((colorWhite), "Please enter a list of No proxies")
+							slice := createSlice()
+							network.Proxy.NoProxy = slice
 						}
-					}
-					fmt.Println("Please enter 'yes' or 'no':")
-					if enableProxy == "no" {
-						network.Proxy.Enabled = false
-						break
-					}
-					if enableProxy == "exit" {
-						break
-					}
-				}
-			case 2:
-				log.Println("In Case statement 2 - Ingress")
-				fmt.Print("Do you want to configure an ingress controller? ")
-				externalIngress := formatInput()
-				if externalIngress == "yes" {
-					fmt.Print("What is the ingress type [istio|ingress|openshift|nodeport]?: ")
-					ingressType := formatInput()
-					network.Ingress.Type = ingressType
-					if ingressType != "istio" {
-						network.Ingress.IstioGwEnabled = false
-						network.Ingress.IstioGwName = ""
-						network.Ingress.External = true
-					}
-					continue
-				}
-				if externalIngress == "no" {
-					network.Ingress.External = false
-					continue
-				}
-			case 3:
-				log.Println("In case statement 3 - HTTPS")
-				for {
-					// Ask if they want to enable https and skip if "no"
-					fmt.Print("Do you want to enable HTTPS? ")
-					caseThreeInput := formatInput()
-
-					if caseThreeInput == "yes" {
-						network.Https.Enabled = true
-						fmt.Printf("The HTTPS network setting is %v \n", network.Https.Enabled)
-						break
-					}
-					if caseThreeInput == "no" {
-						network.Https.Enabled = false
-						fmt.Printf("The HTTPS network setting is %v \n", network.Https.Enabled)
-						break
-					}
-					fmt.Println("Please enter 'yes' or 'no' ")
-				}
-				fmt.Print("Do you want to add a Certificate Secret? ")
-				certinput := formatInput()
-				if certinput == "yes" {
-					fmt.Print("What do you want to name the secret? ")
-					var certName string
-					fmt.Scan(&certName)
-					network.Https.CertSecret = certName
-					fmt.Printf("The secret name is %s \n", certName)
-				}
-			case 4:
-				log.Println("In Case 4")
-				fmt.Print("Do you want to disable the Istio deployment? ")
-				disableIstio := formatInput()
-				if disableIstio == "yes" {
-					network.Istio.Enabled = false
-				}
-				if disableIstio == "no" {
-					network.Istio.Enabled = true
-					fmt.Println("Do you need to modify any of the following? yes/no ")
-					fmt.Print("[Istio External IP, Ingress svc Annotations, Ingress Extra Ports or LB Source Ranges: ")
-					modifyIstio := formatInput()
-					if modifyIstio == "yes" {
-						for {
-							fmt.Println("Press '1' list IPs to use for istio ingress service")
-							fmt.Println("Press '2' list extra ports for istio ingress service")
-							fmt.Println("Press '3' list extra LB sources ranges")
-							fmt.Println("Press '4' map of strings for Istio SVC annotations")
-							fmt.Println("Press '5' to exit changing Proxy settings")
-							fmt.Print("Please make your selection: ")
-							caseInput := formatInput()
-							intVar, _ := strconv.Atoi(caseInput)
-							switch intVar {
-							case 1:
-								fmt.Print("Please enter a list of IPs to use for Istio ingress service: ")
-								slice := createSlice()
-								network.Istio.ExternalIp = slice
-							case 2:
-								fmt.Print("Please enter a list extra ports for Istio ingress service: ")
-								slice := createSlice()
-								network.Istio.IngressSvcExtraPorts = slice
-
-							case 3:
-								fmt.Print("Please enter a list of extra LB sources ranges: ")
-								slice := createSlice()
-								network.Istio.LbSourceRanges = slice
-							case 4:
-								fmt.Print("Please enter a map of strings for Istio SVC annotations: ")
-								slice := createSlice()
-								network.Istio.IngressSvcAnnotations = slice
-							}
-							if intVar == 5 {
-								break
-							}
+						if intVar == 4 {
+							fmt.Println((colorYellow), "Saving and Exiting Proxy section")
+							break
 						}
 					}
 				}
-			default:
-				fmt.Print("In the default case section")
-
+				fmt.Println("Please enter 'yes' or 'no':")
+				if enableProxy == "no" {
+					network.Proxy.Enabled = false
+					break
+				}
+				if enableProxy == "exit" {
+					break
+				}
 			}
+		case 2:
+			log.Println("In Case statement 2 - Ingress")
+			fmt.Print("Do you want to configure an ingress controller? ")
+			externalIngress := formatInput()
+			if externalIngress == "yes" {
+				fmt.Print("What is the ingress type [istio|ingress|openshift|nodeport]?: ")
+				ingressType := formatInput()
+				network.Ingress.Type = ingressType
+				if ingressType != "istio" {
+					network.Ingress.IstioGwEnabled = false
+					network.Ingress.IstioGwName = ""
+					network.Ingress.External = true
+				}
+				continue
+			}
+			if externalIngress == "no" {
+				network.Ingress.External = false
+				continue
+			}
+		case 3:
+			log.Println("In case statement 3 - HTTPS")
+			for {
+				// Ask if they want to enable https and skip if "no"
+				fmt.Print("Do you want to enable HTTPS? ")
+				caseThreeInput := formatInput()
+
+				if caseThreeInput == "yes" {
+					network.Https.Enabled = true
+					fmt.Printf("The HTTPS network setting is %v \n", network.Https.Enabled)
+					break
+				}
+				if caseThreeInput == "no" {
+					network.Https.Enabled = false
+					fmt.Printf("The HTTPS network setting is %v \n", network.Https.Enabled)
+					break
+				}
+				fmt.Println("Please enter 'yes' or 'no' ")
+			}
+			fmt.Print("Do you want to add a Certificate Secret? ")
+			certinput := formatInput()
+			if certinput == "yes" {
+				fmt.Print("What do you want to name the secret? ")
+				var certName string
+				fmt.Scan(&certName)
+				network.Https.CertSecret = certName
+				fmt.Printf("The secret name is %s \n", certName)
+			}
+		case 4:
+			log.Println("In Case 4")
+			fmt.Print("Do you want to disable the Istio deployment? ")
+			disableIstio := formatInput()
+			if disableIstio == "yes" {
+				network.Istio.Enabled = false
+			}
+			if disableIstio == "no" {
+				network.Istio.Enabled = true
+				fmt.Println("Do you need to modify any of the following? yes/no ")
+				fmt.Print("[Istio External IP, Ingress svc Annotations, Ingress Extra Ports or LB Source Ranges: ")
+				modifyIstio := formatInput()
+				if modifyIstio == "yes" {
+					for {
+						fmt.Println((colorBlue), "Press '1' list IPs to use for istio ingress service")
+						fmt.Println((colorBlue), "Press '2' list extra ports for istio ingress service")
+						fmt.Println((colorBlue), "Press '3' list extra LB sources ranges")
+						fmt.Println((colorBlue), "Press '4' map of strings for Istio SVC annotations")
+						fmt.Println((colorBlue), "Press '5' to Save and Exit Proxy settings")
+						fmt.Print((colorWhite), "Please make your selection: ")
+						caseInput := formatInput()
+						intVar, _ := strconv.Atoi(caseInput)
+						switch intVar {
+						case 1:
+							fmt.Print("Please enter a list of IPs to use for Istio ingress service: ")
+							slice := createSlice()
+							network.Istio.ExternalIp = slice
+						case 2:
+							fmt.Print("Please enter a list extra ports for Istio ingress service: ")
+							slice := createSlice()
+							network.Istio.IngressSvcExtraPorts = slice
+
+						case 3:
+							fmt.Print("Please enter a list of extra LB sources ranges: ")
+							slice := createSlice()
+							network.Istio.LbSourceRanges = slice
+						case 4:
+							fmt.Print("Please enter a map of strings for Istio SVC annotations: ")
+							slice := createSlice()
+							network.Istio.IngressSvcAnnotations = slice
+						}
+						if intVar == 5 {
+							break
+						}
+					}
+				}
+			}
+		}
+		if intVar == 5 {
+			fmt.Print((colorYellow), "Saving and Exiting Networking Menu")
 			break
 		}
 	}
-
 }
 
 /* function used to leverage the Logging struct
@@ -850,8 +838,8 @@ func gatherGpu(gpu *Gpu) {
 	}
 }
 
-/* function used to leverage the Backup struct
-and to prompt user for all Backup settings
+/* Function used to gather Backup values through menu driven options.
+This function uses the Backup struct
 */
 func gatherBackup(backup *Backup) {
 	log.Println("In the gatherBackup function")
@@ -890,16 +878,33 @@ func gatherBackup(backup *Backup) {
 
 }
 
-/* function used to leverage the Capsule struct
-and to prompt user for all Capsule settings this
-will return a struct
+/* Function used to gather Capsule values through menu driven options.
+This function uses the Capsule struct
 */
 func gatherCapsule(capsule *Capsule) {
 	log.Println("In the gatherCapsule function")
 
-	fmt.Println((colorYellow), "Capsule is disabled")
-	capsule.Enabled = false
-
+	for {
+		fmt.Println((colorBlue), "Press '1' to disable Capsule")
+		fmt.Println((colorBlue), "Press '2' to modify Capsule image")
+		fmt.Println((colorBlue), "Press '3' to Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			capsule.Enabled = false
+			fmt.Println((colorYellow), "Capsule is disabled")
+		case 2:
+			fmt.Print((colorBlue), "Please enter new image: ")
+			caseInput := formatInput()
+			capsule.Image = caseInput
+		}
+		if intVar == 3 {
+			fmt.Println((colorYellow), "Saving and Exiting Capsule menu")
+			break
+		}
+	}
 }
 
 /* function used to leverate the ConfigReloader struct
@@ -963,6 +968,7 @@ will return a struct
 */
 func gatherTenancy(tenancy *Tenancy) {
 	log.Println("In the gatherTenancy function")
+
 	for {
 		fmt.Println((colorBlue), "Press '1' to enable Tenancy")
 		fmt.Println((colorBlue), "Press '2' to add Tenancy node selector key")
@@ -1233,8 +1239,8 @@ to quickly create a Cobra application.`,
 			case 8:
 				for {
 					fmt.Println((colorBlue), "Press '1' To modify Backup settings")
-					fmt.Println((colorBlue), "Press '2' To disable NvidiaDp or HabanaDp GPU")
-					fmt.Println((colorBlue), "Press '3' To disable Capsule")
+					fmt.Println((colorBlue), "Press '2' To modify Capsule settings")
+					fmt.Println((colorBlue), "Press '3' To disable NvidiaDp or HabanaDp GPU")
 					fmt.Println((colorBlue), "Press '4' To disable ConfigReloader")
 					fmt.Println((colorBlue), "Press '5' To Exit modifying settings")
 					fmt.Print((colorBlue), "Please make your selection: ")
@@ -1245,10 +1251,10 @@ to quickly create a Cobra application.`,
 						gatherBackup(&backup)
 						fmt.Println((colorGreen), "Please update your Backup settings: ")
 					case 2:
+						gatherCapsule(&capsule)
+					case 3:
 						gatherGpu(&gpu)
 						fmt.Println((colorGreen), "Please update your GPU settings: ")
-					case 3:
-						gatherCapsule(&capsule)
 					case 4:
 						gatherConfigReloader(&configreloader)
 					}
