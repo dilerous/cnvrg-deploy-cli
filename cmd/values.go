@@ -759,9 +759,8 @@ func gatherDbs(dbs *Dbs) {
 	}
 }
 
-/* function used to leverage the Logging struct
-and to prompt user for all Logging settings this
-will return a struct
+/* Function used to gather Logging values through menu driven options.
+This function uses the Logging struct
 */
 func gatherLogging(logging *Logging) {
 	log.Println("In the gatherLogging function")
@@ -823,16 +822,16 @@ func gatherLogging(logging *Logging) {
 	}
 }
 
-/* function used to leverage the Gpu struct
-and to prompt user for all Gpu settings
+/* Function used to gather GPU values through menu driven options.
+This function uses the Gpu struct
 */
 func gatherGpu(gpu *Gpu) {
 	log.Println("In the gatherGpu function")
 
 	for {
 		fmt.Println((colorBlue), "Press '1' to disable Nvidia GPU")
-		fmt.Println((colorBlue), "Press '2' to Save and Exit")
-		fmt.Println((colorBlue), "Press '2' to Save and Exit")
+		fmt.Println((colorBlue), "Press '2' to disable Habana GPU")
+		fmt.Println((colorBlue), "Press '3' to Save and Exit")
 		fmt.Print((colorWhite), "Please make your selection: ")
 		caseInput := formatInput()
 		intVar, _ := strconv.Atoi(caseInput)
@@ -856,18 +855,39 @@ and to prompt user for all Backup settings
 */
 func gatherBackup(backup *Backup) {
 	log.Println("In the gatherBackup function")
-	//settings := ["enabled", "rotation", "period"]
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable backups? ")
-	disableBackup := formatInput()
-	if disableBackup == "yes" {
-		backup.Enabled = false
+
+	for {
+		fmt.Println((colorBlue), "Press '1' to disable Backups")
+		fmt.Println((colorBlue), "Press '2' to modify Backup Rotation [default: 5]")
+		fmt.Println((colorBlue), "Press '3' to modify Backup Period [default: 24h]")
+		fmt.Println((colorBlue), "Press '4' to Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			backup.Enabled = false
+			fmt.Println((colorYellow), "Backup is disabled")
+		case 2:
+			fmt.Print((colorBlue), "Input Backup Rotation [default: 5]: ")
+			caseInput := formatInput()
+			intVar, _ := strconv.Atoi(caseInput)
+			backup.Rotation = intVar
+		case 3:
+			fmt.Print((colorBlue), "Input Backup Period [default: 24h]: ")
+			caseInput := formatInput()
+			if caseInput == "" {
+				backup.Period = "24h"
+			} else {
+				backup.Period = caseInput
+			}
+		}
+		if intVar == 4 {
+			fmt.Println((colorYellow), "Saving and Exiting Backup menu")
+			break
+		}
 	}
-	if disableBackup == "no" {
-		backup.Enabled = true
-		backup.Rotation = 5
-		backup.Period = "24h"
-	}
+
 }
 
 /* function used to leverage the Capsule struct
@@ -877,12 +897,9 @@ will return a struct
 func gatherCapsule(capsule *Capsule) {
 	log.Println("In the gatherCapsule function")
 
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable capsule? yes/no: ")
-	disableCapsule := formatInput()
-	if disableCapsule == "yes" {
-		capsule.Enabled = false
-	}
+	fmt.Println((colorYellow), "Capsule is disabled")
+	capsule.Enabled = false
+
 }
 
 /* function used to leverate the ConfigReloader struct
@@ -891,12 +908,8 @@ and to prompt user for all ConfigReloader settings
 func gatherConfigReloader(configReloader *ConfigReloader) {
 	log.Println("In the gatherConfigReloader func")
 
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable ConfigReloader? (yes/no): ")
-	enableConfigReloader := formatInput()
-	if enableConfigReloader == "yes" {
-		configReloader.Enabled = false
-	}
+	fmt.Println((colorYellow), "Config Reload is disabled")
+	configReloader.Enabled = false
 }
 
 /* function used to leverate the Registry struct
@@ -1219,8 +1232,8 @@ to quickly create a Cobra application.`,
 				gatherStorage(&storage)
 			case 8:
 				for {
-					fmt.Println((colorBlue), "Press '1' To disable GPU for nvidiaDp or habanaDp")
-					fmt.Println((colorBlue), "Press '2' To modify backup settings")
+					fmt.Println((colorBlue), "Press '1' To modify Backup settings")
+					fmt.Println((colorBlue), "Press '2' To disable NvidiaDp or HabanaDp GPU")
 					fmt.Println((colorBlue), "Press '3' To disable Capsule")
 					fmt.Println((colorBlue), "Press '4' To disable ConfigReloader")
 					fmt.Println((colorBlue), "Press '5' To Exit modifying settings")
@@ -1229,9 +1242,11 @@ to quickly create a Cobra application.`,
 					intVar, _ := strconv.Atoi(caseInput)
 					switch intVar {
 					case 1:
-						gatherGpu(&gpu)
-					case 2:
 						gatherBackup(&backup)
+						fmt.Println((colorGreen), "Please update your Backup settings: ")
+					case 2:
+						gatherGpu(&gpu)
+						fmt.Println((colorGreen), "Please update your GPU settings: ")
 					case 3:
 						gatherCapsule(&capsule)
 					case 4:

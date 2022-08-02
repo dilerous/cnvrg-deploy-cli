@@ -136,34 +136,42 @@ storage:
     nodeSelector: {{ .Storage.Hostpath.NodeSelector }}
 {{- end }}
     
-{{- if eq .Gpu.NvidiaEnable false }}
+{{- if of (not .Gpu.NvidiaEnable) (not .Gpu.HabanaEnable) }}
 gpu:
+{{- end  }}
+{{- if not .Gpu.NvidiaEnable }}
   nvidiaDp:
     enabled: {{ .Gpu.NvidiaEnable }}
 {{- end  }}
-{{- if eq .Gpu.HabanaEnable false }}
+{{- if not .Gpu.HabanaEnable }}
   habanaDp:
     enabled: {{ .Gpu.HabanaEnable }}
 {{- end }}
-
 
 {{- if not .ConfigReloader.Enabled  }}
 configReloader:
   enabled: {{ .ConfigReloader.Enabled }}
 {{- end }}
 
-{{- if not .Capsule.Enabled  }}
+{{- if or (not .Capsule.Enabled) (.Capsule.Image)  }}
 capsule:
   enabled: {{ .Capsule.Enabled }}
+{{- end }}
+{{- if .Capsule.Image }}
   image: {{ .Capsule.Image }}
 {{- end }}
 
-{{- if not .Backup.Enabled  }}
+{{- if or (not .Backup.Enabled) (.Backup.Rotation) (.Backup.Period) }}
 backup:
   enabled: {{ .Backup.Enabled }}
+{{- end }}
+{{- if .Backup.Rotation }}
   rotation: {{ .Backup.Rotation }}
+{{- end }}
+{{- if .Backup.Period }}
   period: {{ .Backup.Period }}
 {{- end }}
+
 
 {{- if or (not .Monitoring.DcgmExportEnable) (not .Monitoring.HabanaExportEnable) (not .Monitoring.NodeExportEnable) 
 (not .Monitoring.KubeStateMetricEnable) (not .Monitoring.GrafanaEnable) (not .Monitoring.PrometheusOperatorEnable) 
