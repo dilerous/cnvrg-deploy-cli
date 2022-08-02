@@ -1,7 +1,7 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
+Copyright © 2022 BRAD SOPER	BRADLEY.SOPER@CNVRG.IO
 */
+
 package cmd
 
 import (
@@ -16,19 +16,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var temp *template.Template
+// Global Variables
+var (
+	temp *template.Template
 
-// Set colors for text
-var colorBlue = "\033[34m"
-var colorWhite = "\033[37m"
-var colorYellow = "\033[33m"
-var colorGreen = "\033[32m"
+	// Set colors for text
+	colorBlue   = "\033[34m"
+	colorWhite  = "\033[37m"
+	colorYellow = "\033[33m"
+	colorGreen  = "\033[32m"
+)
 
 func init() {
-
 	createCmd.AddCommand(valuesCmd)
 	temp = template.Must(template.ParseFiles("values.tmpl"))
-
 }
 
 // Parent struct for the Backup values
@@ -342,7 +343,7 @@ func gatherAnnotations(annotations *Annotations) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Print((colorBlue), "To add an Annotation enter with the format: [format- key: value]; 'return' when done: ")
+		fmt.Print((colorBlue), "To add an Annotation enter with the format: [key: value,]; 'return' when done: ")
 		scanner.Scan()
 
 		text := scanner.Text()
@@ -718,14 +719,13 @@ func gatherControlPlane(controlplane *ControlPlane) {
 	}
 }
 
+/* Function used to gather Database values through menu driven options.
+This function used the Dbs struct
+*/
 func gatherDbs(dbs *Dbs) {
 	log.Println("In the gatherLabels func")
-	colorYellow := "\033[33m"
-	colorBlue := "\033[34m"
-	colorWhite := "\033[37m"
 
 	for {
-
 		fmt.Println((colorBlue), "Press '1' To enable CVAT")
 		fmt.Println((colorBlue), "Press '2' To disable Elastic Search")
 		fmt.Println((colorBlue), "Press '3' To disable Minio")
@@ -765,10 +765,6 @@ will return a struct
 */
 func gatherLogging(logging *Logging) {
 	log.Println("In the gatherLogging function")
-
-	colorYellow := "\033[33m"
-	colorBlue := "\033[34m"
-	colorWhite := "\033[37m"
 
 	for {
 		fmt.Println((colorBlue), "Press '1' To disable Fluentbit")
@@ -833,20 +829,26 @@ and to prompt user for all Gpu settings
 func gatherGpu(gpu *Gpu) {
 	log.Println("In the gatherGpu function")
 
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Nvidia GPU? ")
-	disableNvidia := formatInput()
-	if disableNvidia == "yes" {
-		gpu.NvidiaEnable = false
+	for {
+		fmt.Println((colorBlue), "Press '1' to disable Nvidia GPU")
+		fmt.Println((colorBlue), "Press '2' to Save and Exit")
+		fmt.Println((colorBlue), "Press '2' to Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			gpu.NvidiaEnable = false
+			fmt.Println((colorYellow), "Nvidia GPU is disabled")
+		case 2:
+			gpu.HabanaEnable = false
+			fmt.Println((colorYellow), "Habana GPU is disabled")
+		}
+		if intVar == 3 {
+			fmt.Println((colorYellow), "Saving and Exiting GPU menu")
+			break
+		}
 	}
-
-	// Ask if they want to enable Tenancy skip if "no"
-	fmt.Print("Do you want to disable Habana GPU? ")
-	disableHabana := formatInput()
-	if disableHabana == "yes" {
-		gpu.HabanaEnable = false
-	}
-
 }
 
 /* function used to leverage the Backup struct
