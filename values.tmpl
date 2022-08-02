@@ -136,7 +136,7 @@ storage:
     nodeSelector: {{ .Storage.Hostpath.NodeSelector }}
 {{- end }}
     
-{{- if of (not .Gpu.NvidiaEnable) (not .Gpu.HabanaEnable) }}
+{{- if or (not .Gpu.NvidiaEnable) (not .Gpu.HabanaEnable) }}
 gpu:
 {{- end  }}
 {{- if not .Gpu.NvidiaEnable }}
