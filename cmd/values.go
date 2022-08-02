@@ -1164,98 +1164,95 @@ func gatherStorage(storage *Storage) {
 	for {
 		fmt.Println((colorGreen), "----Storage Menu----")
 		fmt.Println((colorGreen), "Update Storage values")
-		fmt.Println("Press '1' to modify HostPath settings")
-		fmt.Println("Press '2' to modify NFS settings")
-		fmt.Println("Press '3' when  your done making Networking changes")
-		fmt.Print("Please make your selection: ")
+		fmt.Println((colorBlue), "Press '1' to modify HostPath settings")
+		fmt.Println((colorBlue), "Press '2' to modify NFS settings")
+		fmt.Println((colorBlue), "Press '3' to Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
 		caseInput := formatInput()
 		intVar, _ := strconv.Atoi(caseInput)
 		switch intVar {
 		case 1:
-			fmt.Print("Do you want to enable Hostpath for storage? ")
-			input := formatInput()
-			if input == "no" {
-				storage.Hostpath.Enabled = false
-				break
-			}
-			if input == "yes" {
-
-				storage.Hostpath.Enabled = true
-				fmt.Print("Do you want to set the hostpath as the default storage class? yes/no: ")
-				hostpath := formatInput()
-				if hostpath == "no" {
-					storage.Hostpath.DefaultSc = false
+			for {
+				fmt.Println((colorGreen), "----HostPath Menu----")
+				fmt.Println((colorGreen), "Update HostPath values")
+				fmt.Println((colorBlue), "Press '1' to change the Default Storage Class")
+				fmt.Println((colorBlue), "Press '2' to modify the Path")
+				fmt.Println((colorBlue), "Press '3' to modify Reclaim Policy [default: Retain]")
+				fmt.Println((colorBlue), "Press '4' to modify Node Selector")
+				fmt.Println((colorBlue), "Press '5' to Save and Exit")
+				fmt.Print((colorWhite), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
+					fmt.Print("Make HostPath the default Storage Class? (yes/no): ")
+					var input bool
+					fmt.Scanln(&input)
+					storage.Hostpath.DefaultSc = input
+					storage.Hostpath.Enabled = true
+				case 2:
+					fmt.Print((colorBlue), "Input the path [default=/cnvrg-hostpath-storage]: ")
+					caseInput := formatInput()
+					storage.Hostpath.Path = caseInput
+					storage.Hostpath.Enabled = true
+				case 3:
+					fmt.Print((colorBlue), "Set the Reclaim Policy [Retain, Delete or Recycle]: ")
+					var input string
+					fmt.Scanln(&input)
+					storage.Hostpath.ReclaimPolicy = input
+					storage.Hostpath.Enabled = true
+				case 4:
+					fmt.Print((colorBlue), "Set the Node Selector")
+					nodeselector := createSlice()
+					storage.Hostpath.NodeSelector = nodeselector
+					storage.Hostpath.Enabled = true
 				}
-				if hostpath == "yes" {
-					storage.Hostpath.DefaultSc = true
+				if intVar == 5 {
+					fmt.Println("Saving and Exiting HostPath menu")
+					break
 				}
-				fmt.Print("Please enter host directory path. [default=/cnvrg-hostpath-storage]: ")
-				path := formatInput()
-				if path == "" {
-					storage.Hostpath.Path = "/cnvrg-hostpath-storage"
-				} else {
-					storage.Hostpath.Path = path
-				}
-				fmt.Print("Please enter the retain policy for the host path. [default=Retain]: ")
-				var reclaim string
-				fmt.Scanln(&reclaim)
-				if reclaim == "" {
-					storage.Hostpath.ReclaimPolicy = "Retain"
-				} else {
-					storage.Hostpath.ReclaimPolicy = reclaim
-				}
-				fmt.Print("Please enter your NodeSelector if needed: ")
-				nodeselector := createSlice()
-				storage.Hostpath.NodeSelector = nodeselector
-				break
 			}
 		case 2:
-			fmt.Print("Do you want to enable NFS for storage? yes/no: ")
-			input := formatInput()
-			if input == "no" {
-				storage.Nfs.Enabled = false
-				break
-			}
-			if input == "yes" {
-				storage.Nfs.Enabled = true
-				fmt.Print("What is the NFS server IP address? ")
-				ip := formatInput()
-				storage.Nfs.Server = ip
-
-				fmt.Print("What is the NFS export path? ")
-				path := formatInput()
-				storage.Nfs.Path = path
-				fmt.Print("Do you want to make NFS the default SC? yes/no: ")
-				sc := formatInput()
-				if sc == "yes" {
+			for {
+				fmt.Println((colorGreen), "----NFS Menu----")
+				fmt.Println((colorGreen), "Update NFS values")
+				fmt.Println((colorBlue), "Press '1' to modify Server IP address")
+				fmt.Println((colorBlue), "Press '2' to modify NFS export path")
+				fmt.Println((colorBlue), "Press '3' to set NFS as default Storage Class")
+				fmt.Println((colorBlue), "Press '4' to modify Reclaim Policy [default: Retain]")
+				fmt.Println((colorBlue), "Press '5' to Save and Exit")
+				fmt.Print((colorWhite), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
+					fmt.Print((colorWhite), "Input the NFS server IP address? ")
+					ip := formatInput()
+					storage.Nfs.Server = ip
+					storage.Nfs.Enabled = true
+				case 2:
+					fmt.Print((colorWhite), "What is the NFS export path? ")
+					path := formatInput()
+					storage.Nfs.Path = path
+					storage.Nfs.Enabled = true
+				case 3:
 					storage.Nfs.DefaultSc = true
+					fmt.Println((colorYellow), "NFS set as default Storage Class")
+				case 4:
+					fmt.Print((colorBlue), "Set the Reclaim Policy [Reclaim, Delete or Recycle]: ")
+					var input string
+					fmt.Scanln(&input)
+					storage.Nfs.ReclaimPolicy = input
+					storage.Nfs.Enabled = true
 				}
-				if sc == "no" {
-					storage.Nfs.DefaultSc = false
+				if intVar == 5 {
+					fmt.Println((colorYellow), "Saving and Exiting NFS menu")
+					break
 				}
-				fmt.Print("Do you want to change the default NFS image\n",
-					" [default=gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.0]? yes/no: ")
-				image := formatInput()
-				if image == "yes" {
-					fmt.Print("Enter new NFS image")
-					nfsimagepath := formatInput()
-					storage.Nfs.Image = nfsimagepath
-				}
-				if image == "no" {
-					storage.Nfs.Image = "gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.0"
-				}
-				fmt.Print("Please enter the retain policy for the NFS export. [default=Retain]: ")
-				var reclaim string
-				fmt.Scanln(&reclaim)
-				if reclaim == "" {
-					storage.Hostpath.ReclaimPolicy = "Retain"
-				} else {
-					storage.Hostpath.ReclaimPolicy = reclaim
-				}
-				break
 			}
 		}
 		if intVar == 3 {
+			fmt.Println((colorYellow), "Saving and Exiting Storage menu")
 			break
 		}
 	}
@@ -1395,28 +1392,20 @@ to quickly create a Cobra application.`,
 			intVar, _ := strconv.Atoi(caseInput)
 			switch intVar {
 			case 1:
-				fmt.Println((colorGreen), "Please add your Labels and Annotations: ")
 				gatherLabels(&labels)
 				gatherAnnotations(&annotations)
 				gatherInternalDomain(&internalDomain)
 			case 2:
-				fmt.Println((colorGreen), "Please update your Network settings: ")
 				gatherNetworking(&network)
-
 			case 3:
-				fmt.Println((colorGreen), "Please update your Logging settings: ")
 				gatherLogging(&logging)
 			case 4:
-				fmt.Println((colorGreen), "Please update your Registry credentials: ")
 				gatherRegistry(&registry)
 			case 5:
-				fmt.Println((colorGreen), "Please update your Tenancy settings: ")
 				gatherTenancy(&tenancy)
 			case 6:
-				fmt.Println((colorGreen), "Please update your Single Sign On settings: ")
 				gatherSso(&sso)
 			case 7:
-				fmt.Println((colorGreen), "Please update your Storage settings: ")
 				gatherStorage(&storage)
 			case 8:
 				for {
@@ -1433,12 +1422,10 @@ to quickly create a Cobra application.`,
 					switch intVar {
 					case 1:
 						gatherBackup(&backup)
-						fmt.Println((colorGreen), "Please update your Backup settings: ")
 					case 2:
 						gatherCapsule(&capsule)
 					case 3:
 						gatherGpu(&gpu)
-						fmt.Println((colorGreen), "Please update your GPU settings: ")
 					case 4:
 						gatherConfigReloader(&configreloader)
 					}
@@ -1448,13 +1435,10 @@ to quickly create a Cobra application.`,
 					}
 				}
 			case 9:
-				fmt.Println((colorGreen), "Please update your Monitoring settings:")
 				gatherMonitoring(&monitoring)
 			case 10:
-				fmt.Println((colorGreen), "Please update the Control Plane settings:")
 				gatherControlPlane(&controlplane)
 			case 11:
-				fmt.Println((colorGreen), "Please update the Database settings:")
 				gatherDbs(&dbs)
 			}
 			if intVar == 12 {
