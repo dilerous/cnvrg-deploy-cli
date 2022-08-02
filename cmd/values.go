@@ -1175,7 +1175,7 @@ func gatherStorage(storage *Storage) {
 			for {
 				fmt.Println((colorGreen), "----HostPath Menu----")
 				fmt.Println((colorGreen), "Update HostPath values")
-				fmt.Println((colorBlue), "Press '1' to change the Default Storage Class")
+				fmt.Println((colorBlue), "Press '1' to set HostPath as the Default Storage Class")
 				fmt.Println((colorBlue), "Press '2' to modify the Path")
 				fmt.Println((colorBlue), "Press '3' to modify Reclaim Policy [default: Retain]")
 				fmt.Println((colorBlue), "Press '4' to modify Node Selector")
@@ -1185,21 +1185,27 @@ func gatherStorage(storage *Storage) {
 				intVar, _ := strconv.Atoi(caseInput)
 				switch intVar {
 				case 1:
-					fmt.Print("Make HostPath the default Storage Class? (yes/no): ")
-					var input bool
-					fmt.Scanln(&input)
-					storage.Hostpath.DefaultSc = input
-					storage.Hostpath.Enabled = true
+					storage.Hostpath.DefaultSc = true
+					fmt.Println((colorYellow), "HostPath set as default Storage Class")
 				case 2:
 					fmt.Print((colorBlue), "Input the path [default=/cnvrg-hostpath-storage]: ")
 					caseInput := formatInput()
 					storage.Hostpath.Path = caseInput
 					storage.Hostpath.Enabled = true
 				case 3:
-					fmt.Print((colorBlue), "Set the Reclaim Policy [Retain, Delete or Recycle]: ")
 					var input string
-					fmt.Scanln(&input)
-					storage.Hostpath.ReclaimPolicy = input
+					var policy = []string{"Retain", "Delete", "Recycle"}
+					done := true
+					for done {
+						fmt.Print((colorBlue), "Set the Reclaim Policy [Retain, Delete or Recycle]: ")
+						fmt.Scanln(&input)
+						for _, s := range policy {
+							if input == s {
+								storage.Hostpath.ReclaimPolicy = input
+								done = false
+							}
+						}
+					}
 					storage.Hostpath.Enabled = true
 				case 4:
 					fmt.Print((colorBlue), "Set the Node Selector")
@@ -1369,7 +1375,8 @@ to quickly create a Cobra application.`,
 
 		//Start of program to ask user for Input
 		log.Println((colorWhite), "You are in the values main function")
-		fmt.Println((colorGreen), "Welcome, we will gather your information to build a values file")
+		fmt.Println((colorGreen), "********************** Welcome **********************")
+		fmt.Println((colorGreen), "We will gather your information to build a values file")
 		clusterdomain := ClusterDomain{}
 		gatherClusterDomain(&clusterdomain)
 		for {
