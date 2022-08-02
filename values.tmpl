@@ -243,20 +243,31 @@ monitoring:
     labels: { {{ .Monitoring.CnvrgIdleMetricsLabels }} }
 {{- end }}
 
-
+{{- if or (.Dbs.CvatEnable) (not .Dbs.EsEnable) }}
 dbs:
+{{- end }}
 {{- if .Dbs.CvatEnable }}
   cvat:
     enabled: {{ .Dbs.CvatEnable }}
 {{- end }}
 
-{{- if eq .Dbs.EsEnable false }}
+{{- if or (eq .Dbs.EsEnable false) (.Dbs.EsStorageSize) (.Dbs.EsPatchNodes) (.Dbs.EsNodeSelector) }}
   es:
     enabled: {{ .Dbs.EsEnable }}
+{{- end }}
+{{- if .Dbs.EsStorageSize }}
     storageSize: {{ .Dbs.EsStorageSize }}
+{{- end }}
+{{- if .Dbs.EsStorageClass }}
     storageClass: {{ .Dbs.EsStorageClass }}
+{{- end }}
+{{- if .Dbs.EsPatchNodes }}
     patchEsNodes: {{ .Dbs.EsPatchNodes }}
+{{- end }}
+{{- if .Dbs.EsNodeSelector }}
     nodeSelector: { {{ .Dbs.EsNodeSelector }} }
+{{- end }}
+{{- if or (.Dbs.CleanUpAll) (.Dbs.CleanUpApp) (.Dbs.CleanUpJobs) (.Dbs.CleanUpEndpoints) }}
     cleanupPolicy:
       all: {{ .Dbs.CleanUpAll }}
       app: {{ .Dbs.CleanUpApp }}

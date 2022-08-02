@@ -746,17 +746,21 @@ func gatherDbs(dbs *Dbs) {
 					fmt.Print((colorWhite), "Input Storage Size [default: 80Gi]: ")
 					caseInput := formatInput()
 					dbs.EsStorageSize = caseInput
+					dbs.EsEnable = true
 				case 3:
 					fmt.Print((colorWhite), "Input Storage Class: ")
 					caseInput := formatInput()
 					dbs.EsStorageSize = caseInput
+					dbs.EsEnable = true
 				case 4:
 					dbs.EsPatchNodes = false
 					fmt.Println((colorYellow), "Elastic Search Patch Nodes disabled")
+					dbs.EsEnable = true
 				case 5:
 					fmt.Print((colorWhite), "Input Node Selector values")
 					node := createSlice()
 					dbs.EsNodeSelector = node
+					dbs.EsEnable = true
 				}
 				if intVar == 6 {
 					fmt.Println((colorYellow), "Saving and Exiting Elastic Search settings")
