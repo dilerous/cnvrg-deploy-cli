@@ -715,10 +715,10 @@ func gatherDbs(dbs *Dbs) {
 
 	for {
 		fmt.Println((colorBlue), "Press '1' To enable CVAT")
-		fmt.Println((colorBlue), "Press '2' To disable Elastic Search")
-		fmt.Println((colorBlue), "Press '3' To disable Minio")
-		fmt.Println((colorBlue), "Press '4' To disable Postgres")
-		fmt.Println((colorBlue), "Press '5' To disable Redis")
+		fmt.Println((colorBlue), "Press '2' To modify Elastic Search")
+		fmt.Println((colorBlue), "Press '3' To modify Minio")
+		fmt.Println((colorBlue), "Press '4' To modify Postgres")
+		fmt.Println((colorBlue), "Press '5' To modify Redis")
 		fmt.Println((colorBlue), "Press '6' To Save and Exit")
 		fmt.Print((colorWhite), "Please make your selection: ")
 		caseInput := formatInput()
@@ -728,17 +728,139 @@ func gatherDbs(dbs *Dbs) {
 			dbs.CvatEnable = true
 			fmt.Println((colorYellow), "CVAT enabled")
 		case 2:
-			dbs.EsEnable = false
-			fmt.Println((colorYellow), "Elastic Search disabled")
+			for {
+				fmt.Println((colorBlue), "Press '1' To disable Elastic Search")
+				fmt.Println((colorBlue), "Press '2' To modify Storage Size [default: 80Gi]")
+				fmt.Println((colorBlue), "Press '3' To modify Storage Class")
+				fmt.Println((colorBlue), "Press '4' To disable Patch Elastic Search Nodes")
+				fmt.Println((colorBlue), "Press '5' To modify Node Selector")
+				fmt.Println((colorBlue), "Press '6' To Save and Exit Elastic Search menu")
+				fmt.Print((colorWhite), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
+					dbs.EsEnable = false
+					fmt.Println((colorYellow), "Elastic Search disabled")
+				case 2:
+					fmt.Print((colorWhite), "Input Storage Size [default: 80Gi]: ")
+					caseInput := formatInput()
+					dbs.EsStorageSize = caseInput
+				case 3:
+					fmt.Print((colorWhite), "Input Storage Class: ")
+					caseInput := formatInput()
+					dbs.EsStorageSize = caseInput
+				case 4:
+					dbs.EsPatchNodes = false
+					fmt.Println((colorYellow), "Elastic Search Patch Nodes disabled")
+				case 5:
+					fmt.Print((colorWhite), "Input Node Selector values")
+					node := createSlice()
+					dbs.EsNodeSelector = node
+				}
+				if intVar == 6 {
+					fmt.Println((colorYellow), "Saving and Exiting Elastic Search settings")
+					break
+				}
+			}
+
 		case 3:
-			dbs.MinioEnable = false
-			fmt.Println((colorYellow), "Minio disabled")
+			for {
+				fmt.Println((colorBlue), "Press '1' To disable Minio")
+				fmt.Println((colorBlue), "Press '2' To modify Storage Size [default: 100Gi]")
+				fmt.Println((colorBlue), "Press '3' To modify Storage Class")
+				fmt.Println((colorBlue), "Press '4' To modify Node Selector")
+				fmt.Println((colorBlue), "Press '5' To Save and Exit Elastic Search menu")
+				fmt.Print((colorWhite), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
+					dbs.MinioEnable = false
+					fmt.Println((colorYellow), "Minio disabled")
+				case 2:
+					fmt.Print((colorWhite), "Input Storage Size [default: 100Gi]: ")
+					caseInput := formatInput()
+					dbs.MinioStorageSize = caseInput
+				case 3:
+					fmt.Print((colorWhite), "Input Storage Class: ")
+					caseInput := formatInput()
+					dbs.MinioStorageClass = caseInput
+				case 4:
+					fmt.Print((colorWhite), "Input Node Selector values")
+					node := createSlice()
+					dbs.MinioNodeSelector = node
+				}
+				if intVar == 5 {
+					fmt.Println((colorYellow), "Saving and Exiting Minio settings")
+					break
+				}
+			}
 		case 4:
-			dbs.PgEnable = false
-			fmt.Println((colorYellow), "Postgres disabled")
+			for {
+				fmt.Println((colorBlue), "Press '1' To disable Postgres")
+				fmt.Println((colorBlue), "Press '2' To modify Storage Size [default: 100Gi]")
+				fmt.Println((colorBlue), "Press '3' To modify Storage Class")
+				fmt.Println((colorBlue), "Press '4' To modify Node Selector")
+				fmt.Println((colorBlue), "Press '5' To Save and Exit Postgres menu")
+				fmt.Print((colorWhite), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
+					dbs.PgEnable = false
+					fmt.Println((colorYellow), "Postgres disabled")
+				case 2:
+					fmt.Print((colorWhite), "Input Storage Size [default: 80Gi]: ")
+					caseInput := formatInput()
+					dbs.PgStorageSize = caseInput
+				case 3:
+					fmt.Print((colorWhite), "Input Storage Class: ")
+					caseInput := formatInput()
+					dbs.PgStorageClass = caseInput
+				case 4:
+					fmt.Print((colorWhite), "Input Node Selector values")
+					node := createSlice()
+					dbs.PgNodeSelector = node
+				}
+				if intVar == 5 {
+					fmt.Println((colorYellow), "Saving and Exiting Postgres settings")
+					break
+				}
+			}
 		case 5:
-			dbs.RedisEnable = false
-			fmt.Println((colorYellow), "Postgres disabled")
+			for {
+				fmt.Println((colorBlue), "Press '1' To disable Redis")
+				fmt.Println((colorBlue), "Press '2' To modify Storage Size [default: 10Gi]")
+				fmt.Println((colorBlue), "Press '3' To modify Storage Class")
+				fmt.Println((colorBlue), "Press '4' To modify Node Selector")
+				fmt.Println((colorBlue), "Press '5' To Save and Exit Redis menu")
+				fmt.Print((colorWhite), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
+					dbs.RedisEnable = false
+					fmt.Println((colorYellow), "Postgres Redis")
+				case 2:
+					fmt.Print((colorWhite), "Input Storage Size [default: 10Gi]: ")
+					caseInput := formatInput()
+					dbs.RedisStorageSize = caseInput
+				case 3:
+					fmt.Print((colorWhite), "Input Storage Class: ")
+					caseInput := formatInput()
+					dbs.RedisStorageClass = caseInput
+				case 4:
+					fmt.Print((colorWhite), "Input Node Selector values")
+					node := createSlice()
+					dbs.RedisNodeSelector = node
+				}
+				if intVar == 5 {
+					fmt.Println((colorYellow), "Saving and Exiting Redis settings")
+					break
+				}
+			}
+
 		}
 		if intVar == 6 {
 			fmt.Println((colorYellow), "Saving and Exiting Database Settings")
