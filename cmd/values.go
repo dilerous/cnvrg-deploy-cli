@@ -1097,7 +1097,6 @@ func gatherStorage(storage *Storage) {
 				}
 				break
 			}
-
 		}
 		if intVar == 3 {
 			break
@@ -1105,44 +1104,68 @@ func gatherStorage(storage *Storage) {
 	}
 }
 
-/* function used to leverate the Sso struct
-and to prompt user for all SSO settings this
-will return a struct
+/* Function used to gather Single Sign On values through menu driven options.
+This function uses the Sso struct
 */
 func gatherSso(sso *Sso) {
 	log.Println("In the gatherSso function")
-	// Ask if they want to enable SSO skip if "no"
+
 	for {
-		fmt.Print("Do you want to enable SSO? ")
-		input := formatInput()
-		if input == "no" {
-			sso.Enabled = false
-			break
-		}
-		if input == "yes" {
+		fmt.Println((colorBlue), "Press '1' to enable Single Sign On")
+		fmt.Println((colorBlue), "Press '2' to modify Admin User")
+		fmt.Println((colorBlue), "Press '3' to modify SSO Provider")
+		fmt.Println((colorBlue), "Press '4' to modify Email Domain")
+		fmt.Println((colorBlue), "Press '5' to modify Client ID")
+		fmt.Println((colorBlue), "Press '6' to modify Client Secret")
+		fmt.Println((colorBlue), "Press '7' to modify Azure Tenant")
+		fmt.Println((colorBlue), "Press '8' to modify OIDC Issuer URL")
+		fmt.Println((colorBlue), "Press '9' to Save and Exit Single Sign On menu")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
 			sso.Enabled = true
-			fmt.Print("Please input the Admin User: ")
+			fmt.Print((colorYellow), "Single Sign On Enabled")
+		case 2:
+			fmt.Print((colorWhite), "Please input the Admin User: ")
 			admin := formatInput()
 			sso.AdminUser = admin
-			fmt.Print("Please input the SSO Provider: ")
+			sso.Enabled = true
+		case 3:
+			fmt.Print((colorWhite), "Please input the SSO Provider: ")
 			provider := formatInput()
 			sso.Provider = provider
-			fmt.Print("Please input the Email Domain: ")
+			sso.Enabled = true
+		case 4:
+			fmt.Print((colorWhite), "Please input the Email Domain: ")
 			domain := createSlice()
 			sso.EmailDomain = domain
-			fmt.Print("Please input the Client ID: ")
+			sso.Enabled = true
+		case 5:
+			fmt.Print((colorWhite), "Please input the Client ID: ")
 			clientid := formatInput()
 			sso.ClientId = clientid
-			fmt.Print("Please input the Client Secret: ")
+			sso.Enabled = true
+		case 6:
+			fmt.Print((colorWhite), "Please input the Client Secret: ")
 			var clientsecret string
 			fmt.Scan(&clientsecret)
 			sso.ClientSecret = clientsecret
-			fmt.Print("Please input the Azure Tenant: ")
+			sso.Enabled = true
+		case 7:
+			fmt.Print((colorWhite), "Please input the Azure Tenant: ")
 			azure := formatInput()
 			sso.AzureTenant = azure
-			fmt.Print("Please input the OIDC Issuer URL: ")
+			sso.Enabled = true
+		case 8:
+			fmt.Print((colorWhite), "Please input the OIDC Issuer URL: ")
 			oidc := formatInput()
 			sso.OidcIssuerUrl = oidc
+			sso.Enabled = true
+		}
+		if intVar == 9 {
+			fmt.Println((colorYellow), "Saving and Exiting Single Sign On menu")
 			break
 		}
 	}

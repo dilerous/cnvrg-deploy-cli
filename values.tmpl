@@ -106,12 +106,26 @@ tenancy:
 {{- if .Sso.Enabled }}
 sso:
   enabled: {{ .Sso.Enabled }}
+{{- end }}
+{{- if .Sso.AdminUser }}
   adminUser: {{ .Sso.AdminUser }}
+{{- end }}
+{{- if .Sso.Provider }}
   provider: {{ .Sso.Provider }}
-  emailDomain: {{ .Sso.EmailDomain }}
+{{- end }}
+{{- if .Sso.EmailDomain }}
+  emailDomain: [ {{ .Sso.EmailDomain }} ]
+{{- end }}
+{{- if .Sso.ClientId }}
   clientId: {{ .Sso.ClientId }}
+{{- end }}
+{{- if .Sso.ClientSecret }}
   clientSecret: {{ .Sso.ClientSecret }}
+{{- end }}
+{{- if .Sso.AzureTenant }}
   azureTenant: {{ .Sso.AzureTenant }}
+{{- end }}
+{{- if .Sso.OidcIssuerUrl }}
   oidcIssuerUrl: {{ .Sso.OidcIssuerUrl }}
 {{- end }}
 
