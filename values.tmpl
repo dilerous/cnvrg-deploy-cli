@@ -129,27 +129,45 @@ sso:
   oidcIssuerUrl: {{ .Sso.OidcIssuerUrl }}
 {{- end }}
 
-{{- if .Storage.Nfs.Enabled }}
+{{- if or (.Storage.Nfs.Enabled) (.Storage.Hostpath.Enabled) }}
 storage:
   nfs:
     enabled: {{ .Storage.Nfs.Enabled }}
+{{- end }}
+{{- if .Storage.Nfs.Server }}
     server: {{ .Storage.Nfs.Server }}
+{{- end }}
+{{- if .Storage.Nfs.Path }}
     path: {{ .Storage.Nfs.Path }}
+{{- end }}
+{{- if .Storage.Nfs.DefaultSc }}
     defaultSc: {{ .Storage.Nfs.DefaultSc }}
+{{- end }}
+{{- if .Storage.Nfs.ReclaimPolicy }}
     reclaimPolicy: {{ .Storage.Nfs.ReclaimPolicy }}
+{{- end }}
+{{- if .Storage.Nfs.Image }}
     image: {{ .Storage.Nfs.Image }}
 {{- end }}
 
 {{- if .Storage.Hostpath.Enabled }}
-storage:
   hostpath:
     enabled: {{ .Storage.Hostpath.Enabled }}
+{{- end }}
+{{- if .Storage.Hostpath.DefaultSc }}
     defaultSc: {{ .Storage.Hostpath.DefaultSc }}
+{{- end }}
+{{- if .Storage.Hostpath.Path }}
     path: {{ .Storage.Hostpath.Path }}
+{{- end }}
+{{- if .Storage.Hostpath.ReclaimPolicy }}
     reclaimPolicy: {{ .Storage.Hostpath.ReclaimPolicy }}
+{{- end }}
+{{- if .Storage.Hostpath.NodeSelector }}
     nodeSelector: {{ .Storage.Hostpath.NodeSelector }}
 {{- end }}
     
+
 {{- if or (not .Gpu.NvidiaEnable) (not .Gpu.HabanaEnable) }}
 gpu:
 {{- end  }}

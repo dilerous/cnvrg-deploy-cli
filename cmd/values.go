@@ -1185,6 +1185,7 @@ func gatherStorage(storage *Storage) {
 				intVar, _ := strconv.Atoi(caseInput)
 				switch intVar {
 				case 1:
+					storage.Hostpath.Enabled = true
 					storage.Hostpath.DefaultSc = true
 					fmt.Println((colorYellow), "HostPath set as default Storage Class")
 				case 2:
@@ -1242,13 +1243,23 @@ func gatherStorage(storage *Storage) {
 					storage.Nfs.Path = path
 					storage.Nfs.Enabled = true
 				case 3:
+					storage.Nfs.Enabled = true
 					storage.Nfs.DefaultSc = true
 					fmt.Println((colorYellow), "NFS set as default Storage Class")
 				case 4:
-					fmt.Print((colorBlue), "Set the Reclaim Policy [Reclaim, Delete or Recycle]: ")
 					var input string
-					fmt.Scanln(&input)
-					storage.Nfs.ReclaimPolicy = input
+					var policy = []string{"Retain", "Delete", "Recycle"}
+					done := true
+					for done {
+						fmt.Print((colorBlue), "Set the Reclaim Policy [Retain, Delete or Recycle]: ")
+						fmt.Scanln(&input)
+						for _, s := range policy {
+							if input == s {
+								storage.Nfs.ReclaimPolicy = input
+								done = false
+							}
+						}
+					}
 					storage.Nfs.Enabled = true
 				}
 				if intVar == 5 {
