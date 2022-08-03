@@ -343,7 +343,6 @@ dbs:
       memory: {{ .Dbs.PgPagesMemory }}
 {{- end }}
 
-
 {{- if or (not .Dbs.RedisEnable) (.Dbs.RedisStorageSize) (.Dbs.RedisStorageClass) (.Dbs.RedisNodeSelector) }}
   redis:
     enabled: {{ .Dbs.RedisEnable }}
@@ -359,9 +358,15 @@ dbs:
 {{- end }}
 
 
-{{- if .ControlPlane.Image }}
+{{- if or (.ControlPlane.Image) (not .ControlPlane.HyperEnable) (not .ControlPlane.CnvrgScheduleEnable) (.ControlPlane.CnvrgClusterProvisionerEnable)
+(.ControlPlane.ObjectStorageType) (not .ControlPlane.SearchkiqEnable) (not .ControlPlane.SidekiqEnable) (.ControlPlane.CnvrgRouterEnable) (not .ControlPlane.WebappEnable)
+(.ControlPlane.SmtpServer) (not .ControlPlane.SystemkiqEnable) }}
 controlPlane:
+{{- end }}
+{{- if .ControlPlane.Image }}
   image: {{ .ControlPlane.Image }}
+{{- end }}
+{{- if or (.ControlPlane.BaseConfigAgentTag) (.ControlPlane.BaseConfigIntercom) (.ControlPlane.BaseConfigFeatureFlags) (.ControlPlane.BaseConfigCnvrgPrivileged) }}
   baseConfig:
     agentCustomTag: {{ .ControlPlane.BaseConfigAgentTag }}
     intercom: {{ .ControlPlane.BaseConfigIntercom }}
@@ -403,74 +408,119 @@ controlPlane:
     enabled: {{ .ControlPlane.SearchkiqEnable }}
 {{- end }}
 
-{{- if eq .ControlPlane.SearchkiqHpaEnable false }}
+{{- if or (not .ControlPlane.SearchkiqHpaEnable) (.ControlPlane.SearchkiqHpaMaxReplicas) }}
     hpa:
       enabled: {{ .ControlPlane.SearchkiqHpaEnable }}
+{{- end }}
+{{- if .ControlPlane.SearchkiqHpaMaxReplicas }}
       maxReplicas: {{ .ControlPlane.SearchkiqHpaMaxReplicas }}
 {{- end }}
 
-{{- if eq .ControlPlane.SidekiqEnable false }}
+{{- if or (not .ControlPlane.SidekiqEnable) (.ControlPlane.SidekiqSplit) }}
   sidekiq:
     enabled: {{ .ControlPlane.SidekiqEnable }}
+{{- end }}
+{{- if .ControlPlane.SidekiqSplit }}
     split: {{ .ControlPlane.SidekiqSplit }}
 {{- end }}
 
-{{- if eq .ControlPlane.SidekiqHpaEnable false }}
+{{- if or (not .ControlPlane.SidekiqHpaEnable) (.ControlPlane.SidekiqHpaMaxReplicas) }}
     hpa:
       enabled: {{ .ControlPlane.SidekiqHpaEnable }}
+{{- end }}
+{{- if .ControlPlane.SidekiqHpaMaxReplicas }}
       maxReplicas: {{ .ControlPlane.SidekiqHpaMaxReplicas }}
 {{- end }}
 
-{{- if .ControlPlane.CnvrgRouterEnable }}
+{{- if or (.ControlPlane.CnvrgRouterEnable) (.ControlPlane.CnvrgRouterImage) }}
   cnvrgRouter:
     enabled: {{ .ControlPlane.CnvrgRouterEnable }}
+{{- end }}
+{{- if .ControlPlane.CnvrgRouterImage }}
     image: {{ .ControlPlane.CnvrgRouterImage }}
 {{- end }}
 
-{{- if .ControlPlane.SmtpServer }}
+{{- if or (.ControlPlane.SmtpServer) (.ControlPlane.SmtpPort) (.ControlPlane.SmtpUsername) (.ControlPlane.SmtpPassword) (.ControlPlane.SmtpDomain)
+ (.ControlPlane.SmtpOpenSslMode) (.ControlPlane.SmtpSender) }}
   smtp:
+{{- end }}
+{{- if .ControlPlane.SmtpServer }}
     server: {{ .ControlPlane.SmtpServer }}
+{{- end }}
+{{- if .ControlPlane.SmtpPort }}
     port: {{ .ControlPlane.SmtpPort }}
+{{- end }}
+{{- if .ControlPlane.SmtpUsername }}    
     username: {{ .ControlPlane.SmtpUsername }}
+{{- end }}
+{{- if .ControlPlane.SmtpPassword }}
     password: {{ .ControlPlane.SmtpPassword }}
+{{- end }}
+{{- if .ControlPlane.SmtpDomain }}
     domain: {{ .ControlPlane.SmtpDomain }}
+{{- end }}
+{{- if .ControlPlane.SmtpOpenSslMode }}
     opensslVerifyMode: {{ .ControlPlane.SmtpOpenSslMode }}
+{{- end }}
+{{- if .ControlPlane.SmtpSender }}
     sender: {{ .ControlPlane.SmtpSender }}
 {{- end }}
 
-{{- if eq .ControlPlane.SystemkiqEnable false }}
+{{- if not .ControlPlane.SystemkiqEnable }}
   systemkiq:
     enabled: {{ .ControlPlane.SystemkiqEnable }}
 {{- end }}
 
-{{- if eq .ControlPlane.SystemkiqHpaEnable false }}
+{{- if or (not .ControlPlane.SystemkiqHpaEnable) (.ControlPlane.SystemkiqHpaMaxReplicas) }}
     hpa:
       enabled: {{ .ControlPlane.SystemkiqHpaEnable }}
+{{- end }}
+{{- if .ControlPlane.SystemkiqHpaMaxReplicas }}
       maxReplicas: {{ .ControlPlane.SystemkiqHpaMaxReplicas }}
 {{- end }}
 
-{{- if eq .ControlPlane.WebappEnable false }}
+{{- if or (not .ControlPlane.WebappEnable) (.ControlPlane.WebappSvcName) (.ControlPlane.WebappReplicas) }}
   webapp:
     enabled: {{ .ControlPlane.WebappEnable }}
+{{- end }}
+{{- if .ControlPlane.WebappSvcName }}
     svcName: {{ .ControlPlane.WebappSvcName }}
+{{- end }}
+{{- if .ControlPlane.WebappReplicas }}
     replicas: {{ .ControlPlane.WebappReplicas }}
 {{- end }}
-
-{{- if eq .ControlPlane.WebappHpaEnable false }}
+{{- if or (not .ControlPlane.WebappHpaEnable) (.ControlPlane.WebappHpaMaxReplicas) }}
     hpa:
       enabled: {{ .ControlPlane.WebappHpaEnable }}
+{{- end }}
+{{- if .ControlPlane.WebappHpaMaxReplicas }}
       maxReplicas: {{ .ControlPlane.WebappHpaMaxReplicas }}
 {{- end }}
 
-{{- if eq .ControlPlane.MpiEnable false }}     
+{{- if or (not .ControlPlane.MpiEnable) (.ControlPlane.MpiImage) (.ControlPlane.MpiKubectlImage) (.ControlPlane.MpiExtraArgs)
+(.ControlPlane.MpiRegistryUrl) (.ControlPlane.MpiRegistryUser) (.ControlPlane.MpiRegistryPassword) }}     
   mpi: 
     enabled: {{ .ControlPlane.MpiEnable }}
+{{- end }}
+{{- if .ControlPlane.MpiImage }}
     image: {{ .ControlPlane.MpiImage }}
+{{- end }}
+{{- if .ControlPlane.MpiKubectlImage }}
     kubectlDeliveryImage: {{ .ControlPlane.MpiKubectlImage }}
+{{- end }}
+{{- if .ControlPlane.MpiExtraArgs }}
     extraArgs: { {{ .ControlPlane.MpiExtraArgs }} }
+{{- end }}
+{{- if or (.ControlPlane.MpiRegistryUrl) (.ControlPlane.MpiRegistryUser) (.ControlPlane.MpiRegistryPassword) }}
     registry:
+{{- end }}
+{{- if .ControlPlane.MpiRegistryUrl }}
       url: {{ .ControlPlane.MpiRegistryUrl }}
+{{- end }}
+{{- if .ControlPlane.MpiRegistryUser }}
       user: {{ .ControlPlane.MpiRegistryUser }}
+{{- end }}
+{{- if .ControlPlane.MpiRegistryPassword }}
       password: {{ .ControlPlane.MpiRegistryPassword }}
 {{- end }}
 

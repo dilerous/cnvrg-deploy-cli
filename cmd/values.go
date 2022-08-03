@@ -666,10 +666,6 @@ func gatherMonitoring(monitoring *Monitoring) {
 func gatherControlPlane(controlplane *ControlPlane) {
 	log.Println("In the gatherControlPlane function")
 
-	colorYellow := "\033[33m"
-	colorBlue := "\033[34m"
-	colorWhite := "\033[37m"
-
 	for {
 		fmt.Println((colorGreen), "----ControlPlane Menu----")
 		fmt.Println((colorGreen), "Update ControlPlane values")

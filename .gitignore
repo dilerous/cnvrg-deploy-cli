@@ -1,4 +1,5 @@
 cnvrg-deploy-cli
+.gitignore
 values.yaml
 logs.txt
 .DS_Store
