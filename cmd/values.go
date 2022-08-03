@@ -30,6 +30,12 @@ var (
 func init() {
 	createCmd.AddCommand(valuesCmd)
 	temp = template.Must(template.ParseFiles("values.tmpl"))
+	// Create and configure a log.txt file to capture all errors and logs
+	file, error := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if error != nil {
+		log.Fatal(error)
+	}
+	log.SetOutput(file)
 }
 
 // Parent struct for the Backup values
@@ -1375,14 +1381,6 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		// Create and configure a log.txt file to capture all errors and logs
-		file, error := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-		if error != nil {
-			log.Fatal(error)
-		}
-		log.SetOutput(file)
-
 		// set variables for each struct defined above - Used in gather functions for each menu item
 		// This also sets any defaults needed for templating
 		internalDomain := ClusterInteralDomain{Domain: "cluster.local"}
