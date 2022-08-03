@@ -314,7 +314,7 @@ func gatherLabels(labels *Labels) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Print((colorBlue), "To add a Label, enter with the format[ key: value ]; 'return' when done: ")
+		fmt.Print((colorBlue), "Add Label with format [ key: value ]; 'return' when done: ")
 		scanner.Scan()
 		text := scanner.Text()
 
@@ -343,7 +343,7 @@ func gatherAnnotations(annotations *Annotations) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Print((colorBlue), "To add an Annotation enter with the format: [key: value,]; 'return' when done: ")
+		fmt.Print((colorBlue), "Add Annotation with format [key: value]; 'return' when done: ")
 		scanner.Scan()
 
 		text := scanner.Text()
@@ -592,7 +592,7 @@ func gatherNetworking(network *Networking) {
 			}
 		}
 		if intVar == 5 {
-			fmt.Print((colorYellow), "Saving and Exiting Networking Menu")
+			fmt.Println((colorYellow), "Saving and Exiting Networking Menu")
 			break
 		}
 	}
@@ -651,7 +651,7 @@ func gatherMonitoring(monitoring *Monitoring) {
 			fmt.Println((colorYellow), "cnvrg Idle Metrics Disabled")
 		}
 		if intVar == 10 {
-			fmt.Print((colorYellow), "Saving and Exiting Menu")
+			fmt.Println((colorYellow), "Saving and Exiting Menu")
 			break
 		}
 	}
@@ -1344,6 +1344,26 @@ func gatherSso(sso *Sso) {
 	}
 }
 
+// Function that will take a name and create a file
+// in the root directory from Template
+func createFile(name string, template *Template) {
+
+	// Creating an empty file
+	// Using Create() function
+	myfile, e := os.Create(name)
+	if e != nil {
+		log.Fatal(e)
+	}
+	log.Println(myfile)
+
+	// Execute the template and write to the file which was previously created
+	f := temp.Execute(myfile, template)
+	if f != nil {
+		log.Print(f)
+	}
+	myfile.Close()
+}
+
 // valuesCmd represents the values command
 var valuesCmd = &cobra.Command{
 	Use:   "values",
@@ -1391,7 +1411,7 @@ to quickly create a Cobra application.`,
 		clusterdomain := ClusterDomain{}
 		gatherClusterDomain(&clusterdomain)
 		for {
-			fmt.Println((colorGreen), "  ----------------------------- Main Menu -----------------------------")
+			fmt.Println((colorGreen), "----------------------------- Main Menu -----------------------------")
 			fmt.Println((colorGreen), "Please make a selection to modify the values file for the cnvrg.io install")
 			fmt.Println((colorBlue), "Press '1' To add Labels and Annotations or change the Internal Domain")
 			fmt.Println((colorBlue), "Press '2' To modify Networks settings E.g. Istio, NodePort, HTTPS")
@@ -1448,7 +1468,7 @@ to quickly create a Cobra application.`,
 						gatherConfigReloader(&configreloader)
 					}
 					if intVar == 5 {
-						fmt.Print((colorYellow), "Saving changes and exiting")
+						fmt.Println((colorYellow), "Saving changes and exiting")
 						break
 					}
 				}
@@ -1471,5 +1491,6 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Print(err)
 		}
+		createFile("values.yaml", &finaltemp)
 	},
 }

@@ -221,7 +221,7 @@ monitoring:
     enabled: {{ .Monitoring.HabanaExportEnable }}
 {{- end }}
 
-{{- if eq .Monitoring.NodeExportEnable false }}
+{{- if not .Monitoring.NodeExportEnable }}
   nodeExporter:
     enabled: {{ .Monitoring.NodeExportEnable }}
 {{- end }}
@@ -231,9 +231,11 @@ monitoring:
     enabled: {{ .Monitoring.KubeStateMetricEnable }}
 {{- end }}
 
-{{- if eq .Monitoring.GrafanaEnable  false }}
+{{- if or (not .Monitoring.GrafanaEnable) (.Monitoring.GrafanaSvcName) }}
   grafana:
     enabled: {{ .Monitoring.GrafanaEnable }}
+{{- end }}
+{{- if .Monitoring.GrafanaSvcName }}
     svcName: {{ .Monitoring.GrafanaSvcName }}
 {{- end }}
 
@@ -242,11 +244,17 @@ monitoring:
     enabled: {{ .Monitoring.PrometheusOperatorEnable }}
 {{- end }}
 
-{{- if eq .Monitoring.PrometheusEnable false }}
+{{- if or (not .Monitoring.PrometheusEnable) (.Monitoring.PrometheusStorageSize) (.Monitoring.PrometheusStorageClass) (.Monitoring.PrometheusNodeSelector) }}
   prometheus:
     enabled: {{ .Monitoring.PrometheusEnable }}
+{{- end }}
+{{- if .Monitoring.PrometheusStorageSize }}
     storageSize: {{ .Monitoring.PrometheusStorageSize }}
+{{- end }}
+{{- if .Monitoring.PrometheusStorageClass }}
     storageClass: {{ .Monitoring.PrometheusStorageClass }}
+{{- end }}
+{{- if .Monitoring.PrometheusNodeSelector }}
     nodeSelector: { {{ .Monitoring.PrometheusNodeSelector }} }
 {{- end }}
 
@@ -258,6 +266,8 @@ monitoring:
 {{- if eq .Monitoring.CnvrgIdleMetricsEnable false }}
   cnvrgIdleMetricsExporter:
     enabled: {{ .Monitoring.CnvrgIdleMetricsEnable }}
+{{- end }}
+{{- if .Monitoring.CnvrgIdleMetricsLabels }}
     labels: { {{ .Monitoring.CnvrgIdleMetricsLabels }} }
 {{- end }}
 
@@ -293,33 +303,61 @@ dbs:
       endpoints: {{ .Dbs.CleanUpEndpoints }} 
 {{- end }}
 
-{{- if eq .Dbs.MinioEnable false }} 
+{{- if or (not .Dbs.MinioEnable) (.Dbs.MinioStorageSize) (.Dbs.MinioStorageClass) (.Dbs.MinioNodeSelector) }} 
   minio:
     enabled: {{ .Dbs.MinioEnable }}
+{{- end }}
+{{- if .Dbs.MinioStorageSize }}
     storageSize: {{ .Dbs.MinioStorageSize }}
+{{- end }}
+{{- if .Dbs.MinioStorageClass }}
     storageClass: {{ .Dbs.MinioStorageClass }}
+{{- end }}
+{{- if .Dbs.MinioNodeSelector }}
     nodeSelector: { {{ .Dbs.MinioNodeSelector }} }
 {{- end }}
 
-{{- if eq .Dbs.PgEnable false }}    
+{{- if or (not .Dbs.PgEnable) (.Dbs.PgStorageSize) (.Dbs.PgStorageClass) (.Dbs.PgNodeSelector) }}    
   pg:
     enabled: {{ .Dbs.PgEnable }}
+{{- end }}
+{{- if .Dbs.PgStorageSize }}
     storageSize: {{ .Dbs.PgStorageSize }}
+{{- end }}
+{{- if .Dbs.PgStorageClass }}
     storageClass: {{ .Dbs.PgStorageClass }}
+{{- end }}
+{{- if .Dbs.PgNodeSelector }}
     nodeSelector: { {{ .Dbs.PgNodeSelector }} }
+{{- end }}
+{{- if or (.Dbs.PgPagesEnable) (.Dbs.PgPagesSize) (.Dbs.PgPagesMemory) }}
     hugePages:
+{{- end }}
+{{- if .Dbs.PgPagesEnable }}
       enabled: {{ .Dbs.PgPagesEnable }}
+{{- end }}
+{{- if .Dbs.PgPagesSize }}
       size: {{ .Dbs.PgPagesSize }}
+{{- end }}
+{{- if .Dbs.PgPagesMemory }}
       memory: {{ .Dbs.PgPagesMemory }}
 {{- end }}
 
-{{- if eq .Dbs.RedisEnable false }}
+
+{{- if or (not .Dbs.RedisEnable) (.Dbs.RedisStorageSize) (.Dbs.RedisStorageClass) (.Dbs.RedisNodeSelector) }}
   redis:
     enabled: {{ .Dbs.RedisEnable }}
+{{- end }}
+{{- if .Dbs.RedisStorageSize }}
     storageSize: {{ .Dbs.RedisStorageSize }}
+{{- end }}
+{{- if .Dbs.RedisStorageSize }}
     storageClass: {{ .Dbs.RedisStorageClass }}
+{{- end }}
+{{- if .Dbs.RedisStorageSize }}
     nodeSelector: {{ .Dbs.RedisNodeSelector }}
 {{- end }}
+
 
 {{- if .ControlPlane.Image }}
 controlPlane:
