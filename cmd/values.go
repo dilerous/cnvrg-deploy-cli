@@ -461,7 +461,7 @@ func gatherNetworking(network *Networking) {
 		case 1:
 			log.Println("In case statement 1 - Proxy")
 			for {
-				fmt.Print("Do you want to enable a Proxy? ")
+				fmt.Print((colorBlue), "Do you want to enable a Proxy (yes/no)? ")
 				enableProxy := formatInput()
 				if enableProxy == "yes" {
 					network.Proxy.Enabled = true
@@ -491,6 +491,10 @@ func gatherNetworking(network *Networking) {
 							fmt.Println((colorYellow), "Saving and Exiting Proxy section")
 							break
 						}
+						if intVar == 4 {
+							fmt.Println((colorYellow), "Saving and Exiting Proxy section")
+							break
+						}
 					}
 				}
 				fmt.Println("Please enter 'yes' or 'no':")
@@ -498,29 +502,61 @@ func gatherNetworking(network *Networking) {
 					network.Proxy.Enabled = false
 					break
 				}
-				if enableProxy == "exit" {
-					break
-				}
+
 			}
 		case 2:
 			log.Println("In Case statement 2 - Ingress")
-			fmt.Print("Do you want to configure an ingress controller? ")
-			externalIngress := formatInput()
-			if externalIngress == "yes" {
-				fmt.Print("What is the ingress type [istio|ingress|openshift|nodeport]?: ")
+			fmt.Println((colorGreen), "----Ingress Menu----")
+			fmt.Println((colorGreen), "Update Ingress values")
+			fmt.Println((colorBlue), "Press '1' to modify Ingress Type [default: istio")
+			fmt.Println((colorBlue), "Press '3' to input extra No Proxy values to use")
+			fmt.Println((colorBlue), "Press '4' to Save and Exit Proxy settings")
+			fmt.Print((colorWhite), "Please make your selection: ")
+			caseInput := formatInput()
+			intVar, _ := strconv.Atoi(caseInput)
+			switch intVar {
+			case 1:
+				fmt.Print((colorWhite), "What is the ingress type [istio|ingress|openshift|nodeport]?: ")
 				ingressType := formatInput()
-				network.Ingress.Type = ingressType
-				if ingressType != "istio" {
-					network.Ingress.IstioGwEnabled = false
-					network.Ingress.IstioGwName = ""
-					network.Ingress.External = true
+				if ingressType == "istio" {
+					fmt.Println((colorBlue), "Press '1' to modify External IP")
+					fmt.Println((colorBlue), "Press '2' to modify Service Annotations")
+					fmt.Println((colorBlue), "Press '3' to modify Service Extra Ports")
+					fmt.Println((colorBlue), "Press '4' to modify Load Balance Source Ranges")
+					fmt.Println((colorBlue), "Press '5' to Save and Exit")
+					fmt.Print((colorWhite), "Please make your selection: ")
+					caseInput := formatInput()
+					intVar, _ := strconv.Atoi(caseInput)
+					switch intVar {
+					case 1:
+						fmt.Print((colorWhite), "Input External IPs")
+						input := createSlice()
+						network.Istio.ExternalIp = input
+					case 2:
+						fmt.Print((colorWhite), "Input Service Annotations")
+						input := createSlice()
+						network.Istio.IngressSvcAnnotations = input
+					case 3:
+						fmt.Print((colorWhite), "Input Service Extra Ports")
+						input := createSlice()
+						network.Istio.IngressSvcExtraPorts = input
+					case 4:
+						fmt.Print((colorWhite), "Input Load Balance Source Ranges")
+						input := createSlice()
+						network.Istio.LbSourceRanges = input
+					}
+					if intVar == 5 {
+						fmt.Println((colorYellow), "Saving and Exiting Proxy section")
+						break
+					}
+
 				}
-				continue
+				if ingressType == "ingress" {
+					network.Ingress.Type = "ingress"
+					continue
+				}
 			}
-			if externalIngress == "no" {
-				network.Ingress.External = false
-				continue
-			}
+
 		case 3:
 			log.Println("In case statement 3 - HTTPS")
 			for {

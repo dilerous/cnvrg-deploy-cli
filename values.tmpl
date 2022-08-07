@@ -17,18 +17,28 @@ labels:{ {{ .Labels.Stringify }} }
 annotations:{ {{ .Annotations.Stringify }} }
 {{- end }}
 
-{{- if .Network.Https.Enabled }}
+{{- if or (.Network.Https.Enabled) (.Network.Proxy.Enabled) (.Network.Ingress.External) (not .Network.Istio.Enabled) }}
 networking:
+{{- end }}
+{{- if or (.Network.Https.Enabled) (.Network.Https.CertSecret) }}
   https:
     enabled: {{ .Network.Https.Enabled }}
+{{- end }}
+{{- if .Network.Https.CertSecret }}
     certSecret: {{ .Network.Https.CertSecret }}
 {{- end }}
 
 {{- if .Network.Proxy.Enabled }}
   proxy:
     enabled: {{ .Network.Proxy.Enabled }}
+{{- end }}
+{{- if .Network.Proxy.HttpProxy }}
     httpProxy:[ {{ .Network.Proxy.HttpProxy }} ]
+{{- end }}
+{{- if .Network.Proxy.HttpsProxy }}
     httpsProxy:[ {{ .Network.Proxy.HttpsProxy }} ]
+{{- end }}
+{{- if .Network.Proxy.NoProxy }}
     noProxy:[ {{ .Network.Proxy.NoProxy }} ]
 {{- end }}
 
@@ -523,4 +533,3 @@ controlPlane:
 {{- if .ControlPlane.MpiRegistryPassword }}
       password: {{ .ControlPlane.MpiRegistryPassword }}
 {{- end }}
-
