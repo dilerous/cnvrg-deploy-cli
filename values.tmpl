@@ -17,7 +17,8 @@ labels:{ {{ .Labels.Stringify }} }
 annotations:{ {{ .Annotations.Stringify }} }
 {{- end }}
 
-{{- if or (.Network.Https.Enabled) (.Network.Proxy.Enabled) (.Network.Ingress.External) (not .Network.Istio.Enabled) }}
+{{- if or (.Network.Https.Enabled) (.Network.Proxy.Enabled) (.Network.Ingress.External) (not .Network.Istio.Enabled) (.Network.Istio.ExternalIp)
+(.Network.Istio.IngressSvcAnnotations) (.Network.Istio.IngressSvcExtraPorts) (.Network.Istio.LbSourceRanges) }}
 networking:
 {{- end }}
 {{- if or (.Network.Https.Enabled) (.Network.Https.CertSecret) }}

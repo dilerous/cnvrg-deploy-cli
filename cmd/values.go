@@ -298,19 +298,19 @@ func gatherInternalDomain(domain *ClusterInteralDomain) {
 	InfoLogger.Println("In the gatherInternalDomain function")
 
 	for {
-		fmt.Print((colorBlue), "Do you want to change the internal cluster domain? [default: cluster.local] (yes/no): ")
+		fmt.Println((colorBlue), "Press '1' to modify Internal Cluster Domain [default: cluster.local]")
+		fmt.Println((colorBlue), "Press '2' to Save and Exit")
+		fmt.Print((colorWhite), "Please make your selection: ")
 		input := formatInput()
-
-		if input == "yes" {
-			fmt.Print((colorBlue), "Please enter the internal cluster domain: ")
+		intVar, _ := strconv.Atoi(input)
+		if intVar == 1 {
+			fmt.Print((colorWhite), "Please enter the internal cluster domain: ")
 			clusterInput := formatInput()
 			domain.Domain = clusterInput
-			fmt.Printf("Setting the internal cluster domain to %v\n", domain.Domain)
-			break
+			InfoLogger.Printf("Setting the internal cluster domain to %v\n", domain.Domain)
 		}
-		if input == "no" {
-			domain.Domain = "cluster.local"
-			fmt.Printf("Setting the internal cluster domain to %v\n", domain.Domain)
+		if intVar == 2 {
+			fmt.Println((colorYellow), "Saving and Exiting Internal Domain menu")
 			break
 		}
 	}
@@ -330,7 +330,7 @@ func gatherLabels(labels *Labels) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Print((colorBlue), "Add Label with format [ key: value ]; 'return' when done: ")
+		fmt.Print((colorWhite), "Add Label, format [key: value]; 'return' when done: ")
 		scanner.Scan()
 		text := scanner.Text()
 
@@ -359,7 +359,7 @@ func gatherAnnotations(annotations *Annotations) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Print((colorBlue), "Add Annotation with format [key: value]; 'return' when done: ")
+		fmt.Print((colorWhite), "Add Annotation, format [key: value]; 'return' when done: ")
 		scanner.Scan()
 
 		text := scanner.Text()
@@ -425,11 +425,38 @@ func formatInput() string {
 	return input
 }
 
+// The function prompts for a key value value
+// Takes the key value and returns a string
+func createArray() string {
+	InfoLogger.Println("In the createArray function")
+	scanner := bufio.NewScanner(os.Stdin)
+	var key []string
+	var stringify string
+
+	for {
+		fmt.Print((colorWhite), "Format [key: value]; 'return' when done: ")
+		scanner.Scan()
+		text := scanner.Text()
+
+		if len(text) != 0 {
+			key = append(key, text)
+		} else {
+			break
+		}
+	}
+	for _, v := range key {
+		stringify += fmt.Sprintf("%s, ", v)
+
+	}
+	return stringify
+
+}
+
 // This function will return a slice as a string. You can enter
 // any number of values one line at a time.
 func createSlice() string {
 	InfoLogger.Println("In the createSlice function")
-	fmt.Println("Enter 1 value per line. Press 'return' when done: ")
+	fmt.Println((colorWhite), "Enter 1 value per line. Press 'return' when done: ")
 	consoleScanner := bufio.NewScanner(os.Stdin)
 	var slice []string
 	var finalSlice string
@@ -463,7 +490,7 @@ func gatherNetworking(network *Networking) {
 		fmt.Println((colorBlue), "Press '2' for Ingress Settings")
 		fmt.Println((colorBlue), "Press '3' for HTTPS Settings")
 		fmt.Println((colorBlue), "Press '4' for Istio Settings")
-		fmt.Println((colorBlue), "Press '5' to Save and Exit")
+		fmt.Println((colorBlue), "Press '5' to Save and Exit Network Menu")
 		fmt.Print((colorWhite), "Please make your selection: ")
 		caseInput := formatInput()
 		intVar, _ := strconv.Atoi(caseInput)
@@ -471,50 +498,41 @@ func gatherNetworking(network *Networking) {
 		case 1:
 			InfoLogger.Println("In case statement 1 - Proxy")
 			for {
-				fmt.Print((colorBlue), "Do you want to enable a Proxy (yes/no)? ")
-				enableProxy := formatInput()
-				if enableProxy == "yes" {
+				fmt.Println((colorGreen), "----Proxy Menu----")
+				fmt.Println((colorGreen), "Update Proxy values")
+				fmt.Println((colorBlue), "Press '1' to enable Proxy")
+				fmt.Println((colorBlue), "Press '2' to input HTTP proxies to use")
+				fmt.Println((colorBlue), "Press '3' to input HTTPS proxies to use")
+				fmt.Println((colorBlue), "Press '4' to input extra No Proxy values to use")
+				fmt.Println((colorBlue), "Press '5' to Save and Exit Proxy settings")
+				fmt.Print((colorWhite), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
 					network.Proxy.Enabled = true
-					for {
-						fmt.Println((colorGreen), "----Proxy Menu----")
-						fmt.Println((colorGreen), "Update Proxy values")
-						fmt.Println((colorBlue), "Press '1' to input HTTP proxies to use")
-						fmt.Println((colorBlue), "Press '2' to input HTTPS proxies to use")
-						fmt.Println((colorBlue), "Press '3' to input extra No Proxy values to use")
-						fmt.Println((colorBlue), "Press '4' to Save and Exit Proxy settings")
-						fmt.Print((colorWhite), "Please make your selection: ")
-						caseInput := formatInput()
-						intVar, _ := strconv.Atoi(caseInput)
-						switch intVar {
-						case 1:
-							fmt.Print((colorWhite), "Please enter a list of HTTP proxies")
-							slice := createSlice()
-							network.Proxy.HttpProxy = slice
-						case 2:
-							fmt.Print((colorWhite), "Please enter a list of HTTPS proxies")
-							slice := createSlice()
-							network.Proxy.HttpsProxy = slice
-						case 3:
-							fmt.Print((colorWhite), "Please enter a list of No proxies")
-							slice := createSlice()
-							network.Proxy.NoProxy = slice
-						}
-						if intVar == 4 {
-							fmt.Println((colorYellow), "Saving and Exiting Proxy section")
-							break
-						}
-						if intVar == 4 {
-							fmt.Println((colorYellow), "Saving and Exiting Proxy section")
-							break
-						}
-					}
+					fmt.Println((colorYellow), "Proxy enabled")
+					InfoLogger.Printf("Network Proxy set to %v\n", network.Proxy.Enabled)
+				case 2:
+					fmt.Println((colorBlue), "Please enter a list of HTTP proxies")
+					slice := createSlice()
+					network.Proxy.HttpProxy = slice
+					network.Proxy.Enabled = true
+				case 3:
+					fmt.Println((colorBlue), "Please enter a list of HTTPS proxies")
+					slice := createSlice()
+					network.Proxy.HttpsProxy = slice
+					network.Proxy.Enabled = true
+				case 4:
+					fmt.Println((colorBlue), "Please enter a list of No proxies")
+					slice := createSlice()
+					network.Proxy.NoProxy = slice
+					network.Proxy.Enabled = true
 				}
-				fmt.Println("Please enter 'yes' or 'no':")
-				if enableProxy == "no" {
-					network.Proxy.Enabled = false
+				if intVar == 5 {
+					fmt.Println((colorYellow), "Saving and Exiting Proxy section")
 					break
 				}
-
 			}
 		case 2:
 			for {
@@ -523,6 +541,7 @@ func gatherNetworking(network *Networking) {
 				fmt.Println((colorGreen), "Update Ingress values")
 				fmt.Println((colorBlue), "Press '1' to modify Ingress Type")
 				fmt.Println((colorBlue), "Press '2' to Save and Exit Ingress Menu")
+				fmt.Print((colorWhite), "Please make your selection: ")
 				caseInput := formatInput()
 				intVar, _ := strconv.Atoi(caseInput)
 				switch intVar {
@@ -530,50 +549,51 @@ func gatherNetworking(network *Networking) {
 					fmt.Print((colorWhite), "What is the ingress type [istio|ingress|openshift|nodeport]?: ")
 					ingressType := formatInput()
 					if ingressType == "istio" {
-						fmt.Println((colorGreen), "----Istio Menu----")
-						fmt.Println((colorGreen), "Update Istio values")
-						fmt.Println((colorBlue), "Press '1' to modify External IP")
-						fmt.Println((colorBlue), "Press '2' to modify Service Annotations")
-						fmt.Println((colorBlue), "Press '3' to modify Service Extra Ports")
-						fmt.Println((colorBlue), "Press '4' to modify Load Balance Source Ranges")
-						fmt.Println((colorBlue), "Press '5' to Save and Exit")
-						fmt.Print((colorWhite), "Please make your selection: ")
-						caseInput := formatInput()
-						intVar, _ := strconv.Atoi(caseInput)
-						switch intVar {
-						case 1:
-							fmt.Print((colorWhite), "Input External IPs")
-							input := createSlice()
-							network.Istio.ExternalIp = input
-						case 2:
-							fmt.Print((colorWhite), "Input Service Annotations")
-							input := createSlice()
-							network.Istio.IngressSvcAnnotations = input
-						case 3:
-							fmt.Print((colorWhite), "Input Service Extra Ports")
-							input := createSlice()
-							network.Istio.IngressSvcExtraPorts = input
-						case 4:
-							fmt.Print((colorWhite), "Input Load Balance Source Ranges")
-							input := createSlice()
-							network.Istio.LbSourceRanges = input
+						for {
+							fmt.Println((colorGreen), "----Istio Menu----")
+							fmt.Println((colorGreen), "Update Istio values")
+							fmt.Println((colorBlue), "Press '1' to modify External IP")
+							fmt.Println((colorBlue), "Press '2' to modify Service Annotations")
+							fmt.Println((colorBlue), "Press '3' to modify Service Extra Ports")
+							fmt.Println((colorBlue), "Press '4' to modify Load Balance Source Ranges")
+							fmt.Println((colorBlue), "Press '5' to Save and Exit")
+							fmt.Print((colorWhite), "Please make your selection: ")
+							caseInput := formatInput()
+							intVar, _ := strconv.Atoi(caseInput)
+							switch intVar {
+							case 1:
+								fmt.Print((colorWhite), "Input External IPs")
+								input := createSlice()
+								network.Istio.ExternalIp = input
+							case 2:
+								fmt.Print((colorWhite), "Input Service Annotations")
+								input := createSlice()
+								network.Istio.IngressSvcAnnotations = input
+							case 3:
+								fmt.Print((colorWhite), "Input Service Extra Ports")
+								input := createSlice()
+								network.Istio.IngressSvcExtraPorts = input
+							case 4:
+								fmt.Print((colorWhite), "Input Load Balance Source Ranges")
+								input := createSlice()
+								network.Istio.LbSourceRanges = input
+							}
+							if intVar == 5 {
+								fmt.Println((colorYellow), "Saving and Exiting Istio menu")
+								break
+							}
 						}
-						if intVar == 5 {
-							fmt.Println((colorYellow), "Saving and Exiting Istio menu")
-							break
-						}
-
 					}
 					if ingressType == "ingress" {
 						network.Ingress.Type = "ingress"
 						network.Istio.Enabled = false
-						fmt.Printf("Set Ingress to %v and Disabled Istio\n", ingressType)
+						fmt.Printf("Set Ingress to '%v' and Disabled Istio\n", ingressType)
 
 					}
 					if ingressType == "nodeport" {
 						network.Ingress.Type = "nodeport"
 						network.Istio.Enabled = false
-						fmt.Printf("Set Ingress to %v and Disabled Istio\n", ingressType)
+						fmt.Printf("Set Ingress to '%v' and Disabled Istio\n", ingressType)
 					}
 				}
 				if intVar == 2 {
@@ -590,27 +610,29 @@ func gatherNetworking(network *Networking) {
 
 				if caseThreeInput == "yes" {
 					network.Https.Enabled = true
-					fmt.Printf("The HTTPS network setting is %v\n", network.Https.Enabled)
+					InfoLogger.Printf("The HTTPS network setting is %v\n", network.Https.Enabled)
 					break
 				}
 				if caseThreeInput == "no" {
 					network.Https.Enabled = false
-					fmt.Printf("The HTTPS network setting is %v\n", network.Https.Enabled)
+					InfoLogger.Printf("The HTTPS network setting is %v\n", network.Https.Enabled)
 					break
 				}
-				fmt.Println("Please enter 'yes' or 'no' ")
 			}
-			fmt.Print((colorWhite), "Do you want to add a Certificate? (yes/no)")
-			certinput := formatInput()
-			if certinput == "yes" {
-				fmt.Print("What do you want to name the secret? ")
-				var certName string
-				fmt.Scan(&certName)
-				network.Https.CertSecret = certName
-				fmt.Printf("The secret name is %s \n", certName)
+			for {
+				fmt.Print((colorWhite), "Do you want to add a Certificate? (yes/no)")
+				certinput := formatInput()
+				if certinput == "yes" {
+					fmt.Print("What do you want to name the Certificate secret? ")
+					var certName string
+					fmt.Scan(&certName)
+					network.Https.CertSecret = certName
+					network.Https.Enabled = true
+					InfoLogger.Printf("The secret name is %s \n", certName)
+					break
+				}
 			}
 		case 4:
-
 			for {
 				fmt.Println((colorGreen), "----Istio Menu----")
 				fmt.Println((colorGreen), "Update Istio values")
@@ -619,7 +641,7 @@ func gatherNetworking(network *Networking) {
 				fmt.Println((colorBlue), "Press '3' list extra ports for istio ingress service")
 				fmt.Println((colorBlue), "Press '4' list extra LB sources ranges")
 				fmt.Println((colorBlue), "Press '5' map of strings for Istio SVC annotations")
-				fmt.Println((colorBlue), "Press '6' to Save and Exit Proxy settings")
+				fmt.Println((colorBlue), "Press '6' to Save and Exit Istio menu")
 				fmt.Print((colorWhite), "Please make your selection: ")
 				caseInput := formatInput()
 				intVar, _ := strconv.Atoi(caseInput)
@@ -627,30 +649,37 @@ func gatherNetworking(network *Networking) {
 				case 1:
 					network.Istio.Enabled = false
 					fmt.Println((colorYellow), "Istio is disabled")
-					InfoLogger.Printf("Istio has been disabled. Istio set to %v", network.Istio.Enabled)
+					InfoLogger.Printf("Istio set to %v", network.Istio.Enabled)
 				case 2:
-					fmt.Print((colorWhite), "Please enter a list of IPs to use for Istio ingress service: ")
+					fmt.Println((colorWhite), "Please enter a list of IPs to use for Istio ingress service: ")
 					slice := createSlice()
 					network.Istio.ExternalIp = slice
+					network.Istio.Enabled = true
 				case 3:
-					fmt.Print((colorWhite), "Please enter a list extra ports for Istio ingress service: ")
+					fmt.Println((colorWhite), "Please enter a list extra ports for Istio ingress service: ")
 					slice := createSlice()
 					network.Istio.IngressSvcExtraPorts = slice
-
+					network.Istio.Enabled = true
 				case 4:
-					fmt.Print((colorWhite), "Please enter a list of extra LB sources ranges: ")
+					fmt.Println((colorWhite), "Please enter a list of extra LB sources ranges: ")
 					slice := createSlice()
 					network.Istio.LbSourceRanges = slice
+					network.Istio.Enabled = true
 				case 5:
-					fmt.Print((colorWhite), "Please enter a map of strings for Istio SVC annotations: ")
-					slice := createSlice()
+					fmt.Println((colorWhite), "Please enter Istio SVC annotations: ")
+					slice := createArray()
 					network.Istio.IngressSvcAnnotations = slice
+					network.Istio.Enabled = true
 				}
 				if intVar == 6 {
 					fmt.Println((colorYellow), "Saving and Exiting Istio menu")
 					break
 				}
 			}
+		}
+		if intVar == 5 {
+			fmt.Println((colorYellow), "Saving and Exiting Networking menu")
+			break
 		}
 	}
 }
@@ -953,7 +982,7 @@ func gatherLogging(logging *Logging) {
 		fmt.Println((colorGreen), "Update Logging values")
 		fmt.Println((colorBlue), "Press '1' To disable Fluentbit")
 		fmt.Println((colorBlue), "Press '2' To disable Kibana")
-		fmt.Println((colorBlue), "Press '3' To configure or disable Elastalert")
+		fmt.Println((colorBlue), "Press '3' To configure Elastalert")
 		fmt.Println((colorBlue), "Press '4' To Save and Exit")
 		fmt.Print((colorWhite), "Please make your selection: ")
 		caseInput := formatInput()
@@ -962,42 +991,47 @@ func gatherLogging(logging *Logging) {
 		case 1:
 			logging.FluentbitEnable = false
 			fmt.Println((colorYellow), "Fluentbit is disabled")
+			InfoLogger.Printf("Fluentbit Enabled set to %v\n", logging.FluentbitEnable)
 		case 2:
 			logging.KibanaEnable = false
 			fmt.Println((colorYellow), "Kibana is disabled")
+			InfoLogger.Printf("Kibana Enabled set to %v\n", logging.KibanaEnable)
 		case 3:
 			for {
 				fmt.Println((colorGreen), "----Elastic Search Menu----")
 				fmt.Println((colorGreen), "Update Elastic Search values")
-				fmt.Println((colorBlue), "Press '1' to change the Storage Size")
-				fmt.Println((colorBlue), "Press '2' to change the Storage Class")
-				fmt.Println((colorBlue), "Press '3' to change the node Selector")
-				fmt.Println((colorBlue), "Press '4' to disable Elastalert")
+				fmt.Println((colorBlue), "Press '1' to disable Elastalert")
+				fmt.Println((colorBlue), "Press '2' to change the Storage Size")
+				fmt.Println((colorBlue), "Press '3' to change the Storage Class")
+				fmt.Println((colorBlue), "Press '4' to change the node Selector")
 				fmt.Println((colorBlue), "Press '5' to Save and Exit")
 				fmt.Print((colorWhite), "Please make your selection: ")
 				caseInput := formatInput()
 				intVar, _ := strconv.Atoi(caseInput)
 				switch intVar {
 				case 1:
-					fmt.Print("Please enter the new Storage Size in Gi: ")
+					logging.ElastalertEnable = false
+					fmt.Println((colorYellow), "Elastalert is disabled")
+				case 2:
+					fmt.Print((colorWhite), "Please enter the new Storage Size in Gi: ")
 					var storageSize string
 					fmt.Scan(&storageSize)
 					logging.ElastaStorageSize = storageSize + "Gi"
-				case 2:
-					fmt.Print("Please enter the new Storage Class: ")
+					logging.ElastalertEnable = true
+				case 3:
+					fmt.Print((colorWhite), "Please enter the new Storage Class: ")
 					var storageClass string
 					fmt.Scan(&storageClass)
 					logging.ElastaStorageClass = storageClass
-				case 3:
-					fmt.Print("Please enter the new Node Selector: ")
+					logging.ElastalertEnable = true
+				case 4:
+					fmt.Print((colorWhite), "Please enter the new Node Selector: ")
 					storageClass := createSlice()
 					logging.ElastaNodeSelector = storageClass
-				case 4:
-					logging.ElastalertEnable = false
-					fmt.Println((colorYellow), "Elastalert is disabled")
+					logging.ElastalertEnable = true
 				}
 				if intVar == 5 {
-					fmt.Println((colorYellow), "Saving and Exiting Elastalert menu")
+					fmt.Println((colorYellow), "Saving and Exiting Elastic Search menu")
 					break
 				}
 			}
@@ -1456,7 +1490,7 @@ to quickly create a Cobra application.`,
 		clusterdomain := ClusterDomain{}
 		gatherClusterDomain(&clusterdomain)
 		for {
-			fmt.Println((colorGreen), "----------------------------- Main Menu -----------------------------")
+			fmt.Println((colorGreen), "------------------------------- Main Menu -------------------------------")
 			fmt.Println((colorGreen), "Please make a selection to modify the values file for the cnvrg.io install")
 			fmt.Println((colorBlue), "Press '1' To modify Labeling---------------->[ Labels, Annotations or Internal Domain ]")
 			fmt.Println((colorBlue), "Press '2' To modify Networks settings------->[ Istio, NodePort, HTTPS ]")
@@ -1465,7 +1499,7 @@ to quickly create a Cobra application.`,
 			fmt.Println((colorBlue), "Press '5' To modify Tenancy settings-------->[ Node Selector ]")
 			fmt.Println((colorBlue), "Press '6' To modify Single Sign On settings->[ Admin, Provider, Azure Tenant ]")
 			fmt.Println((colorBlue), "Press '7' To modify Storage settings-------->[ NFS, Hostpath ] ")
-			fmt.Println((colorBlue), "Press '8' To modify Miscellaneous settings-->[ Backup, GPU, ConfigLoader or Capsule settings ]")
+			fmt.Println((colorBlue), "Press '8' To modify Miscellaneous settings-->[ Backup, GPU, ConfigLoader, Capsule ]")
 			fmt.Println((colorBlue), "Press '9' To modify Monitoring settings----->[ Prometheus, Grafana, Exporters ]")
 			fmt.Println((colorBlue), "Press '10' To modify Control Plane settings->[ CP Image, CP Services, SMTP ]")
 			fmt.Println((colorBlue), "Press '11' To modify Database settings------>[ Minio, Postgres, Redis ]")
