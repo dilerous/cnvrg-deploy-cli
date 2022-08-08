@@ -25,6 +25,11 @@ var (
 	colorWhite  = "\033[37m"
 	colorYellow = "\033[33m"
 	colorGreen  = "\033[32m"
+
+	// Set variables for error handling
+	WarningLogger *log.Logger
+	InfoLogger    *log.Logger
+	ErrorLogger   *log.Logger
 )
 
 func init() {
@@ -36,6 +41,11 @@ func init() {
 		log.Fatal(error)
 	}
 	log.SetOutput(file)
+
+	InfoLogger = log.New(file, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+	WarningLogger = log.New(file, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
+	ErrorLogger = log.New(file, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+
 }
 
 // Parent struct for the Backup values
@@ -275,7 +285,7 @@ and to prompt user for all clusterDomain wildcard dns entry
 and if they want to modify the internal cluster domain.
 */
 func gatherClusterDomain(cluster *ClusterDomain) {
-	log.Println("In the gatherClusterDomain function")
+	InfoLogger.Println("In the gatherClusterDomain function")
 
 	// Ask what the wildcard domain is
 	fmt.Print((colorBlue), "What is your wildcard domain? ")
@@ -285,7 +295,7 @@ func gatherClusterDomain(cluster *ClusterDomain) {
 }
 
 func gatherInternalDomain(domain *ClusterInteralDomain) {
-	log.Println("In the gatherInternalDomain function")
+	InfoLogger.Println("In the gatherInternalDomain function")
 
 	for {
 		fmt.Print((colorBlue), "Do you want to change the internal cluster domain? [default: cluster.local] (yes/no): ")
@@ -316,7 +326,7 @@ and to prompt user for all Labels settings this
 will return a struct
 */
 func gatherLabels(labels *Labels) {
-	log.Println("In the gatherLabels function")
+	InfoLogger.Println("In the gatherLabels function")
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -345,7 +355,7 @@ and to prompt user for all Annotations settings this
 will return a struct
 */
 func gatherAnnotations(annotations *Annotations) {
-	log.Println("In the gatherAnnotations function")
+	InfoLogger.Println("In the gatherAnnotations function")
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -418,7 +428,7 @@ func formatInput() string {
 // This function will return a slice as a string. You can enter
 // any number of values one line at a time.
 func createSlice() string {
-	log.Println("In the createSlice function")
+	InfoLogger.Println("In the createSlice function")
 	fmt.Println("Enter 1 value per line. Press 'return' when done: ")
 	consoleScanner := bufio.NewScanner(os.Stdin)
 	var slice []string
@@ -444,7 +454,7 @@ and to prompt user for all networking settings this
 will return a struct
 */
 func gatherNetworking(network *Networking) {
-	log.Println("In the gatherNetworking function")
+	InfoLogger.Println("In the gatherNetworking function")
 
 	for {
 		fmt.Println((colorGreen), "----Networking Menu----")
@@ -459,13 +469,15 @@ func gatherNetworking(network *Networking) {
 		intVar, _ := strconv.Atoi(caseInput)
 		switch intVar {
 		case 1:
-			log.Println("In case statement 1 - Proxy")
+			InfoLogger.Println("In case statement 1 - Proxy")
 			for {
 				fmt.Print((colorBlue), "Do you want to enable a Proxy (yes/no)? ")
 				enableProxy := formatInput()
 				if enableProxy == "yes" {
 					network.Proxy.Enabled = true
 					for {
+						fmt.Println((colorGreen), "----Proxy Menu----")
+						fmt.Println((colorGreen), "Update Proxy values")
 						fmt.Println((colorBlue), "Press '1' to input HTTP proxies to use")
 						fmt.Println((colorBlue), "Press '2' to input HTTPS proxies to use")
 						fmt.Println((colorBlue), "Press '3' to input extra No Proxy values to use")
@@ -505,12 +517,12 @@ func gatherNetworking(network *Networking) {
 
 			}
 		case 2:
-			log.Println("In Case statement 2 - Ingress")
+			InfoLogger.Println("In Case statement 2 - Ingress")
 			fmt.Println((colorGreen), "----Ingress Menu----")
 			fmt.Println((colorGreen), "Update Ingress values")
-			fmt.Println((colorBlue), "Press '1' to modify Ingress Type [default: istio")
-			fmt.Println((colorBlue), "Press '3' to input extra No Proxy values to use")
-			fmt.Println((colorBlue), "Press '4' to Save and Exit Proxy settings")
+			fmt.Println((colorBlue), "Press '1' to modify Ingress Type [default: istio]")
+			fmt.Println((colorBlue), "Press '2' to input extra No Proxy values to use")
+			fmt.Println((colorBlue), "Press '3' to Save and Exit Proxy settings")
 			fmt.Print((colorWhite), "Please make your selection: ")
 			caseInput := formatInput()
 			intVar, _ := strconv.Atoi(caseInput)
@@ -519,6 +531,8 @@ func gatherNetworking(network *Networking) {
 				fmt.Print((colorWhite), "What is the ingress type [istio|ingress|openshift|nodeport]?: ")
 				ingressType := formatInput()
 				if ingressType == "istio" {
+					fmt.Println((colorGreen), "----Istio Menu----")
+					fmt.Println((colorGreen), "Update Istio values")
 					fmt.Println((colorBlue), "Press '1' to modify External IP")
 					fmt.Println((colorBlue), "Press '2' to modify Service Annotations")
 					fmt.Println((colorBlue), "Press '3' to modify Service Extra Ports")
@@ -553,30 +567,37 @@ func gatherNetworking(network *Networking) {
 				}
 				if ingressType == "ingress" {
 					network.Ingress.Type = "ingress"
-					continue
+					network.Istio.Enabled = false
+					fmt.Printf("Set Ingress to %v and Disabled Istio\n", ingressType)
+
+				}
+				if ingressType == "nodeport" {
+					network.Ingress.Type = "nodeport"
+					network.Istio.Enabled = false
+					fmt.Printf("Set Ingress to %v and Disabled Istio\n", ingressType)
 				}
 			}
 
 		case 3:
-			log.Println("In case statement 3 - HTTPS")
+			InfoLogger.Println("In case statement 3 - HTTPS")
 			for {
 				// Ask if they want to enable https and skip if "no"
-				fmt.Print("Do you want to enable HTTPS? ")
+				fmt.Print("Do you want to enable HTTPS? (yes/no): ")
 				caseThreeInput := formatInput()
 
 				if caseThreeInput == "yes" {
 					network.Https.Enabled = true
-					fmt.Printf("The HTTPS network setting is %v \n", network.Https.Enabled)
+					fmt.Printf("The HTTPS network setting is %v\n", network.Https.Enabled)
 					break
 				}
 				if caseThreeInput == "no" {
 					network.Https.Enabled = false
-					fmt.Printf("The HTTPS network setting is %v \n", network.Https.Enabled)
+					fmt.Printf("The HTTPS network setting is %v\n", network.Https.Enabled)
 					break
 				}
 				fmt.Println("Please enter 'yes' or 'no' ")
 			}
-			fmt.Print("Do you want to add a Certificate Secret? ")
+			fmt.Print((colorWhite), "Do you want to add a Certificate? (yes/no)")
 			certinput := formatInput()
 			if certinput == "yes" {
 				fmt.Print("What do you want to name the secret? ")
@@ -586,56 +607,47 @@ func gatherNetworking(network *Networking) {
 				fmt.Printf("The secret name is %s \n", certName)
 			}
 		case 4:
-			log.Println("In Case 4")
-			fmt.Print("Do you want to disable the Istio deployment? ")
-			disableIstio := formatInput()
-			if disableIstio == "yes" {
-				network.Istio.Enabled = false
-			}
-			if disableIstio == "no" {
-				network.Istio.Enabled = true
-				fmt.Println("Do you need to modify any of the following? yes/no ")
-				fmt.Print("[Istio External IP, Ingress svc Annotations, Ingress Extra Ports or LB Source Ranges: ")
-				modifyIstio := formatInput()
-				if modifyIstio == "yes" {
-					for {
-						fmt.Println((colorBlue), "Press '1' list IPs to use for istio ingress service")
-						fmt.Println((colorBlue), "Press '2' list extra ports for istio ingress service")
-						fmt.Println((colorBlue), "Press '3' list extra LB sources ranges")
-						fmt.Println((colorBlue), "Press '4' map of strings for Istio SVC annotations")
-						fmt.Println((colorBlue), "Press '5' to Save and Exit Proxy settings")
-						fmt.Print((colorWhite), "Please make your selection: ")
-						caseInput := formatInput()
-						intVar, _ := strconv.Atoi(caseInput)
-						switch intVar {
-						case 1:
-							fmt.Print("Please enter a list of IPs to use for Istio ingress service: ")
-							slice := createSlice()
-							network.Istio.ExternalIp = slice
-						case 2:
-							fmt.Print("Please enter a list extra ports for Istio ingress service: ")
-							slice := createSlice()
-							network.Istio.IngressSvcExtraPorts = slice
 
-						case 3:
-							fmt.Print("Please enter a list of extra LB sources ranges: ")
-							slice := createSlice()
-							network.Istio.LbSourceRanges = slice
-						case 4:
-							fmt.Print("Please enter a map of strings for Istio SVC annotations: ")
-							slice := createSlice()
-							network.Istio.IngressSvcAnnotations = slice
-						}
-						if intVar == 5 {
-							break
-						}
-					}
+			for {
+				fmt.Println((colorGreen), "----Istio Menu----")
+				fmt.Println((colorGreen), "Update Istio values")
+				fmt.Println((colorBlue), "Press '1' to disable Istio")
+				fmt.Println((colorBlue), "Press '2' list IPs to use for istio ingress service")
+				fmt.Println((colorBlue), "Press '3' list extra ports for istio ingress service")
+				fmt.Println((colorBlue), "Press '4' list extra LB sources ranges")
+				fmt.Println((colorBlue), "Press '5' map of strings for Istio SVC annotations")
+				fmt.Println((colorBlue), "Press '6' to Save and Exit Proxy settings")
+				fmt.Print((colorWhite), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
+					network.Istio.Enabled = false
+					fmt.Println((colorYellow), "Istio is disabled")
+					InfoLogger.Printf("Istio has been disabled. Istio set to %v", network.Istio.Enabled)
+				case 2:
+					fmt.Print((colorWhite), "Please enter a list of IPs to use for Istio ingress service: ")
+					slice := createSlice()
+					network.Istio.ExternalIp = slice
+				case 3:
+					fmt.Print((colorWhite), "Please enter a list extra ports for Istio ingress service: ")
+					slice := createSlice()
+					network.Istio.IngressSvcExtraPorts = slice
+
+				case 4:
+					fmt.Print((colorWhite), "Please enter a list of extra LB sources ranges: ")
+					slice := createSlice()
+					network.Istio.LbSourceRanges = slice
+				case 5:
+					fmt.Print((colorWhite), "Please enter a map of strings for Istio SVC annotations: ")
+					slice := createSlice()
+					network.Istio.IngressSvcAnnotations = slice
+				}
+				if intVar == 6 {
+					fmt.Println((colorYellow), "Saving and Exiting Istio menu")
+					break
 				}
 			}
-		}
-		if intVar == 5 {
-			fmt.Println((colorYellow), "Saving and Exiting Networking Menu")
-			break
 		}
 	}
 }
@@ -645,7 +657,7 @@ and to prompt user for all Logging settings this
 will return a struct
 */
 func gatherMonitoring(monitoring *Monitoring) {
-	log.Println("In the gatherMonitoring function")
+	InfoLogger.Println("In the gatherMonitoring function")
 
 	for {
 		fmt.Println((colorGreen), "----Monitoring Menu----")
@@ -700,7 +712,7 @@ func gatherMonitoring(monitoring *Monitoring) {
 }
 
 func gatherControlPlane(controlplane *ControlPlane) {
-	log.Println("In the gatherControlPlane function")
+	InfoLogger.Println("In the gatherControlPlane function")
 
 	for {
 		fmt.Println((colorGreen), "----ControlPlane Menu----")
@@ -755,7 +767,7 @@ func gatherControlPlane(controlplane *ControlPlane) {
 This function used the Dbs struct
 */
 func gatherDbs(dbs *Dbs) {
-	log.Println("In the gatherLabels func")
+	InfoLogger.Println("In the gatherLabels func")
 
 	for {
 		fmt.Println((colorGreen), "----Database Menu----")
@@ -931,7 +943,7 @@ func gatherDbs(dbs *Dbs) {
 This function uses the Logging struct
 */
 func gatherLogging(logging *Logging) {
-	log.Println("In the gatherLogging function")
+	InfoLogger.Println("In the gatherLogging function")
 
 	for {
 		fmt.Println((colorGreen), "----Logging Menu----")
@@ -998,7 +1010,7 @@ func gatherLogging(logging *Logging) {
 This function uses the Gpu struct
 */
 func gatherGpu(gpu *Gpu) {
-	log.Println("In the gatherGpu function")
+	InfoLogger.Println("In the gatherGpu function")
 
 	for {
 		fmt.Println((colorGreen), "----GPU Menu----")
@@ -1028,7 +1040,7 @@ func gatherGpu(gpu *Gpu) {
 This function uses the Backup struct
 */
 func gatherBackup(backup *Backup) {
-	log.Println("In the gatherBackup function")
+	InfoLogger.Println("In the gatherBackup function")
 
 	for {
 		fmt.Println((colorGreen), "----Backup Menu----")
@@ -1070,7 +1082,7 @@ func gatherBackup(backup *Backup) {
 This function uses the Capsule struct
 */
 func gatherCapsule(capsule *Capsule) {
-	log.Println("In the gatherCapsule function")
+	InfoLogger.Println("In the gatherCapsule function")
 
 	for {
 		fmt.Println((colorGreen), "----Capsule Menu----")
@@ -1101,7 +1113,7 @@ func gatherCapsule(capsule *Capsule) {
 and to prompt user for all ConfigReloader settings
 */
 func gatherConfigReloader(configReloader *ConfigReloader) {
-	log.Println("In the gatherConfigReloader func")
+	InfoLogger.Println("In the gatherConfigReloader func")
 
 	fmt.Println((colorYellow), "Config Reload is disabled")
 	configReloader.Enabled = false
@@ -1112,7 +1124,7 @@ and to prompt user for all Registry settings this
 will return a struct
 */
 func gatherRegistry(registry *Registry) {
-	log.Println("In the gatherRegistry function")
+	InfoLogger.Println("In the gatherRegistry function")
 
 	var password string
 
@@ -1159,7 +1171,7 @@ and to prompt user for all Tenancy settings this
 will return a struct
 */
 func gatherTenancy(tenancy *Tenancy) {
-	log.Println("In the gatherTenancy function")
+	InfoLogger.Println("In the gatherTenancy function")
 
 	for {
 		fmt.Println((colorGreen), "----Tenancy Menu----")
@@ -1197,7 +1209,7 @@ and to prompt user for all Storage settings this
 will return a struct
 */
 func gatherStorage(storage *Storage) {
-	log.Println("In the gatherStorage function")
+	InfoLogger.Println("In the gatherStorage function")
 
 	for {
 		fmt.Println((colorGreen), "----Storage Menu----")
@@ -1317,7 +1329,7 @@ func gatherStorage(storage *Storage) {
 This function uses the Sso struct
 */
 func gatherSso(sso *Sso) {
-	log.Println("In the gatherSso function")
+	InfoLogger.Println("In the gatherSso function")
 
 	for {
 		fmt.Println((colorGreen), "----Single Sign On Menu----")
@@ -1435,7 +1447,7 @@ to quickly create a Cobra application.`,
 		dbs := Dbs{EsEnable: true, MinioEnable: true, PgEnable: true, RedisEnable: true}
 
 		//Start of program to ask user for Input
-		log.Println((colorWhite), "You are in the values main function")
+		InfoLogger.Println((colorWhite), "You are in the values main function")
 		fmt.Println((colorGreen), "********************** Welcome **********************")
 		fmt.Println((colorGreen), "We will gather your information to build a values file")
 		clusterdomain := ClusterDomain{}

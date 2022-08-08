@@ -42,19 +42,34 @@ networking:
     noProxy:[ {{ .Network.Proxy.NoProxy }} ]
 {{- end }}
 
-{{- if .Network.Ingress.External }}
+{{- if or (.Network.Ingress.External) (not .Network.Ingress.IstioGwEnabled) (.Network.Ingress.IstioGwName) }}
   ingress:
+{{- end }}
+{{- if .Network.Ingress.Type }}
     type: {{ .Network.Ingress.Type }}
-    istioGwEnabled: {{ .Network.Ingress.IstioGwEnabled }} 
+{{- end }}
+{{- if .Network.Ingress.IstioGwEnabled }}
+    istioGwEnabled: {{ .Network.Ingress.IstioGwEnabled }}
+{{- end }}
+{{- if .Network.Ingress.IstioGwName }}
     istioGwName: {{ .Network.Ingress.IstioGwName }} 
 {{- end }}
 
-{{- if eq .Network.Istio.Enabled false }}
+{{- if or (not .Network.Istio.Enabled) (.Network.Istio.ExternalIp) (.Network.Istio.IngressSvcAnnotations) 
+(.Network.Istio.IngressSvcExtraPorts) (.Network.Istio.LbSourceRanges) }}
   istio:
     enabled: {{ .Network.Istio.Enabled }}
+{{- end }}
+{{- if .Network.Istio.ExternalIp }}
     externalIp: [ {{ .Network.Istio.ExternalIp }} ]
+{{- end }}
+{{- if .Network.Istio.IngressSvcAnnotations }}
     ingressSvcAnnotations: { {{ .Network.Istio.IngressSvcAnnotations }} }
+{{- end }}
+{{- if .Network.Istio.IngressSvcExtraPorts }}
     ingressSvcExtraPorts: [ {{ .Network.Istio.IngressSvcExtraPorts }} ]
+{{- end }}
+{{- if .Network.Istio.LbSourceRanges }}
     lbSourceRanges: [ {{ .Network.Istio.LbSourceRanges }} ]
 {{- end }}
 
