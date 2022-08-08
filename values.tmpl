@@ -42,13 +42,13 @@ networking:
     noProxy:[ {{ .Network.Proxy.NoProxy }} ]
 {{- end }}
 
-{{- if or (.Network.Ingress.External) (not .Network.Ingress.IstioGwEnabled) (.Network.Ingress.IstioGwName) }}
+{{- if or (eq .Network.Ingress.Type "ingress") (not .Network.Ingress.IstioGwEnabled) (.Network.Ingress.IstioGwName)  }}
   ingress:
 {{- end }}
 {{- if .Network.Ingress.Type }}
     type: {{ .Network.Ingress.Type }}
 {{- end }}
-{{- if .Network.Ingress.IstioGwEnabled }}
+{{- if not .Network.Ingress.IstioGwEnabled }}
     istioGwEnabled: {{ .Network.Ingress.IstioGwEnabled }}
 {{- end }}
 {{- if .Network.Ingress.IstioGwName }}
