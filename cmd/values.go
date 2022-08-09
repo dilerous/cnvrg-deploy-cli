@@ -498,6 +498,7 @@ func gatherNetworking(network *Networking) {
 	InfoLogger.Println("In the gatherNetworking function")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----Networking Menu----")
 		fmt.Println((colorGreen), "Update Networking values")
 		fmt.Println((colorBlue), "Press '1' for Proxy Settings")
@@ -512,6 +513,7 @@ func gatherNetworking(network *Networking) {
 		case 1:
 			InfoLogger.Println("In case statement 1 - Proxy")
 			for {
+				fmt.Println()
 				fmt.Println((colorGreen), "----Proxy Menu----")
 				fmt.Println((colorGreen), "Update Proxy values")
 				fmt.Println((colorBlue), "Press '1' to enable Proxy")
@@ -549,8 +551,9 @@ func gatherNetworking(network *Networking) {
 				}
 			}
 		case 2:
+			InfoLogger.Println("In Case statement 2 - Ingress")
 			for {
-				InfoLogger.Println("In Case statement 2 - Ingress")
+				fmt.Println()
 				fmt.Println((colorGreen), "----Ingress Menu----")
 				fmt.Println((colorGreen), "Update Ingress values")
 				fmt.Println((colorBlue), "Press '1' to modify Ingress Type")
@@ -648,6 +651,7 @@ func gatherNetworking(network *Networking) {
 			}
 		case 4:
 			for {
+				fmt.Println()
 				fmt.Println((colorGreen), "----Istio Menu----")
 				fmt.Println((colorGreen), "Update Istio values")
 				fmt.Println((colorBlue), "Press '1' to disable Istio")
@@ -706,6 +710,7 @@ func gatherMonitoring(monitoring *Monitoring) {
 	InfoLogger.Println("In the gatherMonitoring function")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----Monitoring Menu----")
 		fmt.Println((colorGreen), "Update Monitoring values")
 		fmt.Println((colorBlue), "Press '1' To disable dcgm Export Monitoring")
@@ -761,6 +766,7 @@ func gatherControlPlane(controlplane *ControlPlane) {
 	InfoLogger.Println("In the gatherControlPlane function")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----ControlPlane Menu----")
 		fmt.Println((colorGreen), "Update ControlPlane values")
 		fmt.Println((colorBlue), "Press '1' To disable Hyper")
@@ -816,6 +822,7 @@ func gatherDbs(dbs *Dbs) {
 	InfoLogger.Println("In the gatherLabels func")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----Database Menu----")
 		fmt.Println((colorGreen), "Update Database values")
 		fmt.Println((colorBlue), "Press '1' To enable CVAT")
@@ -833,6 +840,7 @@ func gatherDbs(dbs *Dbs) {
 			fmt.Println((colorYellow), "CVAT enabled")
 		case 2:
 			for {
+				fmt.Println()
 				fmt.Println((colorGreen), "----Elastic Search Menu----")
 				fmt.Println((colorGreen), "Update Elastic Search values")
 				fmt.Println((colorBlue), "Press '1' To disable Elastic Search")
@@ -851,7 +859,7 @@ func gatherDbs(dbs *Dbs) {
 				case 2:
 					fmt.Print((colorWhite), "Input Storage Size [default: 80Gi]: ")
 					caseInput := formatInput()
-					dbs.EsStorageSize = caseInput
+					dbs.EsStorageSize = caseInput + "Gi"
 					dbs.EsEnable = true
 				case 3:
 					fmt.Print((colorWhite), "Input Storage Class: ")
@@ -876,6 +884,7 @@ func gatherDbs(dbs *Dbs) {
 
 		case 3:
 			for {
+				fmt.Println()
 				fmt.Println((colorGreen), "----Minio Menu----")
 				fmt.Println((colorGreen), "Update Minio values")
 				fmt.Println((colorBlue), "Press '1' To disable Minio")
@@ -893,7 +902,7 @@ func gatherDbs(dbs *Dbs) {
 				case 2:
 					fmt.Print((colorWhite), "Input Storage Size [default: 100Gi]: ")
 					caseInput := formatInput()
-					dbs.MinioStorageSize = caseInput
+					dbs.MinioStorageSize = caseInput + "Gi"
 				case 3:
 					fmt.Print((colorWhite), "Input Storage Class: ")
 					caseInput := formatInput()
@@ -910,6 +919,7 @@ func gatherDbs(dbs *Dbs) {
 			}
 		case 4:
 			for {
+				fmt.Println()
 				fmt.Println((colorGreen), "----Postgres Menu----")
 				fmt.Println((colorGreen), "Update Postgres values")
 				fmt.Println((colorBlue), "Press '1' To disable Postgres")
@@ -927,7 +937,7 @@ func gatherDbs(dbs *Dbs) {
 				case 2:
 					fmt.Print((colorWhite), "Input Storage Size [default: 80Gi]: ")
 					caseInput := formatInput()
-					dbs.PgStorageSize = caseInput
+					dbs.PgStorageSize = caseInput + "Gi"
 				case 3:
 					fmt.Print((colorWhite), "Input Storage Class: ")
 					caseInput := formatInput()
@@ -944,6 +954,7 @@ func gatherDbs(dbs *Dbs) {
 			}
 		case 5:
 			for {
+				fmt.Println()
 				fmt.Println((colorGreen), "----Redis Menu----")
 				fmt.Println((colorGreen), "Update Redis values")
 				fmt.Println((colorBlue), "Press '1' To disable Redis")
@@ -961,7 +972,7 @@ func gatherDbs(dbs *Dbs) {
 				case 2:
 					fmt.Print((colorWhite), "Input Storage Size [default: 10Gi]: ")
 					caseInput := formatInput()
-					dbs.RedisStorageSize = caseInput
+					dbs.RedisStorageSize = caseInput + "Gi"
 				case 3:
 					fmt.Print((colorWhite), "Input Storage Class: ")
 					caseInput := formatInput()
@@ -992,6 +1003,7 @@ func gatherLogging(logging *Logging) {
 	InfoLogger.Println("In the gatherLogging function")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----Logging Menu----")
 		fmt.Println((colorGreen), "Update Logging values")
 		fmt.Println((colorBlue), "Press '1' To disable Fluentbit")
@@ -1012,6 +1024,7 @@ func gatherLogging(logging *Logging) {
 			InfoLogger.Printf("Kibana Enabled set to %v\n", logging.KibanaEnable)
 		case 3:
 			for {
+				fmt.Println()
 				fmt.Println((colorGreen), "----Elastic Search Menu----")
 				fmt.Println((colorGreen), "Update Elastic Search values")
 				fmt.Println((colorBlue), "Press '1' to disable Elastalert")
@@ -1027,7 +1040,7 @@ func gatherLogging(logging *Logging) {
 					logging.ElastalertEnable = false
 					fmt.Println((colorYellow), "Elastalert is disabled")
 				case 2:
-					fmt.Print((colorWhite), "Please enter the new Storage Size in Gi: ")
+					fmt.Print((colorWhite), "Input Storage Size [default: 30Gi]: ")
 					var storageSize string
 					fmt.Scan(&storageSize)
 					logging.ElastaStorageSize = storageSize + "Gi"
@@ -1064,6 +1077,7 @@ func gatherGpu(gpu *Gpu) {
 	InfoLogger.Println("In the gatherGpu function")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----GPU Menu----")
 		fmt.Println((colorGreen), "Update GPU values")
 		fmt.Println((colorBlue), "Press '1' to disable Nvidia GPU")
@@ -1094,6 +1108,7 @@ func gatherBackup(backup *Backup) {
 	InfoLogger.Println("In the gatherBackup function")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----Backup Menu----")
 		fmt.Println((colorGreen), "Update Backup values")
 		fmt.Println((colorBlue), "Press '1' to disable Backups")
@@ -1136,6 +1151,7 @@ func gatherCapsule(capsule *Capsule) {
 	InfoLogger.Println("In the gatherCapsule function")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----Capsule Menu----")
 		fmt.Println((colorGreen), "Update Capsule values")
 		fmt.Println((colorBlue), "Press '1' to disable Capsule")
@@ -1180,6 +1196,7 @@ func gatherRegistry(registry *Registry) {
 	var password string
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----Registry Menu----")
 		fmt.Println((colorGreen), "Update Registry values")
 		fmt.Println((colorBlue), "Press '1' to update Registry URL")
@@ -1225,6 +1242,7 @@ func gatherTenancy(tenancy *Tenancy) {
 	InfoLogger.Println("In the gatherTenancy function")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----Tenancy Menu----")
 		fmt.Println((colorGreen), "Update Tenancy values")
 		fmt.Println((colorBlue), "Press '1' to enable Tenancy")
@@ -1265,6 +1283,7 @@ func gatherStorage(storage *Storage) {
 	InfoLogger.Println("In the gatherStorage function")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----Storage Menu----")
 		fmt.Println((colorGreen), "Update Storage values")
 		fmt.Println((colorBlue), "Press '1' to modify HostPath settings")
@@ -1276,6 +1295,7 @@ func gatherStorage(storage *Storage) {
 		switch intVar {
 		case 1:
 			for {
+				fmt.Println()
 				fmt.Println((colorGreen), "----HostPath Menu----")
 				fmt.Println((colorGreen), "Update HostPath values")
 				fmt.Println((colorBlue), "Press '1' to set HostPath as the Default Storage Class")
@@ -1324,6 +1344,7 @@ func gatherStorage(storage *Storage) {
 			}
 		case 2:
 			for {
+				fmt.Println()
 				fmt.Println((colorGreen), "----NFS Menu----")
 				fmt.Println((colorGreen), "Update NFS values")
 				fmt.Println((colorBlue), "Press '1' to modify Server IP address")
@@ -1385,6 +1406,7 @@ func gatherSso(sso *Sso) {
 	InfoLogger.Println("In the gatherSso function")
 
 	for {
+		fmt.Println()
 		fmt.Println((colorGreen), "----Single Sign On Menu----")
 		fmt.Println((colorGreen), "Update Single Sign On values")
 		fmt.Println((colorBlue), "Press '1' to enable Single Sign On")
@@ -1507,6 +1529,7 @@ to quickly create a Cobra application.`,
 		clusterdomain := ClusterDomain{}
 		gatherClusterDomain(&clusterdomain)
 		for {
+			fmt.Println()
 			fmt.Println((colorGreen), "------------------------------- Main Menu -------------------------------")
 			fmt.Println((colorGreen), "Please make a selection to modify the values file for the cnvrg.io install")
 			fmt.Println((colorBlue), "Press '1' To modify Labeling---------------->[ Labels, Annotations or Internal Domain ]")
@@ -1527,6 +1550,7 @@ to quickly create a Cobra application.`,
 			switch intVar {
 			case 1:
 				for {
+					fmt.Println()
 					fmt.Println((colorGreen), "----Labels, Annotations Internal Domain Menu----")
 					fmt.Println((colorGreen), "Update Labels, Annotations or Internal Domain values")
 					fmt.Println((colorBlue), "Press '1' To modify Labels")
@@ -1563,6 +1587,7 @@ to quickly create a Cobra application.`,
 				gatherStorage(&storage)
 			case 8:
 				for {
+					fmt.Println()
 					fmt.Println((colorGreen), "----Backup, GPU, Capsule and GPU Menu----")
 					fmt.Println((colorGreen), "Update Backup, GPU, Capsule and GPU values")
 					fmt.Println((colorBlue), "Press '1' To modify Backup settings")
