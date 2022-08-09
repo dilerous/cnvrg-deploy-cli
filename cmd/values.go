@@ -425,6 +425,20 @@ func formatInput() string {
 	return input
 }
 
+// Outputs to std.out the helm commands which need to be ran for installation
+func outputHelm() {
+	fmt.Println()
+	fmt.Println((colorGreen), "---------Helm Repo Commands---------")
+	fmt.Println((colorGreen), "Run the following Helm command to install add cnvrg repo")
+	fmt.Println((colorWhite), "helm repo add cnvrgv3 https://charts.v3.cnvrg.io")
+	fmt.Println((colorWhite), "helm repo update")
+	fmt.Println((colorWhite), "helm search repo cnvrgv3/cnvrg -l")
+	fmt.Println()
+	fmt.Println((colorGreen), "---------Helm Install Command---------")
+	fmt.Println((colorGreen), "Run the following Helm command to install cnvrg.io")
+	fmt.Println((colorWhite), "helm install cnvrg cnvrgv3/cnvrg --create-namespace -n cnvrg --timeout 1500s --wait --values ./values.yaml")
+}
+
 // The function prompts for a key value value
 // Takes the key value and returns a string
 func createArray() string {
@@ -1278,7 +1292,7 @@ func gatherStorage(storage *Storage) {
 					storage.Hostpath.DefaultSc = true
 					fmt.Println((colorYellow), "HostPath set as default Storage Class")
 				case 2:
-					fmt.Print((colorBlue), "Input the path [default=/cnvrg-hostpath-storage]: ")
+					fmt.Print((colorBlue), "Input the path [default: /cnvrg-hostpath-storage]: ")
 					caseInput := formatInput()
 					storage.Hostpath.Path = caseInput
 					storage.Hostpath.Enabled = true
@@ -1594,5 +1608,6 @@ to quickly create a Cobra application.`,
 			log.Print(err)
 		}
 		createFile("values.yaml", &finaltemp)
+		outputHelm()
 	},
 }

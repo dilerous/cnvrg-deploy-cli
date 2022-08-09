@@ -185,7 +185,7 @@ storage:
 {{- if .Storage.Hostpath.DefaultSc }}
     defaultSc: {{ .Storage.Hostpath.DefaultSc }}
 {{- end }}
-{{- if .Storage.Hostpath.Path }}
+{{- if ne .Storage.Hostpath.Path "/cnvrg-hostpath-storage" }}
     path: {{ .Storage.Hostpath.Path }}
 {{- end }}
 {{- if .Storage.Hostpath.ReclaimPolicy }}
