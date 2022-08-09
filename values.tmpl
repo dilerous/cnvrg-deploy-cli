@@ -157,6 +157,8 @@ sso:
 
 {{- if or (.Storage.Nfs.Enabled) (.Storage.Hostpath.Enabled) }}
 storage:
+{{- end }}
+{{- if .Storage.Nfs.Enabled }}
   nfs:
     enabled: {{ .Storage.Nfs.Enabled }}
 {{- end }}

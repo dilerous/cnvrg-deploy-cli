@@ -1223,6 +1223,8 @@ func gatherTenancy(tenancy *Tenancy) {
 		switch intVar {
 		case 1:
 			tenancy.Enabled = true
+			fmt.Println((colorYellow), "Tenancy Enabled")
+			InfoLogger.Printf("Tenancy enabled set to %v\n", tenancy.Enabled)
 		case 2:
 			fmt.Print((colorBlue), "Please enter the Tenancy node selector key: ")
 			key := formatInput()
@@ -1235,7 +1237,7 @@ func gatherTenancy(tenancy *Tenancy) {
 			tenancy.Enabled = true
 		}
 		if intVar == 4 {
-			fmt.Println("Saving and Exiting Tenancy menu")
+			fmt.Println((colorYellow), "Saving and Exiting Tenancy menu")
 			break
 		}
 	}
@@ -1285,7 +1287,7 @@ func gatherStorage(storage *Storage) {
 					var policy = []string{"Retain", "Delete", "Recycle"}
 					done := true
 					for done {
-						fmt.Print((colorBlue), "Set the Reclaim Policy [Retain, Delete or Recycle]: ")
+						fmt.Print((colorBlue), "Set the Reclaim Policy (Retain, Delete or Recycle): ")
 						fmt.Scanln(&input)
 						for _, s := range policy {
 							if input == s {
@@ -1320,12 +1322,12 @@ func gatherStorage(storage *Storage) {
 				intVar, _ := strconv.Atoi(caseInput)
 				switch intVar {
 				case 1:
-					fmt.Print((colorWhite), "Input the NFS server IP address? ")
+					fmt.Print((colorWhite), "Input the NFS server IP address: ")
 					ip := formatInput()
 					storage.Nfs.Server = ip
 					storage.Nfs.Enabled = true
 				case 2:
-					fmt.Print((colorWhite), "What is the NFS export path? ")
+					fmt.Print((colorWhite), "Input the NFS export path: ")
 					path := formatInput()
 					storage.Nfs.Path = path
 					storage.Nfs.Enabled = true
@@ -1338,7 +1340,7 @@ func gatherStorage(storage *Storage) {
 					var policy = []string{"Retain", "Delete", "Recycle"}
 					done := true
 					for done {
-						fmt.Print((colorBlue), "Set the Reclaim Policy [Retain, Delete or Recycle]: ")
+						fmt.Print((colorBlue), "Set the Reclaim Policy (Retain, Delete or Recycle): ")
 						fmt.Scanln(&input)
 						for _, s := range policy {
 							if input == s {
@@ -1386,40 +1388,41 @@ func gatherSso(sso *Sso) {
 		switch intVar {
 		case 1:
 			sso.Enabled = true
-			fmt.Print((colorYellow), "Single Sign On Enabled")
+			fmt.Println((colorYellow), "Single Sign On Enabled")
+			InfoLogger.Printf("Single Sign on Enable set to %v", sso.Enabled)
 		case 2:
-			fmt.Print((colorWhite), "Please input the Admin User: ")
+			fmt.Print((colorWhite), "Input the Admin User: ")
 			admin := formatInput()
 			sso.AdminUser = admin
 			sso.Enabled = true
 		case 3:
-			fmt.Print((colorWhite), "Please input the SSO Provider: ")
+			fmt.Print((colorWhite), "Input the SSO Provider: ")
 			provider := formatInput()
 			sso.Provider = provider
 			sso.Enabled = true
 		case 4:
-			fmt.Print((colorWhite), "Please input the Email Domain: ")
+			fmt.Print((colorWhite), "Input the Email Domain: ")
 			domain := createSlice()
 			sso.EmailDomain = domain
 			sso.Enabled = true
 		case 5:
-			fmt.Print((colorWhite), "Please input the Client ID: ")
+			fmt.Print((colorWhite), "Input the Client ID: ")
 			clientid := formatInput()
 			sso.ClientId = clientid
 			sso.Enabled = true
 		case 6:
-			fmt.Print((colorWhite), "Please input the Client Secret: ")
+			fmt.Print((colorWhite), "Input the Client Secret: ")
 			var clientsecret string
 			fmt.Scan(&clientsecret)
 			sso.ClientSecret = clientsecret
 			sso.Enabled = true
 		case 7:
-			fmt.Print((colorWhite), "Please input the Azure Tenant: ")
+			fmt.Print((colorWhite), "Input the Azure Tenant: ")
 			azure := formatInput()
 			sso.AzureTenant = azure
 			sso.Enabled = true
 		case 8:
-			fmt.Print((colorWhite), "Please input the OIDC Issuer URL: ")
+			fmt.Print((colorWhite), "Input the OIDC Issuer URL: ")
 			oidc := formatInput()
 			sso.OidcIssuerUrl = oidc
 			sso.Enabled = true
@@ -1472,7 +1475,7 @@ to quickly create a Cobra application.`,
 		registry := Registry{}
 		tenancy := Tenancy{}
 		sso := Sso{}
-		storage := Storage{}
+		storage := Storage{Hostpath: Hostpath{Path: "/cnvrg-hostpath-storage"}}
 		gpu := Gpu{NvidiaEnable: true, HabanaEnable: true}
 		backup := Backup{Enabled: true}
 		capsule := Capsule{Enabled: true}
