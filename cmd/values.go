@@ -648,6 +648,10 @@ func gatherNetworking(network *Networking) {
 					InfoLogger.Printf("The secret name is %s \n", certName)
 					break
 				}
+				if certinput == "no" {
+					InfoLogger.Println("Breaking for loop, not setting Certificate name")
+					break
+				}
 			}
 		case 4:
 			for {
