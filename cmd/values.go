@@ -1534,7 +1534,9 @@ func mainMenu() {
 			quickStart()
 		case 2:
 			advancedOptions()
-		case 3:
+		}
+		if intVar == 3 {
+			fmt.Println((colorWhite), "Exiting and generating the values.yaml file")
 			finaltemp := Template{clusterdomain, internalDomain, labels, annotations, network, logging, registry, tenancy,
 				sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane, dbs}
 			err := temp.Execute(os.Stdout, finaltemp)
@@ -1543,18 +1545,36 @@ func mainMenu() {
 			}
 			createFile("values.yaml", &finaltemp)
 			outputHelm()
+			os.Exit(0)
+
 		}
 	}
 }
 
 func quickStart() {
 	InfoLogger.Println("In the quickStart function")
+
 	fmt.Println()
 	fmt.Println((colorGreen), "----Quick Start Menu----")
-	fmt.Println((colorGreen), "Update Single Sign On values")
-	fmt.Println((colorBlue), "Press '1' to enable Single Sign On")
-	gatherClusterDomain(&clusterdomain)
-
+	fmt.Println((colorGreen), "Begin Quick Start Guide or Exit to Main Menu")
+	fmt.Println((colorBlue), "Press '1' to begin Quick Start")
+	fmt.Println((colorBlue), "Press '2' To Exit and return to Main Menu")
+	fmt.Print((colorWhite), "Please make your selection: ")
+	for {
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			fmt.Println("Starting the Quick Start Guide")
+			gatherClusterDomain(&clusterdomain)
+			gatherAnnotations(&annotations)
+			mainMenu()
+		}
+		if intVar == 2 {
+			fmt.Println((colorWhite), "Exiting and returning to Main Menu")
+			mainMenu()
+		}
+	}
 }
 
 func advancedOptions() {
@@ -1574,7 +1594,7 @@ func advancedOptions() {
 		fmt.Println((colorBlue), "Press '9' To modify Monitoring settings----->[ Prometheus, Grafana, Exporters ]")
 		fmt.Println((colorBlue), "Press '10' To modify Control Plane settings->[ CP Image, CP Services, SMTP ]")
 		fmt.Println((colorBlue), "Press '11' To modify Database settings------>[ Minio, Postgres, Redis ]")
-		fmt.Println((colorBlue), "Press '12' To Exit and generate Values file")
+		fmt.Println((colorBlue), "Press '12' To Exit and return to Main Menu")
 		fmt.Print((colorWhite), "Please make your selection: ")
 		caseInput := formatInput()
 		intVar, _ := strconv.Atoi(caseInput)
@@ -1652,8 +1672,8 @@ func advancedOptions() {
 			gatherDbs(&dbs)
 		}
 		if intVar == 12 {
-			fmt.Println((colorWhite), "Exiting and generating the values.yaml file")
-			break
+			fmt.Println((colorWhite), "Exiting and returning to Main Menu")
+			mainMenu()
 		}
 	}
 
@@ -1673,9 +1693,12 @@ to quickly create a Cobra application.`,
 
 		//Start of program to ask user for Input
 		InfoLogger.Println((colorWhite), "You are in the values main function")
+		fmt.Println()
 		fmt.Println((colorGreen), "********************** Welcome **********************")
 		fmt.Println((colorGreen), "We will gather your information to build a values file")
-		mainMenu()
+		fmt.Println((colorGreen), "Here is the Helm Chart docs for cnvrg.io")
+		fmt.Println((colorBlue), "https://github.com/AccessibleAI/cnvrg-operator")
 
+		mainMenu()
 	},
 }
