@@ -16,6 +16,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Initalize all structs as global variables
+// set variables for each struct defined above - Used in gather functions for each menu item
+// This also sets any defaults needed for templating
+var (
+	clusterdomain  = ClusterDomain{}
+	internalDomain = ClusterInteralDomain{Domain: "cluster.local"}
+	labels         = Labels{}
+	annotations    = Annotations{}
+	network        = Networking{Istio: Istio{Enabled: true}, Ingress: Ingress{IstioGwEnabled: true}}
+	logging        = Logging{FluentbitEnable: true, ElastalertEnable: true, KibanaEnable: true}
+	registry       = Registry{}
+	tenancy        = Tenancy{}
+	sso            = Sso{}
+	storage        = Storage{Hostpath: Hostpath{Path: "/cnvrg-hostpath-storage"}}
+	gpu            = Gpu{NvidiaEnable: true, HabanaEnable: true}
+	backup         = Backup{Enabled: true}
+	capsule        = Capsule{Enabled: true}
+	configreloader = ConfigReloader{Enabled: true}
+	monitoring     = Monitoring{DcgmExportEnable: true, HabanaExportEnable: true, NodeExportEnable: true, KubeStateMetricEnable: true,
+		GrafanaEnable: true, PrometheusOperatorEnable: true, PrometheusEnable: true, DefaultSvcMonitorsEnable: true, CnvrgIdleMetricsEnable: true}
+	controlplane = ControlPlane{HyperEnable: true, CnvrgScheduleEnable: true, SearchkiqEnable: true, SidekiqEnable: true, SystemkiqEnable: true,
+		WebappEnable: true, MpiEnable: true, SearchkiqHpaEnable: true, SidekiqHpaEnable: true, SystemkiqHpaEnable: true, WebappHpaEnable: true}
+	dbs = Dbs{EsEnable: true, MinioEnable: true, PgEnable: true, RedisEnable: true}
+)
+
 // Global Variables
 var (
 	temp *template.Template
@@ -45,7 +70,6 @@ func init() {
 	InfoLogger = log.New(file, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	WarningLogger = log.New(file, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
 	ErrorLogger = log.New(file, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
-
 }
 
 // Parent struct for the Backup values
@@ -1494,6 +1518,147 @@ func createFile(name string, template *Template) {
 	myfile.Close()
 }
 
+func mainMenu() {
+	for {
+		fmt.Println()
+		fmt.Println((colorGreen), "------------------------------- Main Menu -------------------------------")
+		fmt.Println((colorGreen), "Please make a selection to modify the values file for the cnvrg.io install")
+		fmt.Println((colorBlue), "Press '1' to select Quick Start")
+		fmt.Println((colorBlue), "Press '2' to select Advanced Options")
+		fmt.Println((colorBlue), "Press '3' to Save and Generate the values.yaml file")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			quickStart()
+		case 2:
+			advancedOptions()
+		case 3:
+			finaltemp := Template{clusterdomain, internalDomain, labels, annotations, network, logging, registry, tenancy,
+				sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane, dbs}
+			err := temp.Execute(os.Stdout, finaltemp)
+			if err != nil {
+				log.Print(err)
+			}
+			createFile("values.yaml", &finaltemp)
+			outputHelm()
+		}
+	}
+}
+
+func quickStart() {
+	InfoLogger.Println("In the quickStart function")
+	fmt.Println()
+	fmt.Println((colorGreen), "----Quick Start Menu----")
+	fmt.Println((colorGreen), "Update Single Sign On values")
+	fmt.Println((colorBlue), "Press '1' to enable Single Sign On")
+	gatherClusterDomain(&clusterdomain)
+
+}
+
+func advancedOptions() {
+	InfoLogger.Println("In the advancedOptions function")
+	for {
+		fmt.Println()
+		fmt.Println((colorGreen), "---------------------------- Advanced Options Menu ----------------------------")
+		fmt.Println((colorGreen), "Please make a selection to modify the values file for the cnvrg.io install")
+		fmt.Println((colorBlue), "Press '1' To modify Labeling---------------->[ Labels, Annotations or Internal Domain ]")
+		fmt.Println((colorBlue), "Press '2' To modify Networks settings------->[ Istio, NodePort, HTTPS ]")
+		fmt.Println((colorBlue), "Press '3' To modify Logging settings-------->[ Kibana, ElasticAlert, Fluentbit ]")
+		fmt.Println((colorBlue), "Press '4' To modify Registry settings------->[ URL, Username, Password ]")
+		fmt.Println((colorBlue), "Press '5' To modify Tenancy settings-------->[ Node Selector ]")
+		fmt.Println((colorBlue), "Press '6' To modify Single Sign On settings->[ Admin, Provider, Azure Tenant ]")
+		fmt.Println((colorBlue), "Press '7' To modify Storage settings-------->[ NFS, Hostpath ] ")
+		fmt.Println((colorBlue), "Press '8' To modify Miscellaneous settings-->[ Backup, GPU, ConfigLoader, Capsule ]")
+		fmt.Println((colorBlue), "Press '9' To modify Monitoring settings----->[ Prometheus, Grafana, Exporters ]")
+		fmt.Println((colorBlue), "Press '10' To modify Control Plane settings->[ CP Image, CP Services, SMTP ]")
+		fmt.Println((colorBlue), "Press '11' To modify Database settings------>[ Minio, Postgres, Redis ]")
+		fmt.Println((colorBlue), "Press '12' To Exit and generate Values file")
+		fmt.Print((colorWhite), "Please make your selection: ")
+		caseInput := formatInput()
+		intVar, _ := strconv.Atoi(caseInput)
+		switch intVar {
+		case 1:
+			for {
+				fmt.Println()
+				fmt.Println((colorGreen), "----Labels, Annotations Internal Domain Menu----")
+				fmt.Println((colorGreen), "Update Labels, Annotations or Internal Domain values")
+				fmt.Println((colorBlue), "Press '1' To modify Labels")
+				fmt.Println((colorBlue), "Press '2' To modify Annotations")
+				fmt.Println((colorBlue), "Press '3' To modify Internal Domain")
+				fmt.Println((colorBlue), "Press '4' To Save and Exit")
+				fmt.Print((colorWhite), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
+					gatherLabels(&labels)
+				case 2:
+					gatherAnnotations(&annotations)
+				case 3:
+					gatherInternalDomain(&internalDomain)
+				}
+				if intVar == 4 {
+					fmt.Println((colorYellow), "Saving and Exiting menu")
+					break
+				}
+			}
+		case 2:
+			gatherNetworking(&network)
+		case 3:
+			gatherLogging(&logging)
+		case 4:
+			gatherRegistry(&registry)
+		case 5:
+			gatherTenancy(&tenancy)
+		case 6:
+			gatherSso(&sso)
+		case 7:
+			gatherStorage(&storage)
+		case 8:
+			for {
+				fmt.Println()
+				fmt.Println((colorGreen), "----Backup, GPU, Capsule and GPU Menu----")
+				fmt.Println((colorGreen), "Update Backup, GPU, Capsule and GPU values")
+				fmt.Println((colorBlue), "Press '1' To modify Backup settings")
+				fmt.Println((colorBlue), "Press '2' To modify Capsule settings")
+				fmt.Println((colorBlue), "Press '3' To disable NvidiaDp or HabanaDp GPU")
+				fmt.Println((colorBlue), "Press '4' To disable ConfigReloader")
+				fmt.Println((colorBlue), "Press '5' To Exit modifying settings")
+				fmt.Print((colorBlue), "Please make your selection: ")
+				caseInput := formatInput()
+				intVar, _ := strconv.Atoi(caseInput)
+				switch intVar {
+				case 1:
+					gatherBackup(&backup)
+				case 2:
+					gatherCapsule(&capsule)
+				case 3:
+					gatherGpu(&gpu)
+				case 4:
+					gatherConfigReloader(&configreloader)
+				}
+				if intVar == 5 {
+					fmt.Println((colorYellow), "Saving changes and exiting")
+					break
+				}
+			}
+		case 9:
+			gatherMonitoring(&monitoring)
+		case 10:
+			gatherControlPlane(&controlplane)
+		case 11:
+			gatherDbs(&dbs)
+		}
+		if intVar == 12 {
+			fmt.Println((colorWhite), "Exiting and generating the values.yaml file")
+			break
+		}
+	}
+
+}
+
 // valuesCmd represents the values command
 var valuesCmd = &cobra.Command{
 	Use:   "values",
@@ -1505,138 +1670,12 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// set variables for each struct defined above - Used in gather functions for each menu item
-		// This also sets any defaults needed for templating
-		internalDomain := ClusterInteralDomain{Domain: "cluster.local"}
-		labels := Labels{}
-		annotations := Annotations{}
-		network := Networking{Istio: Istio{Enabled: true}, Ingress: Ingress{IstioGwEnabled: true}}
-		logging := Logging{FluentbitEnable: true, ElastalertEnable: true, KibanaEnable: true}
-		registry := Registry{}
-		tenancy := Tenancy{}
-		sso := Sso{}
-		storage := Storage{Hostpath: Hostpath{Path: "/cnvrg-hostpath-storage"}}
-		gpu := Gpu{NvidiaEnable: true, HabanaEnable: true}
-		backup := Backup{Enabled: true}
-		capsule := Capsule{Enabled: true}
-		configreloader := ConfigReloader{Enabled: true}
-		monitoring := Monitoring{DcgmExportEnable: true, HabanaExportEnable: true, NodeExportEnable: true, KubeStateMetricEnable: true,
-			GrafanaEnable: true, PrometheusOperatorEnable: true, PrometheusEnable: true, DefaultSvcMonitorsEnable: true, CnvrgIdleMetricsEnable: true}
-		controlplane := ControlPlane{HyperEnable: true, CnvrgScheduleEnable: true, SearchkiqEnable: true, SidekiqEnable: true, SystemkiqEnable: true,
-			WebappEnable: true, MpiEnable: true, SearchkiqHpaEnable: true, SidekiqHpaEnable: true, SystemkiqHpaEnable: true, WebappHpaEnable: true}
-		dbs := Dbs{EsEnable: true, MinioEnable: true, PgEnable: true, RedisEnable: true}
 
 		//Start of program to ask user for Input
 		InfoLogger.Println((colorWhite), "You are in the values main function")
 		fmt.Println((colorGreen), "********************** Welcome **********************")
 		fmt.Println((colorGreen), "We will gather your information to build a values file")
-		clusterdomain := ClusterDomain{}
-		gatherClusterDomain(&clusterdomain)
-		for {
-			fmt.Println()
-			fmt.Println((colorGreen), "------------------------------- Main Menu -------------------------------")
-			fmt.Println((colorGreen), "Please make a selection to modify the values file for the cnvrg.io install")
-			fmt.Println((colorBlue), "Press '1' To modify Labeling---------------->[ Labels, Annotations or Internal Domain ]")
-			fmt.Println((colorBlue), "Press '2' To modify Networks settings------->[ Istio, NodePort, HTTPS ]")
-			fmt.Println((colorBlue), "Press '3' To modify Logging settings-------->[ Kibana, ElasticAlert, Fluentbit ]")
-			fmt.Println((colorBlue), "Press '4' To modify Registry settings------->[ URL, Username, Password ]")
-			fmt.Println((colorBlue), "Press '5' To modify Tenancy settings-------->[ Node Selector ]")
-			fmt.Println((colorBlue), "Press '6' To modify Single Sign On settings->[ Admin, Provider, Azure Tenant ]")
-			fmt.Println((colorBlue), "Press '7' To modify Storage settings-------->[ NFS, Hostpath ] ")
-			fmt.Println((colorBlue), "Press '8' To modify Miscellaneous settings-->[ Backup, GPU, ConfigLoader, Capsule ]")
-			fmt.Println((colorBlue), "Press '9' To modify Monitoring settings----->[ Prometheus, Grafana, Exporters ]")
-			fmt.Println((colorBlue), "Press '10' To modify Control Plane settings->[ CP Image, CP Services, SMTP ]")
-			fmt.Println((colorBlue), "Press '11' To modify Database settings------>[ Minio, Postgres, Redis ]")
-			fmt.Println((colorBlue), "Press '12' To Exit and generate Values file")
-			fmt.Print((colorWhite), "Please make your selection: ")
-			caseInput := formatInput()
-			intVar, _ := strconv.Atoi(caseInput)
-			switch intVar {
-			case 1:
-				for {
-					fmt.Println()
-					fmt.Println((colorGreen), "----Labels, Annotations Internal Domain Menu----")
-					fmt.Println((colorGreen), "Update Labels, Annotations or Internal Domain values")
-					fmt.Println((colorBlue), "Press '1' To modify Labels")
-					fmt.Println((colorBlue), "Press '2' To modify Annotations")
-					fmt.Println((colorBlue), "Press '3' To modify Internal Domain")
-					fmt.Println((colorBlue), "Press '4' To Save and Exit")
-					fmt.Print((colorWhite), "Please make your selection: ")
-					caseInput := formatInput()
-					intVar, _ := strconv.Atoi(caseInput)
-					switch intVar {
-					case 1:
-						gatherLabels(&labels)
-					case 2:
-						gatherAnnotations(&annotations)
-					case 3:
-						gatherInternalDomain(&internalDomain)
-					}
-					if intVar == 4 {
-						fmt.Println((colorYellow), "Saving and Exiting menu")
-						break
-					}
-				}
-			case 2:
-				gatherNetworking(&network)
-			case 3:
-				gatherLogging(&logging)
-			case 4:
-				gatherRegistry(&registry)
-			case 5:
-				gatherTenancy(&tenancy)
-			case 6:
-				gatherSso(&sso)
-			case 7:
-				gatherStorage(&storage)
-			case 8:
-				for {
-					fmt.Println()
-					fmt.Println((colorGreen), "----Backup, GPU, Capsule and GPU Menu----")
-					fmt.Println((colorGreen), "Update Backup, GPU, Capsule and GPU values")
-					fmt.Println((colorBlue), "Press '1' To modify Backup settings")
-					fmt.Println((colorBlue), "Press '2' To modify Capsule settings")
-					fmt.Println((colorBlue), "Press '3' To disable NvidiaDp or HabanaDp GPU")
-					fmt.Println((colorBlue), "Press '4' To disable ConfigReloader")
-					fmt.Println((colorBlue), "Press '5' To Exit modifying settings")
-					fmt.Print((colorBlue), "Please make your selection: ")
-					caseInput := formatInput()
-					intVar, _ := strconv.Atoi(caseInput)
-					switch intVar {
-					case 1:
-						gatherBackup(&backup)
-					case 2:
-						gatherCapsule(&capsule)
-					case 3:
-						gatherGpu(&gpu)
-					case 4:
-						gatherConfigReloader(&configreloader)
-					}
-					if intVar == 5 {
-						fmt.Println((colorYellow), "Saving changes and exiting")
-						break
-					}
-				}
-			case 9:
-				gatherMonitoring(&monitoring)
-			case 10:
-				gatherControlPlane(&controlplane)
-			case 11:
-				gatherDbs(&dbs)
-			}
-			if intVar == 12 {
-				fmt.Println((colorWhite), "Exiting and generating the values.yaml file")
-				break
-			}
-		}
+		mainMenu()
 
-		finaltemp := Template{clusterdomain, internalDomain, labels, annotations, network, logging, registry, tenancy,
-			sso, storage, configreloader, capsule, backup, gpu, monitoring, controlplane, dbs}
-		err := temp.Execute(os.Stdout, finaltemp)
-		if err != nil {
-			log.Print(err)
-		}
-		createFile("values.yaml", &finaltemp)
-		outputHelm()
 	},
 }
