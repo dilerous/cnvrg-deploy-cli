@@ -1,1 +1,1 @@
-sudo apt install git
+apt install git
