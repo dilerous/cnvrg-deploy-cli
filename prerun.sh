@@ -1,1 +1,1 @@
-apt install git | echo "Y"
+apt-get -y install git
