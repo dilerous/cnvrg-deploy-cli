@@ -2,7 +2,7 @@ apt-get -y install git
 git config --global user.email "brad.soper@gmail.com"
 
 apt-get update
-apt install -y build-essential libssl-dev libreadline-dev zlib1g-dev 
+apt install -y build-essential libssl-dev libreadline-dev zlib1g-dev ruby-dev shared-mime-info
 apt install -y rbenv
 rbenv init
 eval "$(rbenv init -)"
