@@ -5,7 +5,7 @@ apt-get update
 apt install -y build-essential libssl-dev libreadline-dev zlib1g-dev
 apt install -y rbenv
 rbenv init
-eval "$(rbenv init -)"
+echo 'eval "$(rbenv init -)"' >> ~/.bashrc
 mkdir -p "$(rbenv root)"/plugins
 git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
 rbenv install 2.6.9
