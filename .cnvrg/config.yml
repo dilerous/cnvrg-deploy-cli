@@ -1,6 +1,5 @@
 ---
-:project_name: test
-:project_slug: test
-:owner: cnvrg
+:project_name: thermo-test-brad
+:project_slug: thermo-test-brad
+:owner: physics
 :git: true
-:is_git: true
