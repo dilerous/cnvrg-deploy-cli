@@ -10,7 +10,6 @@ mkdir -p "$(rbenv root)"/plugins
 git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
 rbenv install 2.6.9
 rbenv global 2.6.9
-export FREEDESKTOP_MIME_TYPES_PATH=/cnvrg/freedesktop.org.xml
 gem install cnvrg --no-document
 rbenv rehash
 cnvrg version
